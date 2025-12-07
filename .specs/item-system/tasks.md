@@ -96,7 +96,7 @@
   - Actions de uso encapsuladas
   - Integracao com fluxo de turno
 
-- [ ] TASK-IS-018: Atualizar `src/hooks/useAIPlayer.ts`
+- [x] TASK-IS-018: Atualizar `src/hooks/useAIPlayer.ts`
   - Logica de decisao de uso de item
   - Heuristica simples (35% chance, prioridades)
   - Selecao automatica de alvo

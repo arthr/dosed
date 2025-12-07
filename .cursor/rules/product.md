@@ -1,12 +1,36 @@
-# Visão Geral do Produto: Dosed (Pill Roulette)
+# Produto: Dosed (Pill Roulette)
 
-## Objetivo do Jogo
-Um jogo de estratégia por turnos onde dois jogadores (Humano vs IA ou PvP) competem para ser o último sobrevivente, gerenciando risco e informação oculta através do consumo de pílulas com efeitos desconhecidos.
+## Conceito
+Jogo de estrategia por turnos onde dois jogadores competem para ser o ultimo sobrevivente atraves do consumo de pilulas com efeitos ocultos.
 
-## Público-Alvo
-Usuários de desktop e mobile que gostam de jogos de estratégia rápidos e com um elemento de blefe/azar.
+## Modo de Jogo Atual
+- **Humano vs IA** (Player 1 vs Player 2)
+- Turnos alternados automaticamente
+- IA com delay de "pensamento" para UX
 
-## Mecânicas Principais
-1.  **Vidas e Resistência:** Sistema de HP de duas camadas. Resistência (escudo temporário) e Vidas (real HP).
-2.  **Pílulas Ocultas:** Efeitos das pílulas no tabuleiro são ocultos até serem consumidos ou escaneados.
-3.  **Inventário e Itens:** Itens de inteligência (scan), controle (algemas) e sobrevivência (cura).
+## Mecanicas Implementadas
+
+### Sistema de Vida (2 camadas)
+- **Vidas:** 3 por jogador (perder todas = derrota)
+- **Resistencia:** 6 pontos (zerar = perde 1 vida e reseta)
+
+### Tipos de Pilulas
+| Tipo     | Efeito                    | Cor      |
+|----------|---------------------------|----------|
+| SAFE     | Nenhum (placebo)          | Verde    |
+| DMG_LOW  | -1 a -2 resistencia       | Amarelo  |
+| DMG_HIGH | -3 a -4 resistencia       | Laranja  |
+| FATAL    | Zera resistencia          | Roxo     |
+| HEAL     | +2 resistencia            | Ciano    |
+
+### Fluxo do Jogo
+1. **Setup:** Pool de pilulas gerado aleatoriamente
+2. **Playing:** Jogadores alternam turnos escolhendo pilulas
+3. **RoundEnding:** Quando pilulas acabam, nova rodada inicia
+4. **Ended:** Jogo termina quando um jogador perde todas as vidas
+
+## Funcionalidades Futuras (nao implementadas)
+- Sistema de inventario e itens
+- Modo PvP (multiplayer)
+- Sistema de sons
+- Leaderboard/ranking

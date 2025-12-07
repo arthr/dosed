@@ -1,12 +1,9 @@
 import { motion } from 'framer-motion'
 import type { Player } from '@/types'
 import { LivesDisplay } from './LivesDisplay'
-import { HealthBar } from './HealthBar'
 import { FloatingNumber } from './FloatingNumber'
-import PlayerProfileCard from '../ui/8bit/blocks/player-profile-card'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/8bit/card'
+import { Card, CardContent, CardHeader } from '../ui/8bit/card'
 import { cn } from '@/lib/utils'
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/8bit/avatar'
 import { Badge } from '../ui/8bit/badge'
 import { ResistanceDisplay } from './ResistanceDisplay'
 

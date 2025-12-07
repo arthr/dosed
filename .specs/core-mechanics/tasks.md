@@ -10,7 +10,7 @@
 ## Fase 1: Setup do Projeto
 
 ### TASK-001: Inicializar projeto Vite + React + TypeScript
-- [x] Criar projeto com `pnpm create vite@latest side-effects -- --template react-ts`
+- [x] Criar projeto com `pnpm create vite@latest dosed -- --template react-ts`
 - [x] Configurar `tsconfig.json` com strict mode
 - [x] Configurar path aliases (`@/` para `src/`)
 - [x] Instalar e configurar ESLint + Prettier

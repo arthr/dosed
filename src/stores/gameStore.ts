@@ -15,13 +15,14 @@ import type {
   PlayerId,
 } from '@/types'
 import { DEFAULT_GAME_CONFIG, PILL_CONFIG, ROUND_TRANSITION_DELAY } from '@/utils/constants'
-import { applyPillEffect, createPlayer, hasPlayerEffect } from '@/utils/gameLogic'
+import { applyPillEffect, applyHeal, createPlayer, hasPlayerEffect } from '@/utils/gameLogic'
 import {
   countPillTypes,
   generatePillPool,
   revealPill,
 } from '@/utils/pillGenerator'
 import { ITEM_CATALOG } from '@/utils/itemCatalog'
+import { POCKET_PILL_HEAL } from '@/utils/itemLogic'
 
 /**
  * Interface do Store com estado e actions
@@ -69,6 +70,18 @@ interface GameStore extends GameState {
   getPillById: (pillId: string) => Pill | undefined
   isPillPoolEmpty: () => boolean
   getGameStats: () => GameStats
+}
+
+/**
+ * Embaralha um array usando Fisher-Yates
+ */
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
 }
 
 /**
@@ -419,6 +432,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       typeCounts: newTypeCounts,
       round: state.round + 1,
       actionHistory: [...state.actionHistory, roundAction],
+      revealedPills: [], // Limpa pilulas reveladas da rodada anterior
     })
   },
 
@@ -579,13 +593,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
       validTargets = 'opponent'
     }
 
-    // Se item nao requer alvo (self ou table), executa imediatamente
-    if (itemDef.targetType === 'self' || itemDef.targetType === 'table') {
+    // Se item nao requer alvo (self, table, ou opponent que e automatico), executa imediatamente
+    if (
+      itemDef.targetType === 'self' ||
+      itemDef.targetType === 'table' ||
+      itemDef.targetType === 'opponent'
+    ) {
       get().executeItem(itemId)
       return
     }
 
-    // Ativa modo de selecao de alvo
+    // Ativa modo de selecao de alvo (apenas para pill e pill_to_opponent)
     set({
       targetSelection: {
         active: true,
@@ -612,30 +630,195 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   /**
    * Executa o efeito de um item
+   * @param itemId - ID do item a usar
+   * @param targetId - ID do alvo (pillId ou opponentId, dependendo do item)
    */
   executeItem: (itemId: string, targetId?: string) => {
     const state = get()
-    const currentPlayer = state.players[state.currentTurn]
+    const currentPlayerId = state.currentTurn
+    const currentPlayer = state.players[currentPlayerId]
+    const opponentId: PlayerId = currentPlayerId === 'player1' ? 'player2' : 'player1'
 
     // Busca o item no inventario
     const item = currentPlayer.inventory.items.find((i) => i.id === itemId)
     if (!item) return
 
-    // Remove o item do inventario
-    get().removeItemFromInventory(state.currentTurn, itemId)
+    const itemDef = ITEM_CATALOG[item.type]
+    if (!itemDef) return
 
-    // Reseta targetSelection
-    set({
+    // Registra acao no historico
+    const useItemAction: GameAction = {
+      type: 'USE_ITEM',
+      playerId: currentPlayerId,
+      timestamp: Date.now(),
+      payload: {
+        itemType: item.type,
+        targetId,
+      },
+    }
+
+    // Remove o item do inventario primeiro
+    const updatedCurrentPlayer: Player = {
+      ...currentPlayer,
+      inventory: {
+        ...currentPlayer.inventory,
+        items: currentPlayer.inventory.items.filter((i) => i.id !== itemId),
+      },
+    }
+
+    // Aplica efeito baseado no tipo de item
+    let newState: Partial<GameState> = {
+      players: {
+        ...state.players,
+        [currentPlayerId]: updatedCurrentPlayer,
+      },
       targetSelection: {
         active: false,
         itemId: null,
         itemType: null,
         validTargets: null,
       },
-    })
+      actionHistory: [...state.actionHistory, useItemAction],
+    }
 
-    // Nota: A logica de aplicar o efeito sera integrada
-    // com itemLogic.ts nas proximas tasks
+    switch (item.type) {
+      // ========== INTEL ITEMS ==========
+
+      case 'scanner': {
+        // Revela o tipo da pilula temporariamente (adiciona a revealedPills)
+        if (targetId && !state.revealedPills.includes(targetId)) {
+          newState.revealedPills = [...state.revealedPills, targetId]
+        }
+        break
+      }
+
+      case 'inverter': {
+        // Marca a pilula como invertida
+        if (targetId) {
+          const pillIndex = state.pillPool.findIndex((p) => p.id === targetId)
+          if (pillIndex !== -1) {
+            const newPillPool = [...state.pillPool]
+            newPillPool[pillIndex] = {
+              ...newPillPool[pillIndex],
+              inverted: true,
+            }
+            newState.pillPool = newPillPool
+          }
+        }
+        break
+      }
+
+      case 'double': {
+        // Marca a pilula como dobrada
+        if (targetId) {
+          const pillIndex = state.pillPool.findIndex((p) => p.id === targetId)
+          if (pillIndex !== -1) {
+            const newPillPool = [...state.pillPool]
+            newPillPool[pillIndex] = {
+              ...newPillPool[pillIndex],
+              doubled: true,
+            }
+            newState.pillPool = newPillPool
+          }
+        }
+        break
+      }
+
+      // ========== SUSTAIN ITEMS ==========
+
+      case 'pocket_pill': {
+        // Cura +2 resistencia no jogador atual
+        const healResult = applyHeal(updatedCurrentPlayer, POCKET_PILL_HEAL)
+        newState.players = {
+          ...state.players,
+          [currentPlayerId]: healResult.player,
+        }
+        break
+      }
+
+      case 'shield': {
+        // Adiciona efeito de shield ao jogador atual
+        const hasShieldAlready = updatedCurrentPlayer.effects.some((e) => e.type === 'shield')
+        if (!hasShieldAlready) {
+          const playerWithShield: Player = {
+            ...updatedCurrentPlayer,
+            effects: [
+              ...updatedCurrentPlayer.effects,
+              { type: 'shield', roundsRemaining: 2 }, // 2 para durar ate o proximo turno do jogador
+            ],
+          }
+          newState.players = {
+            ...state.players,
+            [currentPlayerId]: playerWithShield,
+          }
+        }
+        break
+      }
+
+      // ========== CONTROL ITEMS ==========
+
+      case 'handcuffs': {
+        // Adiciona efeito de handcuffed ao oponente (se nao tiver shield)
+        const opponent = state.players[opponentId]
+        const opponentHasShield = opponent.effects.some((e) => e.type === 'shield')
+
+        if (!opponentHasShield) {
+          const hasHandcuffsAlready = opponent.effects.some((e) => e.type === 'handcuffed')
+          if (!hasHandcuffsAlready) {
+            const opponentWithHandcuffs: Player = {
+              ...opponent,
+              effects: [
+                ...opponent.effects,
+                { type: 'handcuffed', roundsRemaining: 1 },
+              ],
+            }
+            const currentPlayers = newState.players ?? state.players
+            newState.players = {
+              ...currentPlayers,
+              [opponentId]: opponentWithHandcuffs,
+            }
+          }
+        }
+        break
+      }
+
+      case 'force_feed': {
+        // Forca oponente a consumir pilula - chama consumePill com forcedTarget
+        if (targetId) {
+          // Aplica as mudancas de estado primeiro (remove item, reseta selection)
+          set(newState)
+          // Depois chama consumePill com o alvo forcado
+          get().consumePill(targetId, { forcedTarget: opponentId })
+          return // Retorna cedo pois consumePill ja faz o set
+        }
+        break
+      }
+
+      // ========== CHAOS ITEMS ==========
+
+      case 'shuffle': {
+        // Embaralha as pilulas da mesa
+        const shuffledPillPool = shuffleArray([...state.pillPool])
+        newState.pillPool = shuffledPillPool
+        break
+      }
+
+      case 'discard': {
+        // Remove pilula sem ativar efeito
+        if (targetId) {
+          const newPillPool = state.pillPool.filter((p) => p.id !== targetId)
+          const newTypeCounts = countPillTypes(newPillPool)
+          newState.pillPool = newPillPool
+          newState.typeCounts = newTypeCounts
+
+          // Remove da lista de reveladas tambem
+          newState.revealedPills = state.revealedPills.filter((id) => id !== targetId)
+        }
+        break
+      }
+    }
+
+    set(newState)
   },
 
   /**

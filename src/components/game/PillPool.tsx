@@ -19,6 +19,8 @@ interface PillPoolProps {
   instructionMessage?: string
   /** Se esta em modo de selecao de alvo (item sendo usado) */
   isTargetSelectionMode?: boolean
+  /** IDs de pilulas reveladas temporariamente (Scanner) */
+  scannedPillIds?: string[]
 }
 
 /**
@@ -34,6 +36,7 @@ export function PillPool({
   selectedPillId = null,
   instructionMessage,
   isTargetSelectionMode = false,
+  scannedPillIds = [],
 }: PillPoolProps) {
   return (
     <div className="space-y-4">
@@ -52,6 +55,7 @@ export function PillPool({
         disabled={disabled}
         selectedPillId={selectedPillId}
         isTargetSelectionMode={isTargetSelectionMode}
+        scannedPillIds={scannedPillIds}
       />
 
       {/* Instrucao */}

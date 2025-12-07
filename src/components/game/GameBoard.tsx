@@ -1,4 +1,6 @@
+import { useCallback } from 'react'
 import { useGameStore } from '@/stores/gameStore'
+import { useOverlayStore } from '@/stores/overlayStore'
 import { usePillConsumption } from '@/hooks/usePillConsumption'
 import { useAIPlayer } from '@/hooks/useAIPlayer'
 import { useItemUsage } from '@/hooks'
@@ -6,6 +8,8 @@ import { AnimatedPlayerArea } from './AnimatedPlayerArea'
 import { PillPool } from './PillPool'
 import { TurnIndicator } from './TurnIndicator'
 import { ItemTargetSelector } from './ItemTargetSelector'
+import { ITEM_CATALOG } from '@/utils/itemCatalog'
+import type { ItemType } from '@/types'
 
 /**
  * GameBoard - Tabuleiro principal do jogo
@@ -22,6 +26,7 @@ export function GameBoard() {
   const typeCounts = useGameStore((s) => s.typeCounts)
   const round = useGameStore((s) => s.round)
   const gamePhase = useGameStore((s) => s.phase)
+  const revealedPills = useGameStore((s) => s.revealedPills)
 
   const player1 = players.player1
   const player2 = players.player2
@@ -46,18 +51,91 @@ export function GameBoard() {
     isSelectingTarget,
     validTargets,
     selectedItemId,
+    selectedItemType,
     startUsage,
     executeItem,
   } = useItemUsage()
 
-  // Handler para click em item do inventario
-  const handleItemClick = (itemId: string) => {
-    if (!isHumanTurn || isProcessing || isRoundEnding) return
-    startUsage(itemId)
-  }
+  // Overlay store para feedback de item
+  const openItemEffect = useOverlayStore((s) => s.openItemEffect)
 
   // Determina ID do oponente
   const opponentId = currentTurn === 'player1' ? 'player2' : 'player1'
+
+  /**
+   * Wrapper para executar item com feedback visual
+   * Abre overlay de ItemEffect apos execucao (exceto para force_feed que tem seu proprio flow)
+   */
+  const executeItemWithFeedback = useCallback((targetId?: string) => {
+    const itemType = selectedItemType
+    if (!itemType) return
+
+    // Executa o item
+    executeItem(targetId)
+
+    // Abre overlay de feedback (exceto para force_feed que usa PillReveal)
+    if (itemType !== 'force_feed') {
+      let targetInfo: string | undefined
+
+      // Gera info contextual do alvo
+      if (targetId) {
+        const targetPill = pillPool.find((p) => p.id === targetId)
+        if (targetPill) {
+          targetInfo = `Pilula #${pillPool.indexOf(targetPill) + 1}`
+        }
+      }
+
+      openItemEffect(itemType, targetInfo)
+    }
+  }, [selectedItemType, executeItem, openItemEffect, pillPool])
+
+  /**
+   * Wrapper para IA executar item com feedback
+   */
+  const executeItemForAI = useCallback((itemId: string, targetId?: string) => {
+    // Busca o item no inventario da IA para obter o tipo
+    const aiInventory = players[currentTurn]?.inventory.items ?? []
+    const item = aiInventory.find((i) => i.id === itemId)
+    if (!item) return
+
+    const itemType: ItemType = item.type
+
+    // Chama a action da store diretamente
+    useGameStore.getState().executeItem(itemId, targetId)
+
+    // Abre overlay de feedback (exceto para force_feed)
+    if (itemType !== 'force_feed') {
+      let targetInfo: string | undefined
+
+      if (targetId) {
+        const targetPill = pillPool.find((p) => p.id === targetId)
+        if (targetPill) {
+          targetInfo = `Pilula #${pillPool.indexOf(targetPill) + 1}`
+        }
+      }
+
+      openItemEffect(itemType, targetInfo)
+    }
+  }, [currentTurn, players, pillPool, openItemEffect])
+
+  // Handler para click em item do inventario
+  const handleItemClick = useCallback((itemId: string) => {
+    if (!isHumanTurn || isProcessing || isRoundEnding) return
+
+    // Busca o item para verificar o tipo
+    const item = currentPlayer.inventory.items.find((i) => i.id === itemId)
+    if (!item) return
+
+    const itemDef = ITEM_CATALOG[item.type]
+
+    // Inicia o uso (para self/table, executa imediatamente)
+    startUsage(itemId)
+
+    // Para itens self/table, abre overlay de feedback apos execucao
+    if (itemDef.targetType === 'self' || itemDef.targetType === 'table' || itemDef.targetType === 'opponent') {
+      openItemEffect(item.type)
+    }
+  }, [isHumanTurn, isProcessing, isRoundEnding, currentPlayer.inventory.items, startUsage, openItemEffect])
 
   // Hook da IA - joga automaticamente quando e turno dela
   useAIPlayer({
@@ -66,15 +144,15 @@ export function GameBoard() {
     phase,
     gamePhase,
     startConsumption,
-    executeItem,
+    executeItem: executeItemForAI,
     opponentId,
   })
 
   // Handler para click na pilula
   const handlePillSelect = (pillId: string) => {
-    // Se esta selecionando alvo para um item, executa o item
+    // Se esta selecionando alvo para um item, executa o item com feedback
     if (isSelectingTarget && validTargets === 'pills') {
-      executeItem(pillId)
+      executeItemWithFeedback(pillId)
       return
     }
 
@@ -135,6 +213,7 @@ export function GameBoard() {
           onSelectPill={handlePillSelect}
           disabled={isProcessing || (!isHumanTurn && !isSelectingTarget) || isRoundEnding}
           isTargetSelectionMode={isSelectingTarget && validTargets === 'pills'}
+          scannedPillIds={revealedPills}
           instructionMessage={
             isSelectingTarget && validTargets === 'pills'
               ? 'Selecione uma pilula alvo'

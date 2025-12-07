@@ -97,10 +97,55 @@ Usuario reportou que "alguns itens estao causando comportamentos inesperados na 
 - [x] Force Feed - Stale closure CORRIGIDO (Bug #2), feedback visual CORRIGIDO (Bug #3)
 - [ ] Scanner/Inverter/Double - Verificar selecao de alvo
 - [ ] Shield - Verificar auto-aplicacao
-- [ ] Shuffle/Discard - Verificar comportamento apos uso
+- [x] Discard - CORRIGIDO (Bug #5: nao iniciava nova rodada quando pool esvaziava)
+- [ ] Shuffle - Verificar comportamento apos uso
 
 ### Acao
 Realizar testes manuais focados em cada item usado pela IA.
+
+---
+
+## Bug #5: Discard na ultima pilula nao inicia nova rodada
+
+**Status:** CORRIGIDO
+**Severidade:** Alta
+**Arquivo:** `src/stores/gameStore.ts`
+
+### Descricao
+Quando o item Discard e usado na ultima pilula do pool, o jogo fica travado porque nao inicia uma nova rodada.
+
+### Causa Raiz
+No `consumePill`, quando o pool esvazia, ha verificacao que dispara a transicao de rodada:
+```typescript
+if (newPillPool.length === 0) {
+  set({ phase: 'roundEnding' })
+  setTimeout(() => {
+    get().resetRound()
+  }, ROUND_TRANSITION_DELAY)
+}
+```
+
+Porem, no case `discard` do `executeItem`, essa verificacao NAO existia. O Discard removia a pilula mas nao verificava se o pool ficou vazio.
+
+### Solucao Aplicada
+Adicionada verificacao de pool vazio no case `discard`, similar ao `consumePill`:
+```typescript
+case 'discard': {
+  if (targetId) {
+    const newPillPool = state.pillPool.filter((p) => p.id !== targetId)
+    // ... codigo existente ...
+    
+    // Verifica se pool esvaziou - inicia transicao de rodada
+    if (newPillPool.length === 0) {
+      newState.phase = 'roundEnding'
+      setTimeout(() => {
+        get().resetRound()
+      }, ROUND_TRANSITION_DELAY)
+    }
+  }
+  break
+}
+```
 
 ---
 
@@ -109,5 +154,6 @@ Realizar testes manuais focados em cada item usado pela IA.
 - [x] Fix #1: Refatorar reset de flags em useAIPlayer
 - [x] Fix #2: Corrigir stale closure no setTimeout
 - [x] Fix #3: Adicionar feedback visual para Force Feed
+- [x] Fix #5: Discard na ultima pilula inicia nova rodada
 - [ ] Investigar outros itens que podem causar travamento
 - [ ] Testar cenarios de edge case (handcuffs + shield, etc)

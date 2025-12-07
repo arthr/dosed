@@ -809,6 +809,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
           // Remove da lista de reveladas tambem
           newState.revealedPills = state.revealedPills.filter((id) => id !== targetId)
+
+          // Verifica se pool esvaziou - inicia transicao de rodada
+          if (newPillPool.length === 0) {
+            newState.phase = 'roundEnding'
+            setTimeout(() => {
+              get().resetRound()
+            }, ROUND_TRANSITION_DELAY)
+          }
         }
         break
       }

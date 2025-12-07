@@ -18,3 +18,5 @@ export {
   useGameSnapshot,
 } from './useGameState'
 
+// Pill Consumption Flow
+export { usePillConsumption } from './usePillConsumption'

@@ -230,14 +230,16 @@
 
 ---
 
-### TASK-021: Implementar fluxo de consumo de pílula
-- [ ] Conectar click na pílula com action `consumePill`
-- [ ] Exibir animação de revelação antes de aplicar efeito
-- [ ] Mostrar feedback visual do efeito (dano vermelho, cura verde)
-- [ ] Processar colapso se necessário com animação
-- [ ] Alternar turno automaticamente após resolução
+### TASK-021: Implementar fluxo de consumo de pilula
+- [x] Conectar click na pilula com action `consumePill`
+- [x] Exibir animacao de revelacao antes de aplicar efeito (`PillReveal.tsx`)
+- [x] Mostrar feedback visual do efeito (`GameFeedback.tsx`, `AnimatedPlayerArea.tsx`)
+- [x] Processar colapso se necessario com animacao (shake no PlayerArea)
+- [x] Alternar turno automaticamente apos resolucao
+- [x] Adicionar auto-advance e suporte a teclas no overlay
+- [x] Criar hook `usePillConsumption` para gerenciar fluxo
 
-**Critério de Aceite:** Fluxo completo de consumo funciona end-to-end
+**Criterio de Aceite:** Fluxo completo de consumo funciona end-to-end [CONCLUIDO]
 
 ---
 

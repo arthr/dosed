@@ -70,13 +70,13 @@
 
 ## Fase 3: Lógica do Jogo (Game Logic)
 
-### TASK-007: Implementar gerador de pílulas
-- [ ] Criar `src/utils/pillGenerator.ts`
-- [ ] Implementar função `generatePillPool(config)` que retorna array de Pill[]
-- [ ] Implementar distribuição baseada em probabilidades configuráveis
-- [ ] Garantir que cada pílula tem ID único e `isRevealed: false`
+### TASK-007: Implementar gerador de pilulas
+- [x] Criar `src/utils/pillGenerator.ts`
+- [x] Implementar funcao `generatePillPool(config)` que retorna array de Pill[]
+- [x] Implementar distribuicao baseada em probabilidades configuraveis
+- [x] Garantir que cada pilula tem ID unico (uuid) e `isRevealed: false`
 
-**Critério de Aceite:** Função gera pool válido conforme configuração
+**Criterio de Aceite:** Funcao gera pool valido conforme configuracao [CONCLUIDO]
 
 ---
 

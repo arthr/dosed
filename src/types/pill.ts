@@ -47,6 +47,10 @@ export interface Pill {
   stats: PillStats
   /** Propriedades visuais */
   visuals: PillVisuals
+  /** Se o efeito da pilula esta invertido (dano vira cura, cura vira dano) */
+  inverted?: boolean
+  /** Se o efeito da pilula esta dobrado */
+  doubled?: boolean
 }
 
 /**

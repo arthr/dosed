@@ -4,26 +4,48 @@ import type { Pill, Player, PlayerEffectResult } from '@/types'
  * Aplica o efeito de uma pilula ao jogador
  * Funcao pura que retorna novo estado sem mutar o original
  *
+ * Considera modificadores de item:
+ * - inverted: dano vira cura, cura vira dano
+ * - doubled: dobra o valor do efeito
+ *
  * @param pill - Pilula consumida
  * @param player - Jogador que consumiu
  * @returns Resultado com novo estado do player e flags de evento
  */
 export function applyPillEffect(pill: Pill, player: Player): PlayerEffectResult {
-  const { stats } = pill
+  const { stats, inverted, doubled } = pill
+
+  // Calcula valores base considerando modificadores
+  let baseDamage = stats.damage
+  let baseHeal = stats.heal
+
+  // Se invertido: dano vira cura, cura vira dano
+  if (inverted) {
+    const temp = baseDamage
+    baseDamage = baseHeal
+    baseHeal = temp
+  }
+
+  // Se dobrado: multiplica por 2
+  if (doubled) {
+    baseDamage = baseDamage * 2
+    baseHeal = baseHeal * 2
+  }
+
   let newResistance = player.resistance
   let damageDealt = 0
   let healReceived = 0
 
   // Aplica dano se houver
-  if (stats.damage > 0) {
-    damageDealt = stats.damage
-    newResistance = player.resistance - stats.damage
+  if (baseDamage > 0) {
+    damageDealt = baseDamage
+    newResistance = player.resistance - baseDamage
   }
 
   // Aplica cura se houver (com cap no maximo)
-  if (stats.heal > 0) {
-    healReceived = Math.min(stats.heal, player.maxResistance - player.resistance)
-    newResistance = Math.min(player.resistance + stats.heal, player.maxResistance)
+  if (baseHeal > 0) {
+    healReceived = Math.min(baseHeal, player.maxResistance - player.resistance)
+    newResistance = Math.min(player.resistance + baseHeal, player.maxResistance)
   }
 
   // Verifica colapso (resistencia <= 0)

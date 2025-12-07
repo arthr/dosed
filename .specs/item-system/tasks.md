@@ -77,9 +77,10 @@
   - `decrementEffectRounds(playerId)`
   - `addRevealedPill(pillId)` / `removeRevealedPill(pillId)` / `clearRevealedPills()`
 
-- [ ] TASK-IS-015: Implementar logica de pilula invertida/dobrada
+- [x] TASK-IS-015: Implementar logica de pilula invertida/dobrada
   - Flag `inverted` e `doubled` na Pill
-  - Ajustar `consumePill` para considerar flags
+  - Ajustar `applyPillEffect` para considerar flags
+  - Actions: `invertPill`, `doublePill`, `clearPillModifiers`
 
 ---
 

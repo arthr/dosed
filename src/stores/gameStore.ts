@@ -58,6 +58,11 @@ interface GameStore extends GameState {
   removeRevealedPill: (pillId: string) => void
   clearRevealedPills: () => void
 
+  // Actions - Pill Modifiers (Inverter/Double)
+  invertPill: (pillId: string) => void
+  doublePill: (pillId: string) => void
+  clearPillModifiers: (pillId: string) => void
+
   // Selectors (computed)
   getCurrentPlayer: () => Player
   getOpponent: () => Player
@@ -661,6 +666,62 @@ export const useGameStore = create<GameStore>((set, get) => ({
    */
   clearRevealedPills: () => {
     set({ revealedPills: [] })
+  },
+
+  // ============ PILL MODIFIERS ACTIONS ============
+
+  /**
+   * Marca uma pilula como invertida (dano vira cura, cura vira dano)
+   * Usado pelo item Inverter
+   */
+  invertPill: (pillId: string) => {
+    const state = get()
+    const pillIndex = state.pillPool.findIndex((p) => p.id === pillId)
+    if (pillIndex === -1) return
+
+    const newPillPool = [...state.pillPool]
+    newPillPool[pillIndex] = {
+      ...newPillPool[pillIndex],
+      inverted: true,
+    }
+
+    set({ pillPool: newPillPool })
+  },
+
+  /**
+   * Marca uma pilula como dobrada (efeito x2)
+   * Usado pelo item Double
+   */
+  doublePill: (pillId: string) => {
+    const state = get()
+    const pillIndex = state.pillPool.findIndex((p) => p.id === pillId)
+    if (pillIndex === -1) return
+
+    const newPillPool = [...state.pillPool]
+    newPillPool[pillIndex] = {
+      ...newPillPool[pillIndex],
+      doubled: true,
+    }
+
+    set({ pillPool: newPillPool })
+  },
+
+  /**
+   * Remove todos os modificadores de uma pilula
+   */
+  clearPillModifiers: (pillId: string) => {
+    const state = get()
+    const pillIndex = state.pillPool.findIndex((p) => p.id === pillId)
+    if (pillIndex === -1) return
+
+    const newPillPool = [...state.pillPool]
+    newPillPool[pillIndex] = {
+      ...newPillPool[pillIndex],
+      inverted: false,
+      doubled: false,
+    }
+
+    set({ pillPool: newPillPool })
   },
 
   // ============ SELECTORS ============

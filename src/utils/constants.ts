@@ -133,3 +133,22 @@ export function getHealthBarColor(current: number, max: number): string {
   return 'bg-health-low'
 }
 
+/**
+ * Cores hex para barra de resistencia
+ */
+const HEALTH_BAR_HEX_COLORS = {
+  full: '#22c55e',   // green-500
+  mid: '#f59e0b',    // amber-500
+  low: '#ef4444',    // red-500
+} as const
+
+/**
+ * Retorna a cor hex para a barra de resistencia
+ */
+export function getHealthBarHexColor(current: number, max: number): string {
+  const percentage = current / max
+  if (percentage > HEALTH_BAR_THRESHOLDS.HIGH) return HEALTH_BAR_HEX_COLORS.full
+  if (percentage > HEALTH_BAR_THRESHOLDS.MID) return HEALTH_BAR_HEX_COLORS.mid
+  return HEALTH_BAR_HEX_COLORS.low
+}
+

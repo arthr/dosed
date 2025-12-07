@@ -1,6 +1,6 @@
 import { motion, useSpring, useTransform } from 'framer-motion'
 import { useEffect, useRef } from 'react'
-import { getHealthBarColor } from '@/utils/constants'
+import { getHealthBarColor, getHealthBarHexColor } from '@/utils/constants'
 
 interface HealthBarProps {
   /** Valor atual de resistencia */
@@ -26,7 +26,7 @@ const heightClasses = {
 /**
  * Barra de resistencia com cores dinamicas e animacoes
  * Verde > 66%, Amarelo 33-66%, Vermelho < 33%
- * Animacao de pulse quando valor muda
+ * Animacao de pulse e gradiente quando valor muda
  */
 export function HealthBar({
   current,
@@ -38,6 +38,7 @@ export function HealthBar({
 }: HealthBarProps) {
   const percentage = max > 0 ? (current / max) * 100 : 0
   const colorClass = getHealthBarColor(current, max)
+  const hexColor = getHealthBarHexColor(current, max)
   
   // Ref para rastrear valor anterior
   const prevCurrentRef = useRef(current)
@@ -74,17 +75,39 @@ export function HealthBar({
     },
   }
 
-  // Variantes de animacao da barra interna
+  // Variantes de animacao da barra interna com gradiente
   const barVariants = {
-    idle: { opacity: 1 },
+    idle: { 
+      opacity: 1,
+      background: hexColor,
+    },
     damage: {
-      opacity: [1, 0.6, 1],
-      transition: { duration: 0.3 },
+      opacity: [1, 0.7, 1],
+      background: [
+        hexColor,
+        '#ef4444',  // red flash
+        hexColor,
+      ],
+      boxShadow: [
+        '0 0 0 0 transparent',
+        '0 0 10px 2px rgba(239, 68, 68, 0.5)',
+        '0 0 0 0 transparent',
+      ],
+      transition: { duration: 0.4 },
     },
     heal: {
-      opacity: [1, 1.2, 1],
-      filter: ['brightness(1)', 'brightness(1.3)', 'brightness(1)'],
-      transition: { duration: 0.4 },
+      opacity: 1,
+      background: [
+        hexColor,
+        '#10b981',  // emerald flash
+        hexColor,
+      ],
+      boxShadow: [
+        '0 0 0 0 transparent',
+        '0 0 15px 3px rgba(16, 185, 129, 0.6)',
+        '0 0 5px 1px rgba(16, 185, 129, 0.3)',
+      ],
+      transition: { duration: 0.5 },
     },
   }
 
@@ -101,11 +124,14 @@ export function HealthBar({
           )}
           {showValues && (
             <motion.span 
-              className="text-foreground tabular-nums"
+              className="text-foreground tabular-nums font-medium"
               key={current}
-              initial={{ scale: 1.2, color: animationType === 'damage' ? '#ef4444' : animationType === 'heal' ? '#10b981' : undefined }}
+              initial={{ 
+                scale: 1.3, 
+                color: animationType === 'damage' ? '#ef4444' : animationType === 'heal' ? '#10b981' : undefined 
+              }}
               animate={{ scale: 1, color: 'var(--foreground)' }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.4, type: 'spring' as const }}
             >
               {current}/{max}
             </motion.span>
@@ -121,7 +147,7 @@ export function HealthBar({
         aria-label={`Resistencia: ${current} de ${max}`}
       >
         <motion.div
-          className={`h-full ${colorClass} rounded-full`}
+          className={`h-full rounded-full ${!animationType ? colorClass : ''}`}
           style={{ width: widthStyle }}
           variants={barVariants}
           animate={animationType || 'idle'}

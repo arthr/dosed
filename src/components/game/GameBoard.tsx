@@ -99,6 +99,16 @@ export function GameBoard() {
     return null
   }
 
+  // Calcula o valor do efeito para FloatingNumber (negativo para dano, positivo para cura)
+  const getEffectValue = (playerId: 'player1' | 'player2'): number | null => {
+    if (phase !== 'feedback' || targetPlayer !== playerId) return null
+    if (!effect) return null
+
+    if (effect.damageDealt > 0) return -effect.damageDealt
+    if (effect.healReceived > 0) return effect.healReceived
+    return null
+  }
+
   if (!player1 || !player2) return null
 
   return (
@@ -112,19 +122,13 @@ export function GameBoard() {
 
       {/* Layout principal: Player1 | Pills | Player2 */}
       <div className="grid grid-cols-[1fr_2fr_1fr] gap-6 items-start">
-        {/* Player 1 - Esquerda */}
-        <div
-          className={`
-            p-4 rounded-lg border
-            ${currentTurn === 'player1' ? 'border-primary bg-primary/5' : 'border-border'}
-          `}
-        >
-          <AnimatedPlayerArea
-            player={player1}
-            isCurrentTurn={currentTurn === 'player1'}
-            animationType={getPlayerAnimation('player1')}
-          />
-        </div>
+        {/* Player 1 - Esquerda (card auto-suficiente) */}
+        <AnimatedPlayerArea
+          player={player1}
+          isCurrentTurn={currentTurn === 'player1'}
+          animationType={getPlayerAnimation('player1')}
+          effectValue={getEffectValue('player1')}
+        />
 
         {/* Pill Pool - Centro */}
         <PillPool
@@ -139,19 +143,13 @@ export function GameBoard() {
           }
         />
 
-        {/* Player 2 - Direita */}
-        <div
-          className={`
-            p-4 rounded-lg border
-            ${currentTurn === 'player2' ? 'border-primary bg-primary/5' : 'border-border'}
-          `}
-        >
-          <AnimatedPlayerArea
-            player={player2}
-            isCurrentTurn={currentTurn === 'player2'}
-            animationType={getPlayerAnimation('player2')}
-          />
-        </div>
+        {/* Player 2 - Direita (card auto-suficiente) */}
+        <AnimatedPlayerArea
+          player={player2}
+          isCurrentTurn={currentTurn === 'player2'}
+          animationType={getPlayerAnimation('player2')}
+          effectValue={getEffectValue('player2')}
+        />
       </div>
 
       {/* Overlay de revelacao - so mostra na fase 'revealing' */}

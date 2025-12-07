@@ -19,7 +19,7 @@ export function AnimatedPlayerArea({
   isCurrentTurn = false,
   animationType = null,
 }: AnimatedPlayerAreaProps) {
-  // Variantes de animacao
+  // Variantes de animacao do container
   const variants = {
     idle: { x: 0, scale: 1 },
     damage: {
@@ -27,12 +27,12 @@ export function AnimatedPlayerArea({
       transition: { duration: 0.4 },
     },
     heal: {
-      scale: [1, 1.05, 1],
+      scale: [1, 1.02, 1],
       transition: { duration: 0.3 },
     },
     collapse: {
       x: [0, -15, 15, -15, 15, -10, 10, 0],
-      scale: [1, 0.95, 1],
+      scale: [1, 0.98, 1],
       transition: { duration: 0.6 },
     },
   }
@@ -45,9 +45,21 @@ export function AnimatedPlayerArea({
     return ''
   }
 
+  // Mapeia animationType do container para os componentes filhos
+  const getHealthBarAnimation = (): 'damage' | 'heal' | null => {
+    if (animationType === 'damage' || animationType === 'collapse') return 'damage'
+    if (animationType === 'heal') return 'heal'
+    return null
+  }
+
+  const getLivesAnimation = (): 'damage' | 'collapse' | null => {
+    if (animationType === 'collapse') return 'collapse'
+    return null
+  }
+
   return (
     <motion.div
-      className={`space-y-3 ${getBorderClass()} rounded-lg transition-all`}
+      className={`space-y-3 ${getBorderClass()} rounded-lg transition-shadow duration-300`}
       variants={variants}
       animate={animationType || 'idle'}
     >
@@ -59,29 +71,19 @@ export function AnimatedPlayerArea({
         )}
       </div>
 
-      {/* Lives com animacao */}
-      <motion.div
-        animate={
-          animationType === 'collapse'
-            ? { scale: [1, 1.2, 0.9, 1], transition: { duration: 0.4 } }
-            : {}
-        }
-      >
-        <LivesDisplay lives={player.lives} maxLives={player.maxLives} />
-      </motion.div>
+      {/* Lives com animacao de bounce */}
+      <LivesDisplay
+        lives={player.lives}
+        maxLives={player.maxLives}
+        animationType={getLivesAnimation()}
+      />
 
-      {/* Resistance Bar com cor dinamica */}
-      <motion.div
-        animate={
-          animationType === 'damage'
-            ? { opacity: [1, 0.5, 1], transition: { duration: 0.3 } }
-            : animationType === 'heal'
-              ? { opacity: [1, 0.8, 1], transition: { duration: 0.3 } }
-              : {}
-        }
-      >
-        <HealthBar current={player.resistance} max={player.maxResistance} />
-      </motion.div>
+      {/* Resistance Bar com animacao de pulse */}
+      <HealthBar
+        current={player.resistance}
+        max={player.maxResistance}
+        animationType={getHealthBarAnimation()}
+      />
 
       {/* Turn Indicator */}
       {isCurrentTurn && (
@@ -96,4 +98,3 @@ export function AnimatedPlayerArea({
     </motion.div>
   )
 }
-

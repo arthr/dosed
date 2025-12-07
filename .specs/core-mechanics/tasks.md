@@ -271,10 +271,10 @@
 ### TASK-024: Adicionar animacoes de feedback
 - [x] Animacao de shake no PlayerArea ao receber dano (via AnimatedPlayerArea)
 - [x] Transicao suave ao revelar pilula (via PillReveal)
-- [ ] Animacao de pulse na HealthBar ao mudar valor
-- [ ] Animacao de bounce nas vidas ao perder uma
+- [x] Animacao de pulse na HealthBar ao mudar valor (spring animation + scale)
+- [x] Animacao de bounce nas vidas ao perder uma (AnimatePresence + exit animation)
 
-**Criterio de Aceite:** Feedback visual claro para todas as acoes [PARCIALMENTE CONCLUIDO]
+**Criterio de Aceite:** Feedback visual claro para todas as acoes [CONCLUIDO]
 
 ---
 

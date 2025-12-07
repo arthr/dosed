@@ -79,13 +79,16 @@ Um turno é composto por **Ações Livres** seguidas de uma **Ação Obrigatóri
 Para recriar a estratégia, você precisa destas categorias de itens:
 
 1.  **Intel (Informação):**
-    * *Scanner:* Revela o tipo de 1 pílula alvo.
-    * *Memory:* Revela a contagem de tipos restantes na mesa.
+    * *Scanner:* Revela o tipo de 1 pílula alvo ao jogador.
+    * *Inverter:* Inverte o efeito de 1 pílula alvo.
+    * *Double:* Dobra o efeito de 1 pílula alvo.
 2.  **Sustain (Sobrevivência):**
     * *Pílula de Bolso:* Cura +1 ou +2 de Resistência imediatamente (sem gastar turno).
+    * *Blindagem:* Fica ímune a qualquer efeito de pílulas e itens de adversários durante 1 turno.
 3.  **Control (Controle):**
-    * *Handcuffs (Algemas):* O oponente perde o próximo turno (você joga 2x).
-    * *Force Feed:* Escolha uma pílula e obrigue o oponente a comê-la agora.
+    * *Handcuffs (Algemas):* O oponente perde o próximo turno (passa turno para o próximo jogador).
+    * *Force Feed:* Escolha uma pílula e obrigue um oponente a comê-la agora.
+    * *Give Me:* Obriga um oponente a trocar 1 item com o jogador.
 4.  **Chaos (Manipulação):**
     * *Shuffle:* Embaralha as pílulas da mesa (reseta qualquer informação obtida por Scanners anteriores).
     * *Discard:* Remove uma pílula da mesa sem ativar seu efeito.

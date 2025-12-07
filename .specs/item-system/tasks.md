@@ -142,7 +142,7 @@
   - Horizontal abaixo do card do jogador
   - Animacao de remocao de item
 
-- [ ] TASK-IS-026: Integrar InventoryBar no AnimatedPlayerArea.tsx
+- [x] TASK-IS-026: Integrar InventoryBar no AnimatedPlayerArea.tsx
   - Posicionar abaixo das stats
   - Passar handlers de uso
   - Desabilitar durante turno do oponente

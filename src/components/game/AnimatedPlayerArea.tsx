@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import type { Player } from '@/types'
 import { LivesDisplay } from './LivesDisplay'
 import { FloatingNumber } from './FloatingNumber'
+import { InventoryBar } from './InventoryBar'
 import { Card, CardContent, CardHeader } from '../ui/8bit/card'
 import { cn } from '@/lib/utils'
 import { Badge } from '../ui/8bit/badge'
@@ -14,6 +15,10 @@ interface AnimatedPlayerAreaProps {
   animationType?: 'damage' | 'heal' | 'collapse' | null
   /** Valor do efeito (dano negativo, cura positivo) para FloatingNumber */
   effectValue?: number | null
+  /** Callback ao clicar em um item do inventario */
+  onItemClick?: (itemId: string) => void
+  /** ID do item sendo usado (para highlight) */
+  usingItemId?: string | null
 }
 
 // Cores para os efeitos de glow e borda
@@ -52,6 +57,8 @@ export function AnimatedPlayerArea({
   isCurrentTurn = false,
   animationType = null,
   effectValue = null,
+  onItemClick,
+  usingItemId = null,
 }: AnimatedPlayerAreaProps) {
   // Determina borda baseado em: feedback > turno > idle
   const getBorderColor = () => {
@@ -131,67 +138,81 @@ export function AnimatedPlayerArea({
     return null
   }
 
+  // Inventario da IA e apenas visualizacao (sempre desabilitado, sem callback)
+  const isInventoryInteractive = !player.isAI && isCurrentTurn
+
   return (
-    <motion.div
-      className="relative"
-      variants={variants}
-      animate={animationType || 'idle'}
-    >
-      {/* FloatingNumber para mostrar dano/cura */}
-      <FloatingNumber value={effectValue} />
+    <div className="flex flex-col gap-2">
+      <motion.div
+        className="relative"
+        variants={variants}
+        animate={animationType || 'idle'}
+      >
+        {/* FloatingNumber para mostrar dano/cura */}
+        <FloatingNumber value={effectValue} />
 
-      {/* Conteudo do card */}
-      <Card className={cn(
-        "py-2 gap-2",
-        getBorderColor(),
-        getBackgroundColor(),
-      )}>
-        {/* Header: Nome + Tag IA */}
-        <CardHeader className="border-b pb-0! items-center">
-          {/* <Avatar className="size-8" variant="pixel">
-              <AvatarImage src="/avatars/orcdev.jpeg" alt={player.name} />
-              <AvatarFallback className="text-[8px]">
-                {player.name.charAt(0).toUpperCase() + player.name.charAt(1).toUpperCase()}
-              </AvatarFallback>
-            </Avatar> */}
+        {/* Conteudo do card */}
+        <Card className={cn(
+          "py-2 gap-2",
+          getBorderColor(),
+          getBackgroundColor(),
+        )}>
+          {/* Header: Nome + Tag IA */}
+          <CardHeader className="border-b pb-0! items-center">
+            {/* <Avatar className="size-8" variant="pixel">
+                <AvatarImage src="/avatars/orcdev.jpeg" alt={player.name} />
+                <AvatarFallback className="text-[8px]">
+                  {player.name.charAt(0).toUpperCase() + player.name.charAt(1).toUpperCase()}
+                </AvatarFallback>
+              </Avatar> */}
 
-          <div className="flex gap-1 items-center justify-between">
-            <h3 className="font-medium truncate text-xs">{player.name}</h3>
-            {player.isAI ? (
-              <Badge variant="default" className="text-[8px] bg-accent text-game-accent">IA</Badge>
-            ) : (
-              <Badge variant="secondary" className="text-[8px]">Lv.25</Badge>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="flex justify-between items-center gap-2">
-          {/* Lives com animacao de bounce */}
-          <LivesDisplay
-            showLabel={false}
-            lives={player.lives}
-            maxLives={player.maxLives}
-            animationType={getLivesAnimation()}
-          />
+            <div className="flex gap-1 items-center justify-between">
+              <h3 className="font-medium truncate text-xs">{player.name}</h3>
+              {player.isAI ? (
+                <Badge variant="default" className="text-[8px] bg-accent text-game-accent">IA</Badge>
+              ) : (
+                <Badge variant="secondary" className="text-[8px]">Lv.25</Badge>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="flex justify-between items-center gap-2">
+            {/* Lives com animacao de bounce */}
+            <LivesDisplay
+              showLabel={false}
+              lives={player.lives}
+              maxLives={player.maxLives}
+              animationType={getLivesAnimation()}
+            />
 
-          {/* Resistance Bar com animacao de pulse */}
-          <ResistanceDisplay
-            showLabel={false}
-            resistance={player.resistance}
-            maxResistance={player.maxResistance}
-            animationType={getResistanceAnimation()}
-          />
+            {/* Resistance Bar com animacao de pulse */}
+            <ResistanceDisplay
+              showLabel={false}
+              resistance={player.resistance}
+              maxResistance={player.maxResistance}
+              animationType={getResistanceAnimation()}
+            />
 
-          {/* Turn Indicator - sempre renderizado para manter altura consistente */}
-          {/* <motion.div
-            className="text-xs font-medium h-4 text-primary"
-            initial={false}
-            animate={{ opacity: isCurrentTurn ? 1 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            Seu turno
-          </motion.div> */}
-        </CardContent>
-      </Card>
-    </motion.div>
+            {/* Turn Indicator - sempre renderizado para manter altura consistente */}
+            {/* <motion.div
+              className="text-xs font-medium h-4 text-primary"
+              initial={false}
+              animate={{ opacity: isCurrentTurn ? 1 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              Seu turno
+            </motion.div> */}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Barra de inventario (visivel para todos, interativo apenas para humano no seu turno) */}
+      <InventoryBar
+        playerId={player.id}
+        items={player.inventory.items}
+        usingItemId={usingItemId}
+        disabled={!isInventoryInteractive}
+        onItemClick={isInventoryInteractive ? onItemClick : undefined}
+      />
+    </div>
   )
 }

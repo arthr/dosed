@@ -52,20 +52,20 @@ export function Toast({ toast }: ToastProps) {
         <div
           className={`
             ${styles.bg} ${styles.text}
-            px-6 py-4 shadow-xl
+            px-6 py-4
             flex flex-col items-center gap-1
             min-w-[120px]
           `}
         >
           {toast.value !== undefined && (
-            <span className="text-4xl font-bold tracking-tight">
+            <span className="text-lg font-normal tracking-tight">
               {styles.icon}
               {Math.abs(toast.value)}
             </span>
           )}
-          <span className="text-lg font-medium">{toast.message}</span>
+          <span className="text-sm font-normal">{toast.message}</span>
           {toast.pillType && (
-            <span className="text-sm opacity-80">{PILL_LABELS[toast.pillType]}</span>
+            <span className="text-xs opacity-80">{PILL_LABELS[toast.pillType]}</span>
           )}
         </div>
 

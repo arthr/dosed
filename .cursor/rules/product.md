@@ -23,14 +23,29 @@ Jogo de estrategia por turnos onde dois jogadores competem para ser o ultimo sob
 | FATAL    | Zera resistencia          | Roxo     |
 | HEAL     | +2 resistencia            | Ciano    |
 
+### Sistema de Itens (Power-ups)
+Cada jogador seleciona 5 itens antes da partida. Itens podem ser usados durante o turno.
+
+| Categoria | Item        | Efeito                                |
+|-----------|-------------|---------------------------------------|
+| Intel     | Scanner     | Revela tipo de 1 pilula               |
+| Intel     | Inverter    | Inverte efeito de 1 pilula            |
+| Intel     | Double      | Dobra efeito de 1 pilula              |
+| Sustain   | Pocket Pill | Cura +2 resistencia                   |
+| Sustain   | Shield      | Imunidade a dano por 1 turno          |
+| Control   | Handcuffs   | Oponente perde proximo turno          |
+| Control   | Force Feed  | Forca oponente a consumir pilula      |
+| Chaos     | Shuffle     | Embaralha pilulas da mesa             |
+| Chaos     | Discard     | Remove pilula sem ativar efeito       |
+
 ### Fluxo do Jogo
-1. **Setup:** Pool de pilulas gerado aleatoriamente
-2. **Playing:** Jogadores alternam turnos escolhendo pilulas
-3. **RoundEnding:** Quando pilulas acabam, nova rodada inicia
-4. **Ended:** Jogo termina quando um jogador perde todas as vidas
+1. **Setup:** Tela inicial com botao "Iniciar Partida"
+2. **ItemSelection:** Jogadores selecionam 5 itens cada (IA seleciona automaticamente)
+3. **Playing:** Jogadores alternam turnos (podem usar itens e escolher pilulas)
+4. **RoundEnding:** Quando pilulas acabam, nova rodada inicia
+5. **Ended:** Jogo termina quando um jogador perde todas as vidas
 
 ## Funcionalidades Futuras (nao implementadas)
-- Sistema de inventario e itens
 - Modo PvP (multiplayer)
 - Sistema de sons
 - Leaderboard/ranking

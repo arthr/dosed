@@ -121,9 +121,8 @@ export function AnimatedPlayerArea({
   }
 
   // Mapeia animationType para os componentes filhos
-  const getHealthBarAnimation = (): 'damage' | 'heal' | null => {
-    if (animationType === 'damage' || animationType === 'collapse') return 'damage'
-    if (animationType === 'heal') return 'heal'
+  const getResistanceAnimation = (): 'damage' | 'collapse' | null => {
+    if (animationType === 'collapse') return 'collapse'
     return null
   }
 
@@ -179,7 +178,7 @@ export function AnimatedPlayerArea({
             showLabel={false}
             resistance={player.resistance}
             maxResistance={player.maxResistance}
-            animationType={getLivesAnimation()}
+            animationType={getResistanceAnimation()}
           />
 
           {/* Turn Indicator - sempre renderizado para manter altura consistente */}

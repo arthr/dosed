@@ -38,6 +38,8 @@ export interface GameState {
   targetSelection: TargetSelectionState
   /** IDs de pilulas reveladas pelo Scanner (visiveis apenas para quem usou) */
   revealedPills: string[]
+  /** Status de confirmacao de selecao de itens por jogador */
+  itemSelectionConfirmed: Record<PlayerId, boolean>
 }
 
 /**

@@ -101,6 +101,10 @@ const initialState: GameState = {
     validTargets: null,
   },
   revealedPills: [],
+  itemSelectionConfirmed: {
+    player1: false,
+    player2: false,
+  },
 }
 
 /**
@@ -152,9 +156,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       players: { player1, player2 },
       pillPool,
       typeCounts,
-      round: 1,
+      round: 0,
       winner: null,
       actionHistory: [startAction],
+      // Reset item system state
+      itemSelectionConfirmed: { player1: false, player2: false },
+      targetSelection: initialState.targetSelection,
+      revealedPills: [],
     })
   },
 
@@ -438,7 +446,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Verifica se estamos na fase correta
     if (state.phase !== 'itemSelection') return
 
-    // Gera o pool de pilulas e inicia o jogo
+    // Marca este jogador como confirmado
+    const newConfirmed = {
+      ...state.itemSelectionConfirmed,
+      [playerId]: true,
+    }
+
+    // Se apenas este jogador confirmou, aguarda o outro
+    if (!newConfirmed.player1 || !newConfirmed.player2) {
+      set({ itemSelectionConfirmed: newConfirmed })
+      return
+    }
+
+    // Ambos confirmaram - gera pilulas e inicia o jogo
     const pillPool = generatePillPool(
       DEFAULT_GAME_CONFIG.pillsPerRound,
       PILL_CONFIG
@@ -456,6 +476,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       pillPool,
       typeCounts,
       round: 1,
+      itemSelectionConfirmed: newConfirmed,
       actionHistory: [...state.actionHistory, startAction],
     })
   },

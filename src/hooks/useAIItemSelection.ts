@@ -29,55 +29,63 @@ function shuffleArray<T>(array: T[]): T[] {
  * Seleciona 5 itens aleatorios e confirma apos delay
  */
 export function useAIItemSelection() {
+  // Selectors granulares - retornam primitivos para evitar re-renders
   const phase = useGameStore((state) => state.phase)
-  const player2 = useGameStore((state) => state.players.player2)
-  const selectItem = useGameStore((state) => state.selectItem)
-  const confirmItemSelection = useGameStore((state) => state.confirmItemSelection)
+  const isPlayer2AI = useGameStore((state) => state.players.player2.isAI)
 
-  // Ref para evitar selecao duplicada
-  const hasSelectedRef = useRef(false)
+  // Refs para controle de estado
+  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
+  const hasStartedRef = useRef(false)
 
   useEffect(() => {
-    // So executa se estiver na fase de selecao e player2 for IA
+    // Cleanup e reset quando sair da fase de selecao
     if (phase !== 'itemSelection') {
-      hasSelectedRef.current = false
+      hasStartedRef.current = false
+      timeoutsRef.current.forEach(clearTimeout)
+      timeoutsRef.current = []
       return
     }
 
-    if (!player2.isAI) return
-    if (hasSelectedRef.current) return
+    // Guards
+    if (!isPlayer2AI) return
+    if (hasStartedRef.current) return
 
-    hasSelectedRef.current = true
+    // Verifica se IA ja confirmou (via getState para evitar dependencia)
+    const { itemSelectionConfirmed } = useGameStore.getState()
+    if (itemSelectionConfirmed.player2) return
 
-    // Obtem todos os tipos de item e embaralha
+    hasStartedRef.current = true
+
+    // Obtem actions via getState (referencias estaveis)
+    const { selectItem, confirmItemSelection } = useGameStore.getState()
+
+    // Seleciona 5 itens aleatorios
     const allItems = getAllItemTypes()
     const shuffledItems = shuffleArray(allItems)
     const selectedItems = shuffledItems.slice(0, 5) as ItemType[]
 
-    // Agenda selecao de itens com delay
-    const timeouts: ReturnType<typeof setTimeout>[] = []
-
-    // Delay inicial antes de comecar
+    // Agenda selecao com delays
     let currentDelay = AI_SELECTION_START_DELAY
 
-    // Seleciona cada item com delay entre eles
     selectedItems.forEach((itemType) => {
       const timeout = setTimeout(() => {
-        selectItem('player2', itemType)
+        // Verifica fase antes de executar (pode ter mudado)
+        if (useGameStore.getState().phase === 'itemSelection') {
+          selectItem('player2', itemType)
+        }
       }, currentDelay)
-      timeouts.push(timeout)
+      timeoutsRef.current.push(timeout)
       currentDelay += AI_SELECTION_ITEM_DELAY
     })
 
-    // Confirma a selecao apos todos os itens
+    // Confirma apos selecionar todos
     const confirmTimeout = setTimeout(() => {
-      confirmItemSelection('player2')
+      if (useGameStore.getState().phase === 'itemSelection') {
+        confirmItemSelection('player2')
+      }
     }, currentDelay + AI_CONFIRM_DELAY)
-    timeouts.push(confirmTimeout)
+    timeoutsRef.current.push(confirmTimeout)
 
-    // Cleanup
-    return () => {
-      timeouts.forEach(clearTimeout)
-    }
-  }, [phase, player2.isAI, selectItem, confirmItemSelection])
+    // Nao retorna cleanup - timeouts sao limpos apenas quando fase muda
+  }, [phase, isPlayer2AI])
 }

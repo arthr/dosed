@@ -18,6 +18,51 @@ interface InventoryBarProps {
 }
 
 /**
+ * Variantes para container da barra
+ */
+const barVariants = {
+  initial: { opacity: 0, y: 10 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.3,
+      staggerChildren: 0.05,
+    },
+  },
+}
+
+/**
+ * Variantes para cada slot wrapper (entrada/saida)
+ */
+const slotWrapperVariants = {
+  initial: {
+    scale: 0,
+    opacity: 0,
+    y: 20,
+  },
+  animate: {
+    scale: 1,
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: 'spring' as const,
+      stiffness: 400,
+      damping: 20,
+    },
+  },
+  exit: {
+    scale: 0,
+    opacity: 0,
+    y: -20,
+    transition: {
+      duration: 0.2,
+      ease: 'easeIn' as const,
+    },
+  },
+}
+
+/**
  * Barra horizontal de inventario
  * Exibe os itens do jogador durante a partida
  */
@@ -37,19 +82,19 @@ export function InventoryBar({
   return (
     <motion.div
       className="flex gap-1.5 p-2 bg-muted/30 rounded-lg"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      variants={barVariants}
+      initial="initial"
+      animate="animate"
     >
       <AnimatePresence mode="popLayout">
         {slots.map((item, index) => (
           <motion.div
             key={item?.id ?? `empty-${index}`}
             layout
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            variants={slotWrapperVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
           >
             <InventorySlot
               item={item}

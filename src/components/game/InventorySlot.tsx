@@ -38,6 +38,57 @@ interface InventorySlotProps {
 }
 
 /**
+ * Variantes de animacao para o slot
+ */
+const slotVariants = {
+  // Estado inicial (entrada)
+  initial: {
+    scale: 0,
+    opacity: 0,
+    rotate: -10,
+  },
+  // Estado normal
+  idle: {
+    scale: 1,
+    opacity: 1,
+    rotate: 0,
+  },
+  // Disponivel para uso (pulse sutil)
+  available: {
+    scale: [1, 1.05, 1],
+    opacity: 1,
+    rotate: 0,
+    transition: {
+      scale: {
+        duration: 2,
+        repeat: Infinity,
+        ease: 'easeInOut' as const,
+      },
+    },
+  },
+  // Sendo usado (pulse mais intenso)
+  using: {
+    scale: [1, 1.08, 1],
+    opacity: 1,
+    rotate: 0,
+    transition: {
+      scale: {
+        duration: 0.8,
+        repeat: Infinity,
+        ease: 'easeInOut' as const,
+      },
+    },
+  },
+  // Saida
+  exit: {
+    scale: 0,
+    opacity: 0,
+    rotate: 10,
+    transition: { duration: 0.2 },
+  },
+}
+
+/**
  * Slot individual do inventario
  * Exibe um item ou um espaco vazio
  */
@@ -50,12 +101,14 @@ export function InventorySlot({
   // Slot vazio
   if (!item) {
     return (
-      <div
+      <motion.div
         className="
           w-10 h-10 rounded-md
           border-2 border-dashed border-muted-foreground/30
           bg-muted/20
         "
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.5 }}
         aria-label="Slot vazio"
       />
     )
@@ -66,6 +119,13 @@ export function InventorySlot({
   const IconComponent = ICON_MAP[itemDef.icon]
   const bgColor = CATEGORY_BG_COLORS[itemDef.category]
 
+  // Determina estado de animacao
+  const getAnimationState = () => {
+    if (isUsing) return 'using'
+    if (!disabled) return 'available'
+    return 'idle'
+  }
+
   return (
     <motion.button
       onClick={onClick}
@@ -73,7 +133,7 @@ export function InventorySlot({
       className={`
         w-10 h-10 rounded-md
         flex items-center justify-center
-        border-2 transition-all duration-200
+        border-2 transition-colors duration-200
         focus:outline-none focus-visible:ring-2 focus-visible:ring-primary
         ${bgColor}
         ${disabled
@@ -85,21 +145,12 @@ export function InventorySlot({
           : 'border-transparent hover:border-primary/50'
         }
       `}
-      whileHover={!disabled ? { scale: 1.1 } : undefined}
-      whileTap={!disabled ? { scale: 0.95 } : undefined}
-      // Animacao de pulse quando usando
-      animate={
-        isUsing
-          ? {
-              scale: [1, 1.05, 1],
-              transition: {
-                duration: 1,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              },
-            }
-          : undefined
-      }
+      variants={slotVariants}
+      initial="initial"
+      animate={getAnimationState()}
+      exit="exit"
+      whileHover={!disabled ? { scale: 1.15 } : undefined}
+      whileTap={!disabled ? { scale: 0.9 } : undefined}
       aria-label={`${itemDef.name}: ${itemDef.description}`}
       title={`${itemDef.name}: ${itemDef.description}`}
     >

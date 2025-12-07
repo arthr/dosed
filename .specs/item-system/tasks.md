@@ -198,7 +198,7 @@
   - Incluir icone do item
   - Mensagem contextual
 
-- [ ] TASK-IS-035: Adicionar animacoes de inventario
+- [x] TASK-IS-035: Adicionar animacoes de inventario
   - Entrada de item na selecao
   - Saida de item ao usar
   - Pulse quando disponivel

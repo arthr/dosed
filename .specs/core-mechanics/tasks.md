@@ -256,12 +256,13 @@
 ---
 
 ### TASK-023: Implementar reset de rodada
-- [ ] Detectar quando pool de pílulas está vazio
-- [ ] Gerar novo pool automaticamente
-- [ ] Manter vidas e resetar resistência se necessário
-- [ ] Incrementar contador de rodadas
+- [x] Detectar quando pool de pilulas esta vazio (gameStore.ts linha 217)
+- [x] Gerar novo pool automaticamente (resetRound action)
+- [x] Manter vidas e resetar resistencia se necessario (conforme GAME-IDEA.md)
+- [x] Incrementar contador de rodadas (resetRound action)
+- [x] Adicionar feedback visual de nova rodada (NewRoundBanner.tsx)
 
-**Critério de Aceite:** Nova rodada inicia corretamente
+**Criterio de Aceite:** Nova rodada inicia corretamente [CONCLUIDO]
 
 ---
 

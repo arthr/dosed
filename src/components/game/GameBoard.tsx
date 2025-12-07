@@ -6,6 +6,7 @@ import { PillPool } from './PillPool'
 import { TurnIndicator } from './TurnIndicator'
 import { PillReveal } from './PillReveal'
 import { GameFeedback, useGameFeedback, type FeedbackEvent } from './GameFeedback'
+import { NewRoundBanner } from './NewRoundBanner'
 
 /**
  * GameBoard - Tabuleiro principal do jogo
@@ -30,9 +31,12 @@ export function GameBoard() {
     feedbackType,
     targetPlayer,
     isProcessing,
+    newRoundStarted,
+    round: hookRound,
     startConsumption,
     confirmReveal,
     completeFeedback,
+    clearNewRoundFlag,
     getFeedbackMessage,
   } = usePillConsumption()
 
@@ -159,6 +163,13 @@ export function GameBoard() {
 
       {/* Feedback visual */}
       <GameFeedback event={currentFeedback} onComplete={handleFeedbackComplete} />
+
+      {/* Banner de nova rodada */}
+      <NewRoundBanner
+        show={newRoundStarted}
+        round={hookRound}
+        onComplete={clearNewRoundFlag}
+      />
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import type { Pill, PillType, PlayerEffectResult } from '@/types'
 import { useGameStore } from '@/stores/gameStore'
 import { applyPillEffect } from '@/utils/gameLogic'
@@ -12,6 +12,7 @@ interface ConsumptionState {
   effect: PlayerEffectResult | null
   feedbackType: FeedbackType | null
   targetPlayer: 'player1' | 'player2' | null
+  newRoundStarted: boolean
 }
 
 /**
@@ -27,12 +28,26 @@ export function usePillConsumption() {
     effect: null,
     feedbackType: null,
     targetPlayer: null,
+    newRoundStarted: false,
   })
 
   const consumePill = useGameStore((s) => s.consumePill)
   const currentTurn = useGameStore((s) => s.currentTurn)
   const players = useGameStore((s) => s.players)
   const getPillById = useGameStore((s) => s.getPillById)
+  const round = useGameStore((s) => s.round)
+  const pillPoolLength = useGameStore((s) => s.pillPool.length)
+
+  // Ref para rastrear a rodada anterior
+  const prevRoundRef = useRef(round)
+
+  // Detecta mudanca de rodada
+  useEffect(() => {
+    if (round > prevRoundRef.current && prevRoundRef.current > 0) {
+      setState((prev) => ({ ...prev, newRoundStarted: true }))
+    }
+    prevRoundRef.current = round
+  }, [round])
 
   /**
    * Determina tipo de feedback baseado no efeito
@@ -71,6 +86,7 @@ export function usePillConsumption() {
         effect,
         feedbackType,
         targetPlayer: currentTurn,
+        newRoundStarted: false,
       })
     },
     [getPillById, currentTurn, players]
@@ -102,7 +118,15 @@ export function usePillConsumption() {
       effect: null,
       feedbackType: null,
       targetPlayer: null,
+      newRoundStarted: false,
     })
+  }, [])
+
+  /**
+   * Limpa o flag de nova rodada (apos exibir feedback)
+   */
+  const clearNewRoundFlag = useCallback(() => {
+    setState((prev) => ({ ...prev, newRoundStarted: false }))
   }, [])
 
   /**
@@ -134,11 +158,15 @@ export function usePillConsumption() {
     feedbackType: state.feedbackType,
     targetPlayer: state.targetPlayer,
     isProcessing: state.phase !== 'idle',
+    newRoundStarted: state.newRoundStarted,
+    round,
+    pillPoolLength,
 
     // Acoes
     startConsumption,
     confirmReveal,
     completeFeedback,
+    clearNewRoundFlag,
 
     // Helpers
     getFeedbackMessage,

@@ -91,7 +91,7 @@
   - Actions de selecao encapsuladas
   - Validacao de limite (5 itens)
 
-- [ ] TASK-IS-017: Criar `src/hooks/useItemUsage.ts`
+- [x] TASK-IS-017: Criar `src/hooks/useItemUsage.ts`
   - Estado de selecao de alvo
   - Actions de uso encapsuladas
   - Integracao com fluxo de turno

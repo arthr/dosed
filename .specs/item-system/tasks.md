@@ -203,11 +203,11 @@
   - Saida de item ao usar
   - Pulse quando disponivel
 
-- [ ] TASK-IS-036: Implementar feedback visual de Shield
+- [x] TASK-IS-036: Implementar feedback visual de Shield
   - Borda especial no AnimatedPlayerArea
   - Indicador de turnos restantes
 
-- [ ] TASK-IS-037: Implementar feedback visual de Handcuffs
+- [x] TASK-IS-037: Implementar feedback visual de Handcuffs
   - Icone no oponente
   - Mensagem "Turno pulado"
 

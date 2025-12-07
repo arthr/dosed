@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Shield, Lock } from 'lucide-react'
 import type { Player } from '@/types'
 import { LivesDisplay } from './LivesDisplay'
 import { FloatingNumber } from './FloatingNumber'
@@ -29,12 +30,14 @@ const COLORS = {
     damage: 'rgba(239, 68, 68, 0.6)',      // red-500
     heal: 'rgba(16, 185, 129, 0.6)',       // emerald-500
     collapse: 'rgba(124, 58, 237, 0.7)',   // purple-500
+    shield: 'rgba(234, 179, 8, 0.6)',      // yellow-500
   },
   // Borda durante feedback
   border: {
     damage: 'rgba(239, 68, 68, 0.8)',
     heal: 'rgba(16, 185, 129, 0.8)',
     collapse: 'rgba(124, 58, 237, 0.9)',
+    shield: 'rgba(234, 179, 8, 0.9)',      // yellow-500
     turn: 'var(--primary)',
     idle: 'var(--border)',
   },
@@ -44,6 +47,7 @@ const COLORS = {
     damage: 'rgba(239, 68, 68, 0.05)',
     heal: 'rgba(16, 185, 129, 0.05)',
     collapse: 'rgba(124, 58, 237, 0.08)',
+    shield: 'rgba(234, 179, 8, 0.08)',     // yellow-500
     idle: 'transparent',
   },
 }
@@ -61,20 +65,28 @@ export function AnimatedPlayerArea({
   onItemClick,
   usingItemId = null,
 }: AnimatedPlayerAreaProps) {
-  // Determina borda baseado em: feedback > turno > idle
+  // Detecta efeitos ativos
+  const shieldEffect = player.effects.find((e) => e.type === 'shield')
+  const hasShield = !!shieldEffect
+  const handcuffedEffect = player.effects.find((e) => e.type === 'handcuffed')
+  const isHandcuffed = !!handcuffedEffect
+
+  // Determina borda baseado em: feedback > shield > turno > idle
   const getBorderColor = () => {
     if (animationType === 'damage') return COLORS.border.damage
     if (animationType === 'heal') return COLORS.border.heal
     if (animationType === 'collapse') return COLORS.border.collapse
+    if (hasShield) return COLORS.border.shield
     if (isCurrentTurn) return COLORS.border.turn
     return COLORS.border.idle
   }
 
-  // Determina background baseado em: feedback > turno > idle
+  // Determina background baseado em: feedback > shield > turno > idle
   const getBackgroundColor = () => {
     if (animationType === 'damage') return COLORS.bg.damage
     if (animationType === 'heal') return COLORS.bg.heal
     if (animationType === 'collapse') return COLORS.bg.collapse
+    if (hasShield) return COLORS.bg.shield
     if (isCurrentTurn) return COLORS.bg.turn
     return COLORS.bg.idle
   }
@@ -87,12 +99,18 @@ export function AnimatedPlayerArea({
     return `0 0 ${size * intensity}px ${4 * intensity}px ${color}`
   }
 
+  // Glow para shield (quando nao ha animationType)
+  const getShieldGlow = () => {
+    if (!hasShield || animationType) return undefined
+    return `0 0 15px 2px ${COLORS.glow.shield}`
+  }
+
   // Variantes de animacao - movimento + glow sincronizados
   const variants = {
     idle: {
       x: 0,
       scale: 1,
-      boxShadow: '0 0 0 0 transparent',
+      boxShadow: getShieldGlow() ?? '0 0 0 0 transparent',
     },
     damage: {
       x: [0, -8, 8, -8, 8, 0],
@@ -163,22 +181,48 @@ export function AnimatedPlayerArea({
           getBorderColor(),
           getBackgroundColor(),
         )}>
-          {/* Header: Nome + Tag IA */}
-          <CardHeader className="border-b pb-0! items-center">
-            {/* <Avatar className="size-8" variant="pixel">
-                <AvatarImage src="/avatars/orcdev.jpeg" alt={player.name} />
-                <AvatarFallback className="text-[8px]">
-                  {player.name.charAt(0).toUpperCase() + player.name.charAt(1).toUpperCase()}
-                </AvatarFallback>
-              </Avatar> */}
-
-            <div className="flex gap-1 items-center justify-between">
+          {/* Header: Nome + Tags */}
+          <CardHeader className="border-b pb-0! px-4 items-center">
+            <div className="flex gap-1 items-center justify-between w-full">
               <h3 className="font-medium truncate text-xs">{player.name}</h3>
-              {player.isAI ? (
-                <Badge variant="default" className="text-[8px] bg-accent text-game-accent">IA</Badge>
-              ) : (
-                <Badge variant="secondary" className="text-[8px]">Lv.25</Badge>
-              )}
+              <div className="flex gap-4 items-center">
+                {/* Indicador de Shield */}
+                {hasShield && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                  >
+                    <Badge
+                      variant="outline"
+                      className="flex text-[8px] bg-yellow-500/20 border-yellow-500 text-yellow-500"
+                    >
+                      <Shield size={10} className="mr-0.5" />
+                      {shieldEffect?.roundsRemaining}
+                    </Badge>
+                  </motion.div>
+                )}
+                {/* Indicador de Handcuffs */}
+                {isHandcuffed && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                  >
+                    <Badge
+                      variant="outline"
+                      className="flex text-[8px] bg-red-500/20 border-red-500 text-red-500"
+                    >
+                      <Lock size={10} className="mr-0.5" />
+                      {handcuffedEffect?.roundsRemaining}
+                    </Badge>
+                  </motion.div>
+                )}
+                {/* Tag IA */}
+                {player.isAI && (
+                  <Badge variant="outline" className="text-[8px] bg-accent/80 text-game-accent border-game-accent">IA</Badge>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="flex justify-between items-center gap-2">

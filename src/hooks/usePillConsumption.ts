@@ -14,6 +14,8 @@ interface ConsumptionState {
   effect: PlayerEffectResult | null
   feedbackType: ToastType | null
   targetPlayer: 'player1' | 'player2' | null
+  /** Se consumo foi forcado (Force Feed) */
+  isForced: boolean
 }
 
 /**
@@ -34,6 +36,7 @@ export function usePillConsumption() {
     effect: null,
     feedbackType: null,
     targetPlayer: null,
+    isForced: false,
   })
 
   // Game store
@@ -104,18 +107,22 @@ export function usePillConsumption() {
   /**
    * Inicia o fluxo de consumo
    * Abre o overlay de revelacao
+   * @param pillId - ID da pilula
+   * @param forcedTarget - Se passado, aplica efeito nesse jogador (Force Feed)
    */
   const startConsumption = useCallback(
-    (pillId: string) => {
+    (pillId: string, forcedTarget?: 'player1' | 'player2') => {
       const pill = getPillById(pillId)
       if (!pill) return
 
-      const currentPlayer = players[currentTurn]
-      if (!currentPlayer) return
+      // Determina quem consome: forcedTarget ou currentTurn
+      const targetId = forcedTarget ?? currentTurn
+      const targetPlayer = players[targetId]
+      if (!targetPlayer) return
 
       // Simula o efeito para preview
       const revealedPill: Pill = { ...pill, isRevealed: true }
-      const effect = applyPillEffect(revealedPill, currentPlayer)
+      const effect = applyPillEffect(revealedPill, targetPlayer)
       const feedbackType = determineFeedbackType(pill.type, effect)
 
       // Limpa timeout anterior se existir
@@ -129,11 +136,12 @@ export function usePillConsumption() {
         revealedPill,
         effect,
         feedbackType,
-        targetPlayer: currentTurn,
+        targetPlayer: targetId,
+        isForced: !!forcedTarget,
       })
 
       // Abre overlay de revelacao
-      openPillReveal(revealedPill, currentPlayer.isAI)
+      openPillReveal(revealedPill, targetPlayer.isAI)
 
       // Fallback timeout: forca fechamento do overlay se animacao travar
       // (ex: usuario trocou de aba e requestAnimationFrame foi pausado)
@@ -153,10 +161,14 @@ export function usePillConsumption() {
    * Aplica efeito e mostra toast de feedback
    */
   const confirmReveal = useCallback(() => {
-    if (!state.revealedPill || !state.feedbackType) return
+    if (!state.revealedPill || !state.feedbackType || !state.targetPlayer) return
 
-    // Aplica o efeito no store
-    consumePill(state.revealedPill.id)
+    // Aplica o efeito no store (com forcedTarget se foi Force Feed)
+    if (state.isForced) {
+      consumePill(state.revealedPill.id, { forcedTarget: state.targetPlayer })
+    } else {
+      consumePill(state.revealedPill.id)
+    }
 
     // Mostra toast de feedback
     showToast({
@@ -171,7 +183,7 @@ export function usePillConsumption() {
       ...prev,
       phase: 'feedback',
     }))
-  }, [state.revealedPill, state.feedbackType, state.effect, consumePill, showToast, getFeedbackMessage])
+  }, [state.revealedPill, state.feedbackType, state.effect, state.targetPlayer, state.isForced, consumePill, showToast, getFeedbackMessage])
 
   /**
    * Finaliza o fluxo e volta ao idle
@@ -183,6 +195,7 @@ export function usePillConsumption() {
       effect: null,
       feedbackType: null,
       targetPlayer: null,
+      isForced: false,
     })
   }, [])
 

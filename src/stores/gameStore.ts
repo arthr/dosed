@@ -15,7 +15,7 @@ import type {
   PlayerId,
 } from '@/types'
 import { DEFAULT_GAME_CONFIG, PILL_CONFIG, ROUND_TRANSITION_DELAY } from '@/utils/constants'
-import { applyPillEffect, createPlayer } from '@/utils/gameLogic'
+import { applyPillEffect, createPlayer, hasPlayerEffect } from '@/utils/gameLogic'
 import {
   countPillTypes,
   generatePillPool,
@@ -29,7 +29,7 @@ import { ITEM_CATALOG } from '@/utils/itemCatalog'
 interface GameStore extends GameState {
   // Actions - Game Flow
   initGame: (config?: Partial<GameConfig>) => void
-  consumePill: (pillId: string) => void
+  consumePill: (pillId: string, options?: { forcedTarget?: PlayerId }) => void
   revealPillById: (pillId: string) => void
   nextTurn: () => void
   resetRound: () => void
@@ -69,6 +69,23 @@ interface GameStore extends GameState {
   getPillById: (pillId: string) => Pill | undefined
   isPillPoolEmpty: () => boolean
   getGameStats: () => GameStats
+}
+
+/**
+ * Decrementa roundsRemaining dos efeitos do jogador e remove expirados
+ */
+function decrementPlayerEffects(player: Player): Player {
+  const updatedEffects = player.effects
+    .map((effect) => ({
+      ...effect,
+      roundsRemaining: effect.roundsRemaining - 1,
+    }))
+    .filter((effect) => effect.roundsRemaining > 0)
+
+  return {
+    ...player,
+    effects: updatedEffects,
+  }
 }
 
 /**
@@ -168,8 +185,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   /**
    * Consome uma pilula do pool
+   * @param pillId - ID da pilula a consumir
+   * @param options.forcedTarget - Se passado, aplica efeito nesse jogador (Force Feed)
    */
-  consumePill: (pillId: string) => {
+  consumePill: (pillId: string, options?: { forcedTarget?: PlayerId }) => {
     const state = get()
 
     // Validacoes
@@ -180,13 +199,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (pillIndex === -1) return
 
     const pill = state.pillPool[pillIndex]
-    const currentPlayer = state.players[state.currentTurn]
+
+    // Determina quem consome: forcedTarget (Force Feed) ou currentTurn
+    const isForced = !!options?.forcedTarget
+    const consumerId = options?.forcedTarget ?? state.currentTurn
+    const consumerPlayer = state.players[consumerId]
 
     // Revela a pilula
     const revealedPill = revealPill(pill)
 
-    // Aplica o efeito
-    const result = applyPillEffect(revealedPill, currentPlayer)
+    // Verifica se jogador que consome tem Shield ativo
+    const playerHasShield = hasPlayerEffect(consumerPlayer, 'shield')
+
+    // Aplica o efeito (com imunidade a dano se tiver Shield)
+    const result = applyPillEffect(revealedPill, consumerPlayer, {
+      hasShield: playerHasShield,
+    })
 
     // Remove pilula do pool
     const newPillPool = state.pillPool.filter((p) => p.id !== pillId)
@@ -195,13 +223,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Registra acao
     const consumeAction: GameAction = {
       type: 'CONSUME_PILL',
-      playerId: state.currentTurn,
+      playerId: consumerId,
       timestamp: Date.now(),
       payload: {
         pillId,
         pillType: pill.type,
         damage: result.damageDealt,
         heal: result.healReceived,
+        forced: isForced,
       },
     }
 
@@ -211,7 +240,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (result.collapsed) {
       actions.push({
         type: 'COLLAPSE',
-        playerId: state.currentTurn,
+        playerId: consumerId,
         timestamp: Date.now(),
       })
     }
@@ -220,12 +249,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (result.eliminated) {
       actions.push({
         type: 'ELIMINATE',
-        playerId: state.currentTurn,
+        playerId: consumerId,
         timestamp: Date.now(),
       })
 
-      // Determina vencedor
-      const winnerId = state.currentTurn === 'player1' ? 'player2' : 'player1'
+      // Vencedor e o outro jogador
+      const winnerId = consumerId === 'player1' ? 'player2' : 'player1'
 
       actions.push({
         type: 'GAME_END',
@@ -236,7 +265,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({
         players: {
           ...state.players,
-          [state.currentTurn]: result.player,
+          [consumerId]: result.player,
         },
         pillPool: newPillPool,
         typeCounts: newTypeCounts,
@@ -247,18 +276,62 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return
     }
 
-    // Atualiza estado e passa turno
-    const nextTurn: PlayerId =
+    // Atualiza jogador que consumiu com efeitos decrementados
+    const updatedConsumer = decrementPlayerEffects(result.player)
+
+    // Se foi forcado (Force Feed), NAO troca turno
+    if (isForced) {
+      set({
+        players: {
+          ...state.players,
+          [consumerId]: updatedConsumer,
+        },
+        pillPool: newPillPool,
+        typeCounts: newTypeCounts,
+        actionHistory: [...state.actionHistory, ...actions],
+      })
+
+      // Verifica se pool esvaziou
+      if (newPillPool.length === 0) {
+        set({ phase: 'roundEnding' })
+        setTimeout(() => {
+          get().resetRound()
+        }, ROUND_TRANSITION_DELAY)
+      }
+      return
+    }
+
+    // Fluxo normal: determina proximo jogador
+    const nextPlayerId: PlayerId =
       state.currentTurn === 'player1' ? 'player2' : 'player1'
+    let nextPlayer = state.players[nextPlayerId]
+    let actualNextTurn = nextPlayerId
+
+    // Verifica se proximo jogador esta algemado (Handcuffs)
+    if (hasPlayerEffect(nextPlayer, 'handcuffed')) {
+      // Remove o efeito handcuffed e pula o turno (mantem turno atual)
+      nextPlayer = {
+        ...nextPlayer,
+        effects: nextPlayer.effects.filter((e) => e.type !== 'handcuffed'),
+      }
+      actualNextTurn = state.currentTurn
+
+      actions.push({
+        type: 'SKIP_TURN',
+        playerId: nextPlayerId,
+        timestamp: Date.now(),
+      })
+    }
 
     set({
       players: {
         ...state.players,
-        [state.currentTurn]: result.player,
+        [consumerId]: updatedConsumer,
+        [nextPlayerId]: nextPlayer,
       },
       pillPool: newPillPool,
       typeCounts: newTypeCounts,
-      currentTurn: nextTurn,
+      currentTurn: actualNextTurn,
       actionHistory: [...state.actionHistory, ...actions],
     })
 

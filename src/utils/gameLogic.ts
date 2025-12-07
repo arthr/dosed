@@ -1,4 +1,10 @@
-import type { Pill, Player, PlayerEffectResult } from '@/types'
+import type { Pill, Player, PlayerEffectResult, PlayerEffectType } from '@/types'
+
+/** Opcoes para aplicacao de efeito de pilula */
+interface ApplyPillOptions {
+  /** Se o jogador tem Shield ativo (imunidade a dano) */
+  hasShield?: boolean
+}
 
 /**
  * Aplica o efeito de uma pilula ao jogador
@@ -7,13 +13,20 @@ import type { Pill, Player, PlayerEffectResult } from '@/types'
  * Considera modificadores de item:
  * - inverted: dano vira cura, cura vira dano
  * - doubled: dobra o valor do efeito
+ * - hasShield: imunidade a dano (cura continua funcionando)
  *
  * @param pill - Pilula consumida
  * @param player - Jogador que consumiu
+ * @param options - Opcoes adicionais (shield, etc)
  * @returns Resultado com novo estado do player e flags de evento
  */
-export function applyPillEffect(pill: Pill, player: Player): PlayerEffectResult {
+export function applyPillEffect(
+  pill: Pill,
+  player: Player,
+  options?: ApplyPillOptions
+): PlayerEffectResult {
   const { stats, inverted, doubled } = pill
+  const hasShield = options?.hasShield ?? false
 
   // Calcula valores base considerando modificadores
   let baseDamage = stats.damage
@@ -30,6 +43,11 @@ export function applyPillEffect(pill: Pill, player: Player): PlayerEffectResult 
   if (doubled) {
     baseDamage = baseDamage * 2
     baseHeal = baseHeal * 2
+  }
+
+  // Shield bloqueia dano
+  if (hasShield) {
+    baseDamage = 0
   }
 
   let newResistance = player.resistance
@@ -210,5 +228,12 @@ export function getResistancePercentage(player: Player): number {
  */
 export function canConsumePill(player: Player): boolean {
   return player.lives > 0
+}
+
+/**
+ * Verifica se o jogador tem um efeito especifico ativo
+ */
+export function hasPlayerEffect(player: Player, effectType: PlayerEffectType): boolean {
+  return player.effects.some((e) => e.type === effectType)
 }
 

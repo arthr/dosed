@@ -180,12 +180,12 @@
   - Handlers de uso de item
   - Estado de "usando item"
 
-- [ ] TASK-IS-032: Integrar efeitos de turno
+- [x] TASK-IS-032: Integrar efeitos de turno
   - Verificar Shield antes de aplicar dano
   - Aplicar Handcuffs (pular turno)
   - Decrementar efeitos no fim do turno
 
-- [ ] TASK-IS-033: Atualizar usePillConsumption para Force Feed
+- [x] TASK-IS-033: Atualizar usePillConsumption para Force Feed
   - Aceitar parametro de "forcado"
   - Aplicar no oponente ao inves do jogador atual
 

@@ -53,6 +53,8 @@ export type GameActionType =
   | 'NEW_ROUND'
   | 'GAME_START'
   | 'GAME_END'
+  | 'USE_ITEM'
+  | 'SKIP_TURN'
 
 /**
  * Registro de acao do jogo

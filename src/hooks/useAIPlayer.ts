@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import type { Pill, Player } from '@/types'
+import type { GamePhase, Pill, Player } from '@/types'
 import { selectRandomPill, getAIThinkingDelay } from '@/utils/aiLogic'
 
 interface UseAIPlayerOptions {
@@ -9,6 +9,8 @@ interface UseAIPlayerOptions {
   pillPool: Pill[]
   /** Fase atual do consumo (idle, revealing, feedback) */
   phase: 'idle' | 'revealing' | 'feedback'
+  /** Fase atual do jogo */
+  gamePhase: GamePhase
   /** Funcao para iniciar consumo de pilula */
   startConsumption: (pillId: string) => void
 }
@@ -20,11 +22,13 @@ interface UseAIPlayerOptions {
  * - Aguarda delay simulado (1-2s) para "pensar"
  * - Seleciona pilula aleatoria e inicia consumo
  * - Evita jogar durante animacoes/feedback
+ * - Para quando jogo termina ou rodada esta em transicao
  */
 export function useAIPlayer({
   currentPlayer,
   pillPool,
   phase,
+  gamePhase,
   startConsumption,
 }: UseAIPlayerOptions) {
   // Ref para controlar timeout e evitar memory leaks
@@ -34,11 +38,13 @@ export function useAIPlayer({
 
   useEffect(() => {
     // Condicoes para IA jogar:
-    // 1. E turno da IA (currentPlayer.isAI)
-    // 2. Fase e idle (nao esta processando)
-    // 3. Tem pilulas disponiveis
-    // 4. Nao tem timeout ja agendado
+    // 1. Jogo esta em andamento (nao ended, nao roundEnding)
+    // 2. E turno da IA (currentPlayer.isAI)
+    // 3. Fase de consumo e idle (nao esta processando)
+    // 4. Tem pilulas disponiveis
+    // 5. Nao tem timeout ja agendado
     const shouldAIPlay =
+      gamePhase === 'playing' &&
       currentPlayer.isAI &&
       phase === 'idle' &&
       pillPool.length > 0 &&
@@ -68,7 +74,7 @@ export function useAIPlayer({
         timeoutRef.current = null
       }
     }
-  }, [currentPlayer.isAI, phase, pillPool, startConsumption])
+  }, [gamePhase, currentPlayer.isAI, phase, pillPool, startConsumption])
 
   // Reset flag quando turno muda para humano
   useEffect(() => {

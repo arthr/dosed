@@ -9,7 +9,7 @@ import type {
   Player,
   PlayerId,
 } from '@/types'
-import { DEFAULT_GAME_CONFIG, PILL_CONFIG } from '@/utils/constants'
+import { DEFAULT_GAME_CONFIG, PILL_CONFIG, ROUND_TRANSITION_DELAY } from '@/utils/constants'
 import { applyPillEffect, createPlayer } from '@/utils/gameLogic'
 import {
   countPillTypes,
@@ -213,9 +213,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
       actionHistory: [...state.actionHistory, ...actions],
     })
 
-    // Verifica se pool esvaziou
+    // Verifica se pool esvaziou - inicia fase de transicao
     if (newPillPool.length === 0) {
-      get().resetRound()
+      // Muda para fase roundEnding
+      set({ phase: 'roundEnding' })
+
+      // Apos delay, inicia nova rodada
+      setTimeout(() => {
+        get().resetRound()
+      }, ROUND_TRANSITION_DELAY)
     }
   },
 
@@ -258,11 +264,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   /**
-   * Inicia nova rodada (quando pool esvazia)
+   * Inicia nova rodada (chamado apos fase roundEnding)
    */
   resetRound: () => {
     const state = get()
-    if (state.phase !== 'playing') return
+    // Aceita tanto 'playing' quanto 'roundEnding'
+    if (state.phase !== 'playing' && state.phase !== 'roundEnding') return
 
     // Verifica se ambos jogadores ainda tem vidas
     const { player1, player2 } = state.players
@@ -285,6 +292,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     set({
+      phase: 'playing', // Volta para playing
       pillPool: newPillPool,
       typeCounts: newTypeCounts,
       round: state.round + 1,

@@ -4,7 +4,7 @@ import type { Player, PlayerId } from './player'
 /**
  * Fases do jogo
  */
-export type GamePhase = 'setup' | 'playing' | 'ended'
+export type GamePhase = 'setup' | 'playing' | 'roundEnding' | 'ended'
 
 /**
  * Fases dentro de um turno

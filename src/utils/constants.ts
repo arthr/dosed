@@ -42,6 +42,12 @@ export const PILL_CONFIG: PillConfig = {
 export const FATAL_DAMAGE = 999
 
 /**
+ * Delay em ms para transicao entre rodadas (fase roundEnding)
+ * Permite que toasts/animacoes terminem antes de mostrar nova rodada
+ */
+export const ROUND_TRANSITION_DELAY = 2000
+
+/**
  * Cores associadas a cada tipo de pilula (Tailwind classes)
  */
 export const PILL_COLORS: Record<PillType, string> = {

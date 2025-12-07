@@ -19,6 +19,7 @@ export function GameBoard() {
   const pillPool = useGameStore((s) => s.pillPool)
   const typeCounts = useGameStore((s) => s.typeCounts)
   const round = useGameStore((s) => s.round)
+  const gamePhase = useGameStore((s) => s.phase)
 
   const player1 = players.player1
   const player2 = players.player2
@@ -36,12 +37,14 @@ export function GameBoard() {
   // Jogador atual
   const currentPlayer = players[currentTurn]
   const isHumanTurn = !currentPlayer.isAI
+  const isRoundEnding = gamePhase === 'roundEnding'
 
   // Hook da IA - joga automaticamente quando e turno dela
   useAIPlayer({
     currentPlayer,
     pillPool,
     phase,
+    gamePhase,
     startConsumption,
   })
 
@@ -99,11 +102,13 @@ export function GameBoard() {
           typeCounts={typeCounts}
           round={round}
           onSelectPill={handlePillSelect}
-          disabled={isProcessing || !isHumanTurn}
+          disabled={isProcessing || !isHumanTurn || isRoundEnding}
           instructionMessage={
-            isHumanTurn
-              ? 'Clique em uma pilula para consumi-la'
-              : 'Aguardando IA...'
+            isRoundEnding
+              ? 'Preparando proxima rodada...'
+              : isHumanTurn
+                ? 'Clique em uma pilula para consumi-la'
+                : 'Aguardando IA...'
           }
         />
 

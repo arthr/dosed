@@ -43,19 +43,19 @@ interface ItemCardProps {
 
 const sizeClasses = {
   sm: {
-    card: 'w-20 h-24 p-2',
+    card: 'size-24 p-2',
     icon: 16,
-    text: 'text-xs',
+    text: 'text-[10px]',
   },
   md: {
-    card: 'w-28 h-32 p-3',
+    card: 'size-32 p-3',
     icon: 24,
-    text: 'text-sm',
+    text: 'text-xs',
   },
   lg: {
-    card: 'w-36 h-40 p-4',
+    card: 'size-40 p-4',
     icon: 32,
-    text: 'text-base',
+    text: 'text-sm',
   },
 }
 
@@ -86,7 +86,7 @@ export function ItemCard({
       disabled={disabled}
       className={`
         ${sizeConfig.card}
-        rounded-lg border-2
+        border-2
         flex flex-col items-center justify-center gap-1
         transition-all duration-200
         focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background
@@ -153,7 +153,7 @@ export function ItemCard({
       <span
         className={`
           ${sizeConfig.text}
-          font-medium text-foreground text-center
+          font-normal text-foreground text-center
           leading-tight
         `}
       >
@@ -162,7 +162,7 @@ export function ItemCard({
 
       {/* Descricao (opcional, apenas em tamanhos maiores) */}
       {showDescription && size === 'lg' && (
-        <span className="text-xs text-muted-foreground text-center line-clamp-2">
+        <span className="text-xs/tight text-muted-foreground text-center line-clamp-2">
           {itemDef.description}
         </span>
       )}

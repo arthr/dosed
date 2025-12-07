@@ -95,7 +95,7 @@ export const ITEM_CATALOG: Record<ItemType, ItemDefinition> = {
   handcuffs: {
     type: 'handcuffs',
     category: 'control',
-    name: 'Handcuffs',
+    name: 'Handcuff',
     description: 'Oponente perde o proximo turno',
     targetType: 'opponent',
     icon: 'Lock',

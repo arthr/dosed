@@ -11,6 +11,7 @@ import {
   CATEGORY_COLORS,
   getAllCategories,
 } from '@/utils/itemCatalog'
+import { cn } from '@/lib/utils'
 
 /**
  * Tela de selecao de itens pre-jogo
@@ -54,34 +55,34 @@ export function ItemSelectionScreen() {
 
   return (
     <motion.div
-      className="min-h-screen bg-background flex flex-col items-center justify-center p-6"
+      className="flex flex-col gap-6 w-full max-w-5xl mx-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
       {/* Header */}
       <motion.div
-        className="text-center mb-8"
+        className="text-center"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1 }}
       >
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          Selecione seus Itens
+        <h1 className="text-lg tracking-tight text-foreground">
+          Selecione seus itens
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-xs tracking-tight text-muted-foreground">
           Escolha ate {maxItems} itens para usar durante a partida
         </p>
       </motion.div>
 
       {/* Contador de selecao */}
       <motion.div
-        className="mb-6 px-4 py-2 bg-muted rounded-lg"
+        className="flex bg-muted p-2 justify-end"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        <span className="text-lg font-medium">
+        <span className="text-xs">
           <span
             className={
               selectedCount === maxItems ? 'text-primary' : 'text-foreground'
@@ -95,7 +96,7 @@ export function ItemSelectionScreen() {
 
       {/* Grid de categorias */}
       <motion.div
-        className="w-full max-w-4xl space-y-6"
+        className="flex flex-wrap w-full max-w-4xl space-y-6 space-x-4"
         initial="hidden"
         animate="visible"
         variants={{
@@ -119,28 +120,32 @@ export function ItemSelectionScreen() {
 
       {/* Status de confirmacao */}
       <motion.div
-        className="mt-6 flex gap-6 text-sm"
+        className="mt-6 flex self-center gap-6 text-xs"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
       >
         <div className="flex items-center gap-2">
           {player1Confirmed ? (
-            <Check className="w-4 h-4 text-emerald-500" />
+            <Check className="size-4 text-emerald-500" />
           ) : (
-            <div className="w-4 h-4 rounded-full border-2 border-muted-foreground/50" />
+            <div className="size-4 rounded-full border-2 border-muted-foreground/50" />
           )}
-          <span className={player1Confirmed ? 'text-emerald-500' : 'text-muted-foreground'}>
+          <span className={cn(
+            player1Confirmed ? 'text-emerald-500' : 'text-muted-foreground'
+          )}>
             Voce {player1Confirmed ? 'pronto' : 'selecionando...'}
           </span>
         </div>
         <div className="flex items-center gap-2">
           {aiConfirmed ? (
-            <Check className="w-4 h-4 text-emerald-500" />
+            <Check className="size-4 text-emerald-500" />
           ) : (
-            <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
+            <Loader2 className="size-4 text-muted-foreground animate-spin" />
           )}
-          <span className={aiConfirmed ? 'text-emerald-500' : 'text-muted-foreground'}>
+          <span className={cn(
+            aiConfirmed ? 'text-emerald-500' : 'text-muted-foreground'
+          )}>
             IA {aiConfirmed ? 'pronta' : 'selecionando...'}
           </span>
         </div>
@@ -148,7 +153,7 @@ export function ItemSelectionScreen() {
 
       {/* Botao Confirmar */}
       <motion.div
-        className="mt-4"
+        className="mt-4 flex self-end"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.5 }}
@@ -157,16 +162,15 @@ export function ItemSelectionScreen() {
           onClick={confirmSelection}
           disabled={selectedCount === 0 || player1Confirmed}
           className={`
-            px-8 py-3 rounded-lg font-semibold text-lg
+            px-4 py-3 rounded-sm font-normal text-xs
             transition-all duration-200
-            ${
-              selectedCount > 0 && !player1Confirmed
-                ? 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer'
-                : 'bg-muted text-muted-foreground cursor-not-allowed'
+            ${selectedCount > 0 && !player1Confirmed
+              ? 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer'
+              : 'bg-muted text-muted-foreground cursor-not-allowed'
             }
           `}
         >
-          {player1Confirmed ? 'Aguardando IA...' : 'Confirmar Selecao'}
+          {player1Confirmed ? 'Aguardando IA...' : 'Confirmar seleção'}
         </button>
       </motion.div>
     </motion.div>
@@ -196,14 +200,14 @@ function CategorySection({
 
   return (
     <motion.div
-      className="space-y-3"
+      className="space-y-2"
       variants={{
         hidden: { x: -20, opacity: 0 },
         visible: { x: 0, opacity: 1 },
       }}
     >
       {/* Label da categoria */}
-      <h2 className={`text-lg font-semibold ${colorClass}`}>{label}</h2>
+      <h2 className={`text-base ${colorClass}`}>{label}</h2>
 
       {/* Grid de itens */}
       <div className="flex flex-wrap gap-3">
@@ -218,7 +222,7 @@ function CategorySection({
               selected={isSelected}
               disabled={isDisabled}
               onClick={() => onItemClick(itemType)}
-              size="md"
+              size="sm"
             />
           )
         })}

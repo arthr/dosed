@@ -10,12 +10,14 @@ import {
 } from '@/hooks'
 import { InfoPanel } from '@/components/game/InfoPanel'
 import { GameBoard } from '@/components/game/GameBoard'
+import { GameOverDialog } from '@/components/game/GameOverDialog'
 
 function GameContent() {
   // State
   const phase = useGamePhase()
   const { player1, player2 } = usePlayers()
   const winner = useWinner()
+  const stats = useGameStats()
 
   // Actions
   const { startGame, restartGame } = useGameActions()
@@ -43,52 +45,20 @@ function GameContent() {
     )
   }
 
-  // Tela de jogo ativo
-  if (phase === 'playing') {
-    return <GameBoard />
-  }
+  // Tela de jogo ativo (inclui dialog de fim de jogo)
+  return (
+    <>
+      <GameBoard />
 
-  // Tela de fim de jogo
-  if (phase === 'ended') {
-    return (
-      <GameOverScreen
+      {/* Dialog de fim de jogo */}
+      <GameOverDialog
+        open={phase === 'ended'}
         winner={winner}
         players={{ player1, player2 }}
+        stats={stats}
         onRestart={restartGame}
       />
-    )
-  }
-
-  return null
-}
-
-/**
- * Tela de fim de jogo extraida para componente separado
- */
-interface GameOverScreenProps {
-  winner: 'player1' | 'player2' | null
-  players: { player1: { name: string }; player2: { name: string } }
-  onRestart: () => void
-}
-
-function GameOverScreen({ winner, players, onRestart }: GameOverScreenProps) {
-  const stats = useGameStats()
-
-  return (
-    <div className="flex flex-col items-center justify-center gap-6 py-12">
-      <h2 className="text-3xl font-bold text-foreground">Fim de Jogo!</h2>
-      <p className="text-xl text-primary">
-        {winner ? `${players[winner].name} venceu!` : 'Empate!'}
-      </p>
-
-      <div className="text-sm text-muted-foreground space-y-1 text-center">
-        <p>Rodadas: {stats.totalRounds}</p>
-        <p>Pilulas consumidas: {stats.pillsConsumed}</p>
-        <p>Colapsos: {stats.totalCollapses}</p>
-      </div>
-
-      <Button onClick={onRestart}>Jogar Novamente</Button>
-    </div>
+    </>
   )
 }
 

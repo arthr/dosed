@@ -244,11 +244,14 @@
 ---
 
 ### TASK-022: Implementar tela de fim de jogo
-- [ ] Criar Dialog para exibir vencedor
-- [ ] Adicionar botão para reiniciar jogo
-- [ ] Exibir estatísticas básicas (rodadas, pílulas consumidas)
+- [x] Criar `src/components/game/GameOverDialog.tsx` usando Dialog do shadcn/ui
+- [x] Adicionar botao para reiniciar jogo com icone
+- [x] Exibir estatisticas detalhadas (rodadas, pilulas, colapsos, vidas restantes)
+- [x] Adicionar animacoes com Framer Motion (icone, titulo, stats, botao)
+- [x] Mostrar resumo visual de vencedor vs perdedor
+- [x] Diferenciar vitoria (Trophy dourado) de derrota (Skull vermelho)
 
-**Critério de Aceite:** Jogo detecta fim e exibe vencedor
+**Criterio de Aceite:** Jogo detecta fim e exibe vencedor [CONCLUIDO]
 
 ---
 

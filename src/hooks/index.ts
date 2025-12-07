@@ -43,6 +43,7 @@ export {
 
 // Item Selection (pre-game)
 export { useItemSelection } from './useItemSelection'
+export { useAIItemSelection } from './useAIItemSelection'
 
 // Item Usage (during game)
 export {

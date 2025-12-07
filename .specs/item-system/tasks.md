@@ -123,7 +123,7 @@
   - Renderizar quando phase === 'itemSelection'
   - Transicao para 'playing' apos confirmacao
 
-- [ ] TASK-IS-023: Implementar selecao automatica da IA
+- [x] TASK-IS-023: Implementar selecao automatica da IA
   - Selecionar 5 itens aleatorios
   - Auto-confirmar apos delay
 

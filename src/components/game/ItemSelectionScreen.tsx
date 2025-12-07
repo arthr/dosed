@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import type { ItemCategory, ItemType } from '@/types'
 import { useItemSelection } from '@/hooks'
+import { useAIItemSelection } from '@/hooks/useAIItemSelection'
 import { ItemCard } from './ItemCard'
 import {
   ITEMS_BY_CATEGORY,
@@ -24,6 +25,9 @@ export function ItemSelectionScreen() {
     confirmSelection,
     inventory,
   } = useItemSelection('player1')
+
+  // Ativa selecao automatica da IA (player2)
+  useAIItemSelection()
 
   const categories = getAllCategories()
 

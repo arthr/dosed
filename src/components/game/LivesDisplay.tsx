@@ -52,7 +52,7 @@ export function LivesDisplay({
     animate: { 
       scale: 1, 
       opacity: 1,
-      transition: { type: 'spring', stiffness: 300, damping: 20 }
+      transition: { type: 'spring' as const, stiffness: 300, damping: 20 }
     },
     exit: { 
       scale: [1, 1.3, 0],
@@ -68,7 +68,7 @@ export function LivesDisplay({
     collapse: {
       y: [0, -8, 0],
       scale: [1, 1.2, 0.9, 1],
-      transition: { duration: 0.5, ease: 'easeOut' }
+      transition: { duration: 0.5, ease: 'easeOut' as const }
     },
   }
 

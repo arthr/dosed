@@ -30,32 +30,32 @@
 ---
 
 ### TASK-003: Configurar shadcn/ui
-- [ ] Executar `npx shadcn@latest init`
-- [ ] Configurar `components.json` com aliases corretos
-- [ ] Instalar componentes base: Button, Card, Progress, Badge, Tooltip, Dialog, Alert
+- [x] Executar `pnpm dlx shadcn@latest init` (com Tailwind v4)
+- [x] Configurar `components.json` com aliases corretos (style: new-york)
+- [x] Instalar componentes base: Button, Card, Progress, Badge, Tooltip, Dialog, Alert
 
-**Critério de Aceite:** Componentes shadcn renderizam corretamente
+**Critério de Aceite:** Componentes shadcn renderizam corretamente [CONCLUIDO]
 
 ---
 
-### TASK-004: Instalar dependências adicionais
-- [ ] Instalar Zustand para state management
-- [ ] Instalar Framer Motion para animações
-- [ ] Instalar uuid para geração de IDs únicos
+### TASK-004: Instalar dependencias adicionais
+- [x] Instalar Zustand v5.0.9 para state management
+- [x] Instalar Framer Motion v12.23.25 para animacoes
+- [x] Instalar uuid v13.0.0 para geracao de IDs unicos (tipos inclusos)
 
-**Critério de Aceite:** Dependências instaladas e importáveis
+**Criterio de Aceite:** Dependencias instaladas e importaveis [CONCLUIDO]
 
 ---
 
 ## Fase 2: Estrutura de Tipos e Dados
 
 ### TASK-005: Criar tipos TypeScript base
-- [ ] Criar `src/types/pill.ts` com interfaces Pill, PillType, PillStats, PillVisuals
-- [ ] Criar `src/types/player.ts` com interface Player e PlayerId
-- [ ] Criar `src/types/game.ts` com GameState, GamePhase, TurnPhase
-- [ ] Exportar todos os tipos via `src/types/index.ts`
+- [x] Criar `src/types/pill.ts` com interfaces Pill, PillType, PillStats, PillVisuals, PillConfig
+- [x] Criar `src/types/player.ts` com interface Player, PlayerId, PlayerConfig, PlayerEffectResult
+- [x] Criar `src/types/game.ts` com GameState, GamePhase, TurnPhase, GameConfig, GameStats
+- [x] Exportar todos os tipos via `src/types/index.ts`
 
-**Critério de Aceite:** Tipos compilam sem erros e são exportados corretamente
+**Criterio de Aceite:** Tipos compilam sem erros e sao exportados corretamente [CONCLUIDO]
 
 ---
 

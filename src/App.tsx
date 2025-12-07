@@ -9,10 +9,13 @@ import {
 import { useGameStore } from '@/stores/gameStore'
 import { InfoPanel } from '@/components/game/InfoPanel'
 import { PlayerArea } from '@/components/game/PlayerArea'
+import { PillGrid } from '@/components/game/Pill'
+import { TypeCounter } from '@/components/game/TypeCounter'
 
 function GameContent() {
   const phase = useGameStore((state) => state.phase)
   const initGame = useGameStore((state) => state.initGame)
+  const consumePill = useGameStore((state) => state.consumePill)
   const players = useGameStore((state) => state.players)
   const currentTurn = useGameStore((state) => state.currentTurn)
   const pillPool = useGameStore((state) => state.pillPool)
@@ -75,52 +78,20 @@ function GameContent() {
               </h3>
 
               {/* Type Counts */}
-              <div className="flex flex-wrap justify-center gap-2 text-xs">
-                <span className="px-2 py-1 rounded bg-pill-safe/20 text-pill-safe">
-                  Safe: {typeCounts.SAFE}
-                </span>
-                <span className="px-2 py-1 rounded bg-pill-dmg-low/20 text-pill-dmg-low">
-                  Veneno: {typeCounts.DMG_LOW}
-                </span>
-                <span className="px-2 py-1 rounded bg-pill-dmg-high/20 text-pill-dmg-high">
-                  Toxina: {typeCounts.DMG_HIGH}
-                </span>
-                <span className="px-2 py-1 rounded bg-pill-fatal/20 text-pill-fatal">
-                  Fatal: {typeCounts.FATAL}
-                </span>
-                <span className="px-2 py-1 rounded bg-pill-heal/20 text-pill-heal">
-                  Cura: {typeCounts.HEAL}
-                </span>
-              </div>
+              <TypeCounter counts={typeCounts} />
 
-              {/* Pills Grid - Placeholder */}
-              <div className="flex flex-wrap justify-center gap-3 py-4">
-                {pillPool.map((pill) => (
-                  <button
-                    key={pill.id}
-                    className={`
-                      w-12 h-12 rounded-full border-2 
-                      flex items-center justify-center
-                      transition-all duration-200
-                      hover:scale-110 hover:shadow-lg
-                      ${pill.isRevealed 
-                        ? 'border-transparent' 
-                        : 'border-border bg-pill-hidden'
-                      }
-                    `}
-                    style={{
-                      backgroundColor: pill.isRevealed ? pill.visuals.color : undefined,
-                    }}
-                  >
-                    <span className="text-white font-bold text-xs">
-                      {pill.isRevealed ? pill.visuals.label.slice(0, 1) : '?'}
-                    </span>
-                  </button>
-                ))}
-              </div>
+              {/* Pills Grid */}
+              <PillGrid
+                pills={pillPool}
+                onSelectPill={consumePill}
+                disabled={players[currentTurn].isAI}
+              />
 
               <p className="text-center text-xs text-muted-foreground">
-                Clique em uma pilula para consumi-la
+                {players[currentTurn].isAI 
+                  ? 'Aguardando jogada da IA...' 
+                  : 'Clique em uma pilula para consumi-la'
+                }
               </p>
             </div>
           </TableContainer>

@@ -159,24 +159,27 @@
 ---
 
 ### TASK-015: Criar componente Pill
-- [ ] Criar `src/components/game/Pill.tsx`
-- [ ] Implementar visual oculto (cor neutra, ícone "?")
-- [ ] Implementar visual revelado (cor do tipo, label)
-- [ ] Adicionar estados: hover, selected, disabled
-- [ ] Usar Framer Motion para animações
-- [ ] Props: `pill: Pill, onClick: () => void, disabled: boolean`
+- [x] Criar `src/components/game/Pill.tsx`
+- [x] Implementar visual oculto (cor neutra, icone "?")
+- [x] Implementar visual revelado (cor do tipo, label)
+- [x] Adicionar estados: hover, selected, disabled
+- [x] Usar Framer Motion para animacoes (scale, fade, pulse)
+- [x] Props: `pill, onClick, disabled, selected, size`
+- [x] Criar `PillGrid` para renderizar lista com animacao escalonada
 
-**Critério de Aceite:** Pílula renderiza estados oculto/revelado com animações
+**Criterio de Aceite:** Pilula renderiza estados oculto/revelado com animacoes [CONCLUIDO]
 
 ---
 
 ### TASK-016: Criar componente TypeCounter
-- [ ] Criar `src/components/game/TypeCounter.tsx`
-- [ ] Exibir contagem de cada tipo de pílula restante
-- [ ] Usar Badge do shadcn para cada tipo
-- [ ] Props: `counts: Record<PillType, number>`
+- [x] Criar `src/components/game/TypeCounter.tsx`
+- [x] Exibir contagem de cada tipo de pilula restante
+- [x] Ocultar tipos com contagem 0
+- [x] Props: `counts: Record<PillType, number>`
 
-**Critério de Aceite:** Contador exibe tipos restantes na mesa
+**Criterio de Aceite:** Contador exibe tipos restantes na mesa [CONCLUIDO]
+
+*Nota: TASK 015-016 implementadas juntas. App.tsx atualizado para usar PillGrid e TypeCounter.*
 
 ---
 

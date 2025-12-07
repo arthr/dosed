@@ -10,6 +10,31 @@ interface TurnIndicatorProps {
   isHumanTurn?: boolean
 }
 
+// Variantes estaticas para rodada (vertical)
+const roundVariants = {
+  initial: { opacity: 0, y: -10 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: 10 },
+}
+
+// Variantes estaticas para turno (scale + fade)
+// Animacao simetrica evita problemas com direcao dinamica
+const turnVariants = {
+  initial: { opacity: 0, scale: 0.9 },
+  animate: { opacity: 1, scale: 1 },
+  exit: { opacity: 0, scale: 0.9 },
+}
+
+// Variantes para mensagem IA
+const aiMessageVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  pulse: { 
+    opacity: [0.5, 1, 0.5],
+    transition: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' as const }
+  },
+}
+
 /**
  * Indicador de turno e rodada com animacoes de transicao
  * Exibe de quem e o turno atual e instrucoes contextuais
@@ -19,15 +44,18 @@ export function TurnIndicator({
   round,
   isHumanTurn = true,
 }: TurnIndicatorProps) {
+  const isAIThinking = !isHumanTurn && currentPlayer.isAI
+
   return (
     <div className="text-center space-y-1">
       {/* Rodada - anima quando muda */}
       <AnimatePresence mode="wait">
         <motion.span
           key={round}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 10 }}
+          variants={roundVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
           transition={{ duration: 0.2 }}
           className="text-sm text-muted-foreground inline-block"
         >
@@ -39,10 +67,16 @@ export function TurnIndicator({
       <AnimatePresence mode="wait">
         <motion.h3
           key={currentPlayer.id}
-          initial={{ opacity: 0, x: currentPlayer.id === 'player1' ? -20 : 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: currentPlayer.id === 'player1' ? 20 : -20 }}
-          transition={{ duration: 0.3, type: 'spring' as const, stiffness: 200 }}
+          variants={turnVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={{ 
+            duration: 0.25,
+            type: 'spring' as const, 
+            stiffness: 300,
+            damping: 25,
+          }}
           className="text-lg font-semibold text-foreground"
         >
           Turno de{' '}
@@ -52,22 +86,23 @@ export function TurnIndicator({
         </motion.h3>
       </AnimatePresence>
 
-      {/* Mensagem de IA pensando - sempre renderizado para manter altura consistente */}
-      <motion.p
-        className="text-xs text-muted-foreground h-4"
-        initial={false}
-        animate={{ 
-          opacity: !isHumanTurn && currentPlayer.isAI ? 1 : 0,
-        }}
-        transition={{ duration: 0.2 }}
-      >
-        <motion.span
-          animate={!isHumanTurn && currentPlayer.isAI ? { opacity: [0.5, 1, 0.5] } : { opacity: 0 }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          A IA esta pensando...
-        </motion.span>
-      </motion.p>
+      {/* Mensagem de IA pensando - altura fixa para evitar layout shift */}
+      <div className="h-4">
+        <AnimatePresence>
+          {isAIThinking && (
+            <motion.p
+              key="ai-thinking"
+              variants={aiMessageVariants}
+              initial="hidden"
+              animate="pulse"
+              exit="hidden"
+              className="text-xs text-muted-foreground"
+            >
+              A IA esta pensando...
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }

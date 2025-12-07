@@ -124,13 +124,13 @@ export function HealthBar({
           )}
           {showValues && (
             <motion.span 
-              className="text-foreground tabular-nums font-medium"
+              className="tabular-nums font-medium"
               key={current}
               initial={{ 
                 scale: 1.3, 
-                color: animationType === 'damage' ? '#ef4444' : animationType === 'heal' ? '#10b981' : undefined 
+                color: animationType === 'damage' ? '#ef4444' : animationType === 'heal' ? '#10b981' : '#e5e5e5'
               }}
-              animate={{ scale: 1, color: 'var(--foreground)' }}
+              animate={{ scale: 1, color: '#e5e5e5' }}
               transition={{ duration: 0.4, type: 'spring' as const }}
             >
               {current}/{max}

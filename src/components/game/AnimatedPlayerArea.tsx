@@ -168,12 +168,9 @@ export function AnimatedPlayerArea({
 
         {/* Turn Indicator - sempre renderizado para manter altura consistente */}
         <motion.div
-          className="text-xs font-medium h-4"
+          className="text-xs font-medium h-4 text-primary"
           initial={false}
-          animate={{ 
-            opacity: isCurrentTurn ? 1 : 0,
-            color: isCurrentTurn ? 'var(--primary)' : 'transparent',
-          }}
+          animate={{ opacity: isCurrentTurn ? 1 : 0 }}
           transition={{ duration: 0.2 }}
         >
           Seu turno

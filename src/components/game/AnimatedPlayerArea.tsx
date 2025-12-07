@@ -3,6 +3,12 @@ import type { Player } from '@/types'
 import { LivesDisplay } from './LivesDisplay'
 import { HealthBar } from './HealthBar'
 import { FloatingNumber } from './FloatingNumber'
+import PlayerProfileCard from '../ui/8bit/blocks/player-profile-card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/8bit/card'
+import { cn } from '@/lib/utils'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/8bit/avatar'
+import { Badge } from '../ui/8bit/badge'
+import { ResistanceDisplay } from './ResistanceDisplay'
 
 interface AnimatedPlayerAreaProps {
   player: Player
@@ -78,8 +84,8 @@ export function AnimatedPlayerArea({
 
   // Variantes de animacao - movimento + glow sincronizados
   const variants = {
-    idle: { 
-      x: 0, 
+    idle: {
+      x: 0,
       scale: 1,
       boxShadow: '0 0 0 0 transparent',
     },
@@ -131,11 +137,7 @@ export function AnimatedPlayerArea({
 
   return (
     <motion.div
-      className="p-4 rounded-lg border relative"
-      style={{
-        borderColor: getBorderColor(),
-        backgroundColor: getBackgroundColor(),
-      }}
+      className="relative"
       variants={variants}
       animate={animationType || 'idle'}
     >
@@ -143,39 +145,57 @@ export function AnimatedPlayerArea({
       <FloatingNumber value={effectValue} />
 
       {/* Conteudo do card */}
-      <div className="space-y-3">
+      <Card className={cn(
+        "py-2 gap-2",
+        getBorderColor(),
+        getBackgroundColor(),
+      )}>
         {/* Header: Nome + Tag IA */}
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold">{player.name}</h3>
-          {player.isAI && (
-            <span className="text-xs text-muted-foreground">(IA)</span>
-          )}
-        </div>
+        <CardHeader className="border-b pb-0! items-center">
+          {/* <Avatar className="size-8" variant="pixel" font="retro">
+              <AvatarImage src="/avatars/orcdev.jpeg" alt={player.name} />
+              <AvatarFallback className="text-[8px]">
+                {player.name.charAt(0).toUpperCase() + player.name.charAt(1).toUpperCase()}
+              </AvatarFallback>
+            </Avatar> */}
 
-        {/* Lives com animacao de bounce */}
-        <LivesDisplay
-          lives={player.lives}
-          maxLives={player.maxLives}
-          animationType={getLivesAnimation()}
-        />
+          <div className="flex gap-1 items-center justify-between">
+            <h3 className="font-medium truncate text-xs">{player.name}</h3>
+            {player.isAI ? (
+              <Badge variant="default" className="text-[8px] bg-accent text-game-accent" font="retro">IA</Badge>
+            ) : (
+              <Badge variant="secondary" className="text-[8px]" font="retro">Lv.25</Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="flex items-center gap-2">
+          {/* Lives com animacao de bounce */}
+          <LivesDisplay
+            showLabel={false}
+            lives={player.lives}
+            maxLives={player.maxLives}
+            animationType={getLivesAnimation()}
+          />
 
-        {/* Resistance Bar com animacao de pulse */}
-        <HealthBar
-          current={player.resistance}
-          max={player.maxResistance}
-          animationType={getHealthBarAnimation()}
-        />
+          {/* Resistance Bar com animacao de pulse */}
+          <ResistanceDisplay
+            showLabel={false}
+            resistance={player.resistance}
+            maxResistance={player.maxResistance}
+            animationType={getLivesAnimation()}
+          />
 
-        {/* Turn Indicator - sempre renderizado para manter altura consistente */}
-        <motion.div
-          className="text-xs font-medium h-4 text-primary"
-          initial={false}
-          animate={{ opacity: isCurrentTurn ? 1 : 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          Seu turno
-        </motion.div>
-      </div>
+          {/* Turn Indicator - sempre renderizado para manter altura consistente */}
+          {/* <motion.div
+            className="text-xs font-medium h-4 text-primary"
+            initial={false}
+            animate={{ opacity: isCurrentTurn ? 1 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            Seu turno
+          </motion.div> */}
+        </CardContent>
+      </Card>
     </motion.div>
   )
 }

@@ -1,15 +1,15 @@
 import { motion, AnimatePresence } from 'framer-motion'
+import { Shield } from 'lucide-react'
 import { useEffect, useRef } from 'react'
-import { Heart } from 'lucide-react'
 
-interface LivesDisplayProps {
-  /** Vidas atuais do jogador */
-  lives: number
-  /** Maximo de vidas */
-  maxLives: number
+interface ResistanceDisplayProps {
+  /** Resistencia atuais do jogador */
+  resistance: number
+  /** Maximo de resistencia */
+  maxResistance: number
   /** Tamanho dos icones */
   size?: 'sm' | 'md' | 'lg'
-  /** Mostrar label "Vidas:" */
+  /** Mostrar label "Resistencia:" */
   showLabel?: boolean
   /** Tipo de animacao ativa */
   animationType?: 'damage' | 'collapse' | null
@@ -26,26 +26,26 @@ const sizeClasses = {
  * Coracoes cheios = vidas ativas, vazios = vidas perdidas
  * Animacao de bounce quando perde uma vida
  */
-export function LivesDisplay({
-  lives,
-  maxLives,
+export function ResistanceDisplay({
+  resistance,
+  maxResistance,
   size = 'md',
   showLabel = true,
   animationType = null,
-}: LivesDisplayProps) {
+}: ResistanceDisplayProps) {
   // Ref para rastrear valor anterior
-  const prevLivesRef = useRef(lives)
-  const lostLifeIndexRef = useRef<number | null>(null)
+  const prevResistanceRef = useRef(resistance)
+  const lostResistanceIndexRef = useRef<number | null>(null)
   
   // Detecta qual vida foi perdida
   useEffect(() => {
-    if (lives < prevLivesRef.current) {
-      // Perdeu uma vida - o indice da vida perdida e o novo valor de lives
+    if (resistance < prevResistanceRef.current) {
+      // Perdeu uma resistencia - o indice da resistencia perdida e o novo valor de resistance
       // (porque lives e 0-indexed quando comparado com array)
-      lostLifeIndexRef.current = lives
+      lostResistanceIndexRef.current = resistance
     }
-    prevLivesRef.current = lives
-  }, [lives])
+    prevResistanceRef.current = resistance
+  }, [resistance])
 
   // Variantes para coracao ativo
   const heartVariants = {
@@ -76,19 +76,19 @@ export function LivesDisplay({
   return (
     <div className="flex items-center gap-2">
       {showLabel && (
-        <span className="text-sm text-muted-foreground">Vidas:</span>
+        <span className="text-sm text-muted-foreground">Resistencia:</span>
       )}
       <div className="flex gap-1">
         <AnimatePresence mode="popLayout">
-          {Array.from({ length: maxLives }).map((_, index) => {
-            const isActive = index < lives
-            const isLastLost = lostLifeIndexRef.current === index && !isActive
+          {Array.from({ length: maxResistance }).map((_, index) => {
+            const isActive = index < resistance
+            const isLastLost = lostResistanceIndexRef.current === index && !isActive
             
             return (
               <motion.span
-                key={`heart-${index}-${isActive ? 'active' : 'inactive'}`}
+                key={`resistance-${index}-${isActive ? 'active' : 'inactive'}`}
                 className={`${sizeClasses[size]} inline-block ${
-                  isActive ? 'text-heart' : 'text-muted-foreground/30'
+                  isActive ? 'text-shield' : 'text-muted-foreground/30'
                 }`}
                 variants={isActive ? heartVariants : undefined}
                 initial={isActive ? 'initial' : { scale: 1, opacity: 1 }}
@@ -101,9 +101,9 @@ export function LivesDisplay({
                 }
                 exit="exit"
                 layout
-                aria-label={isActive ? 'Vida ativa' : 'Vida perdida'}
+                aria-label={isActive ? 'Resistencia ativa' : 'Resistencia perdida'}
               >
-                {isActive ? <Heart size={18} fill='currentColor' /> : <Heart size={18} />}
+                {isActive ? <Shield size={18} fill='currentColor' /> : <Shield size={18} />}
               </motion.span>
             )
           })}

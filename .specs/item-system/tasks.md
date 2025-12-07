@@ -28,7 +28,7 @@
 
 ## Fase 2: Logica de Itens (Utils)
 
-- [ ] TASK-IS-006: Criar `src/utils/itemLogic.ts`
+- [x] TASK-IS-006: Criar `src/utils/itemLogic.ts`
   - Funcao `applyItemEffect(item, player, target?)`
   - Logica individual para cada tipo de item
   - Retorno padronizado ItemEffectResult

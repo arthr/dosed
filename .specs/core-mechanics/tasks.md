@@ -101,16 +101,16 @@
 ---
 
 ### TASK-010: Implementar Zustand Store
-- [ ] Criar `src/stores/gameStore.ts`
-- [ ] Implementar estado inicial com dois jogadores e pool vazio
-- [ ] Implementar action `initGame(config)` para setup inicial
-- [ ] Implementar action `consumePill(pillId)` com toda lógica de turno
-- [ ] Implementar action `revealPill(pillId)` para revelar pílula
-- [ ] Implementar action `nextTurn()` para alternar turno
-- [ ] Implementar action `resetRound()` para nova rodada
-- [ ] Implementar selectors para current player, opponent, type counts
+- [x] Criar `src/stores/gameStore.ts`
+- [x] Implementar estado inicial com dois jogadores e pool vazio
+- [x] Implementar action `initGame(config)` para setup inicial
+- [x] Implementar action `consumePill(pillId)` com toda logica de turno
+- [x] Implementar action `revealPillById(pillId)` para revelar pilula
+- [x] Implementar action `nextTurn()` para alternar turno
+- [x] Implementar action `resetRound()` para nova rodada
+- [x] Implementar selectors para current player, opponent, type counts
 
-**Critério de Aceite:** Store gerencia estado completo do jogo corretamente
+**Criterio de Aceite:** Store gerencia estado completo do jogo corretamente [CONCLUIDO]
 
 ---
 

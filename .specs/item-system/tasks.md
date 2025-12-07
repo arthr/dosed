@@ -101,7 +101,7 @@
   - Heuristica simples (35% chance, prioridades)
   - Selecao automatica de alvo
 
-- [ ] TASK-IS-019: Atualizar barrel exports `src/hooks/index.ts`
+- [x] TASK-IS-019: Atualizar barrel exports `src/hooks/index.ts`
 
 ---
 

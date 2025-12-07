@@ -40,3 +40,13 @@ export {
   useToasts,
   useToastDismiss,
 } from './useToast'
+
+// Item Selection (pre-game)
+export { useItemSelection } from './useItemSelection'
+
+// Item Usage (during game)
+export {
+  useItemUsage,
+  useIsValidTarget,
+  useSelectedItemType,
+} from './useItemUsage'

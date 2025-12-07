@@ -71,11 +71,11 @@
   - `executeItem(itemId, targetId?)`
   - `removeItemFromInventory(playerId, itemId)`
 
-- [ ] TASK-IS-014: Implementar actions de efeitos
+- [x] TASK-IS-014: Implementar actions de efeitos
   - `applyPlayerEffect(playerId, effect)`
   - `removePlayerEffect(playerId, effectType)`
-  - `decrementEffectTurns(playerId)`
-  - `revealPill(pillId)` / `hideRevealedPill(pillId)`
+  - `decrementEffectRounds(playerId)`
+  - `addRevealedPill(pillId)` / `removeRevealedPill(pillId)` / `clearRevealedPills()`
 
 - [ ] TASK-IS-015: Implementar logica de pilula invertida/dobrada
   - Flag `inverted` e `doubled` na Pill

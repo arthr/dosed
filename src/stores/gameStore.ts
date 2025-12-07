@@ -10,6 +10,8 @@ import type {
   Pill,
   PillType,
   Player,
+  PlayerEffect,
+  PlayerEffectType,
   PlayerId,
 } from '@/types'
 import { DEFAULT_GAME_CONFIG, PILL_CONFIG, ROUND_TRANSITION_DELAY } from '@/utils/constants'
@@ -45,6 +47,16 @@ interface GameStore extends GameState {
   cancelItemUsage: () => void
   executeItem: (itemId: string, targetId?: string) => void
   removeItemFromInventory: (playerId: PlayerId, itemId: string) => void
+
+  // Actions - Player Effects
+  applyPlayerEffect: (playerId: PlayerId, effect: PlayerEffect) => void
+  removePlayerEffect: (playerId: PlayerId, effectType: PlayerEffectType) => void
+  decrementEffectRounds: (playerId: PlayerId) => void
+
+  // Actions - Revealed Pills (Scanner)
+  addRevealedPill: (pillId: string) => void
+  removeRevealedPill: (pillId: string) => void
+  clearRevealedPills: () => void
 
   // Selectors (computed)
   getCurrentPlayer: () => Player
@@ -546,6 +558,109 @@ export const useGameStore = create<GameStore>((set, get) => ({
         },
       },
     })
+  },
+
+  // ============ PLAYER EFFECTS ACTIONS ============
+
+  /**
+   * Aplica um efeito a um jogador (ex: Shield, Handcuffs)
+   * Se o jogador ja tiver um efeito do mesmo tipo, nao adiciona duplicata
+   */
+  applyPlayerEffect: (playerId: PlayerId, effect: PlayerEffect) => {
+    const state = get()
+    const player = state.players[playerId]
+
+    // Verifica se ja tem efeito do mesmo tipo
+    const hasEffect = player.effects.some((e) => e.type === effect.type)
+    if (hasEffect) return
+
+    set({
+      players: {
+        ...state.players,
+        [playerId]: {
+          ...player,
+          effects: [...player.effects, effect],
+        },
+      },
+    })
+  },
+
+  /**
+   * Remove um tipo especifico de efeito do jogador
+   */
+  removePlayerEffect: (playerId: PlayerId, effectType: PlayerEffectType) => {
+    const state = get()
+    const player = state.players[playerId]
+
+    set({
+      players: {
+        ...state.players,
+        [playerId]: {
+          ...player,
+          effects: player.effects.filter((e) => e.type !== effectType),
+        },
+      },
+    })
+  },
+
+  /**
+   * Decrementa as rodadas restantes de todos os efeitos do jogador
+   * Remove automaticamente efeitos que chegam a 0 rodadas
+   */
+  decrementEffectRounds: (playerId: PlayerId) => {
+    const state = get()
+    const player = state.players[playerId]
+
+    const updatedEffects = player.effects
+      .map((effect) => ({
+        ...effect,
+        roundsRemaining: effect.roundsRemaining - 1,
+      }))
+      .filter((effect) => effect.roundsRemaining > 0)
+
+    set({
+      players: {
+        ...state.players,
+        [playerId]: {
+          ...player,
+          effects: updatedEffects,
+        },
+      },
+    })
+  },
+
+  // ============ REVEALED PILLS ACTIONS ============
+
+  /**
+   * Adiciona uma pilula a lista de reveladas (usado pelo Scanner)
+   */
+  addRevealedPill: (pillId: string) => {
+    const state = get()
+
+    // Evita duplicatas
+    if (state.revealedPills.includes(pillId)) return
+
+    set({
+      revealedPills: [...state.revealedPills, pillId],
+    })
+  },
+
+  /**
+   * Remove uma pilula da lista de reveladas
+   */
+  removeRevealedPill: (pillId: string) => {
+    const state = get()
+
+    set({
+      revealedPills: state.revealedPills.filter((id) => id !== pillId),
+    })
+  },
+
+  /**
+   * Limpa todas as pilulas reveladas (usado ao iniciar nova rodada)
+   */
+  clearRevealedPills: () => {
+    set({ revealedPills: [] })
   },
 
   // ============ SELECTORS ============

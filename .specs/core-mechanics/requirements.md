@@ -1,7 +1,7 @@
-# Requisitos: Mecânica Central - Side Effects (Pill Roulette)
+# Requisitos: Mecânica Central - Dosed (Pill Roulette)
 
 ## Visão Geral
-Este documento especifica os requisitos para a mecânica central do jogo "Side Effects", focando no sistema de Resistência, Vidas e na lógica das Pílulas Ocultas.
+Este documento especifica os requisitos para a mecânica central do jogo "Dosed", focando no sistema de Resistência, Vidas e na lógica das Pílulas Ocultas.
 
 ---
 

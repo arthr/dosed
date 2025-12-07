@@ -1,4 +1,4 @@
-# Visão Geral do Produto: Side Effects (Pill Roulette)
+# Visão Geral do Produto: Dosed (Pill Roulette)
 
 ## Objetivo do Jogo
 Um jogo de estratégia por turnos onde dois jogadores (Humano vs IA ou PvP) competem para ser o último sobrevivente, gerenciando risco e informação oculta através do consumo de pílulas com efeitos desconhecidos.

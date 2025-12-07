@@ -1,4 +1,4 @@
-# Tarefas: Mecânica Central - Side Effects (Pill Roulette)
+# Tarefas: Mecânica Central - Dosed (Pill Roulette)
 
 ## Legenda de Status
 - [ ] Pendente

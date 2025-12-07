@@ -35,10 +35,10 @@ function GameContent() {
       <div className="flex flex-col items-center justify-center gap-8 py-12">
         <div className="text-center space-y-2">
           <h2 className="text-3xl font-bold text-foreground">
-            Bem-vindo ao Side Effects
+            Bem-vindo ao Dosed!
           </h2>
           <p className="text-muted-foreground">
-            Escolha uma pílula. Sobreviva. Seja o último.
+            Escolha uma pílula. Sobreviva. Seja o último!
           </p>
         </div>
 

@@ -1,4 +1,4 @@
-# Side Effects (Pill Roulette): Especificação de Mecânica
+# Dosed (Pill Roulette): Especificação de Mecânica
 
 ## 1. Visão Geral
 Um jogo de estratégia por turnos de soma zero, onde dois jogadores (Humano vs IA ou PvP) competem para ser o último sobrevivente. A mecânica central gira em torno de **Gestão de Risco** e **Informação Oculta**. O jogo utiliza um sistema de vida de duas camadas (Resistência e Vidas).

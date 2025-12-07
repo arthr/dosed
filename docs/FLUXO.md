@@ -1,4 +1,4 @@
-# Fluxo da Aplicacao - Side Effects (Pill Roulette)
+# Fluxo da Aplicacao - Dosed (Pill Roulette)
 
 ## Visao Geral da Arquitetura
 

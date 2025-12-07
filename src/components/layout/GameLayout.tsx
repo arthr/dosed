@@ -5,7 +5,7 @@ interface GameLayoutProps {
 }
 
 /**
- * Layout principal do jogo Side Effects
+ * Layout principal do jogo Dosed
  * Estrutura: Header + Area de Jogadores + Mesa de Pilulas
  */
 export function GameLayout({ children }: GameLayoutProps) {
@@ -15,7 +15,7 @@ export function GameLayout({ children }: GameLayoutProps) {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="font-normal text-foreground tracking-tight">
-            Side Effects
+            Dosed
           </h1>
           <span className="text-xs text-muted-foreground">Pill Roulette</span>
         </div>

@@ -184,33 +184,35 @@
 ---
 
 ### TASK-017: Criar componente PillPool
-- [ ] Criar `src/components/game/PillPool.tsx`
-- [ ] Renderizar grid de componentes Pill
-- [ ] Incluir TypeCounter
-- [ ] Permitir seleção de pílula (click handler)
-- [ ] Props: `pills: Pill[], onSelectPill: (id: string) => void, disabled: boolean`
+- [x] Criar `src/components/game/PillPool.tsx`
+- [x] Renderizar grid de componentes Pill (via PillGrid)
+- [x] Incluir TypeCounter
+- [x] Permitir selecao de pilula (click handler)
+- [x] Props: `pills, typeCounts, onSelectPill, disabled, selectedPillId, instructionMessage`
 
-**Critério de Aceite:** Mesa exibe pílulas selecionáveis com contador
+**Criterio de Aceite:** Mesa exibe pilulas selecionaveis com contador [CONCLUIDO]
 
 ---
 
 ### TASK-018: Criar componente TurnIndicator
-- [ ] Criar `src/components/game/TurnIndicator.tsx`
-- [ ] Exibir de quem é o turno atual
-- [ ] Exibir instrução contextual ("Selecione uma pílula")
-- [ ] Props: `currentPlayer: Player, phase: TurnPhase`
+- [x] Criar `src/components/game/TurnIndicator.tsx`
+- [x] Exibir de quem e o turno atual
+- [x] Exibir instrucao contextual (rodada, "A IA esta pensando...")
+- [x] Props: `currentPlayer, round, isHumanTurn`
 
-**Critério de Aceite:** Indicador mostra turno e fase claramente
+**Criterio de Aceite:** Indicador mostra turno e fase claramente [CONCLUIDO]
 
 ---
 
 ### TASK-019: Criar componente GameBoard
-- [ ] Criar `src/components/game/GameBoard.tsx`
-- [ ] Compor todos os componentes: PlayerArea (x2), PillPool, TurnIndicator
-- [ ] Conectar com gameStore via hooks
-- [ ] Implementar handlers para ações do jogo
+- [x] Criar `src/components/game/GameBoard.tsx`
+- [x] Compor todos os componentes: PlayerArea (x2), PillPool, TurnIndicator
+- [x] Conectar com gameStore via hooks
+- [x] Implementar handlers para acoes do jogo
 
-**Critério de Aceite:** Tabuleiro completo e funcional
+**Criterio de Aceite:** Tabuleiro completo e funcional [CONCLUIDO]
+
+*Nota: App.tsx simplificado de 142 linhas para 75 linhas usando GameBoard*
 
 ---
 

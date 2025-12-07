@@ -1,26 +1,17 @@
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
-import {
-  GameLayout,
-  GameAreaLayout,
-  PlayerContainer,
-  TableContainer,
-} from '@/components/layout/GameLayout'
+import { GameLayout } from '@/components/layout/GameLayout'
 import { useGameStore } from '@/stores/gameStore'
 import { InfoPanel } from '@/components/game/InfoPanel'
-import { PlayerArea } from '@/components/game/PlayerArea'
-import { PillGrid } from '@/components/game/Pill'
-import { TypeCounter } from '@/components/game/TypeCounter'
+import { GameBoard } from '@/components/game/GameBoard'
 
 function GameContent() {
   const phase = useGameStore((state) => state.phase)
   const initGame = useGameStore((state) => state.initGame)
-  const consumePill = useGameStore((state) => state.consumePill)
   const players = useGameStore((state) => state.players)
-  const currentTurn = useGameStore((state) => state.currentTurn)
-  const pillPool = useGameStore((state) => state.pillPool)
-  const typeCounts = useGameStore((state) => state.typeCounts)
-  const round = useGameStore((state) => state.round)
+  const winner = useGameStore((state) => state.winner)
+  const resetGame = useGameStore((state) => state.resetGame)
+  const getGameStats = useGameStore((state) => state.getGameStats)
 
   // Tela inicial - Setup
   if (phase === 'setup') {
@@ -47,62 +38,11 @@ function GameContent() {
 
   // Tela de jogo ativo
   if (phase === 'playing') {
-    const player1 = players.player1
-    const player2 = players.player2
-
-    return (
-      <GameAreaLayout
-        statusArea={
-          <div className="text-center space-y-1">
-            <span className="text-sm text-muted-foreground">Rodada {round}</span>
-            <h3 className="text-lg font-semibold text-foreground">
-              Turno de {players[currentTurn].name}
-            </h3>
-          </div>
-        }
-        playerArea={
-          <PlayerContainer isCurrentTurn={currentTurn === 'player1'} position="left">
-            <PlayerArea player={player1} isCurrentTurn={currentTurn === 'player1'} />
-          </PlayerContainer>
-        }
-        opponentArea={
-          <PlayerContainer isCurrentTurn={currentTurn === 'player2'} position="right">
-            <PlayerArea player={player2} isCurrentTurn={currentTurn === 'player2'} />
-          </PlayerContainer>
-        }
-        tableArea={
-          <TableContainer>
-            <div className="space-y-4">
-              <h3 className="text-center font-semibold text-foreground">
-                Mesa de Pilulas
-              </h3>
-
-              {/* Type Counts */}
-              <TypeCounter counts={typeCounts} />
-
-              {/* Pills Grid */}
-              <PillGrid
-                pills={pillPool}
-                onSelectPill={consumePill}
-                disabled={players[currentTurn].isAI}
-              />
-
-              <p className="text-center text-xs text-muted-foreground">
-                {players[currentTurn].isAI 
-                  ? 'Aguardando jogada da IA...' 
-                  : 'Clique em uma pilula para consumi-la'
-                }
-              </p>
-            </div>
-          </TableContainer>
-        }
-      />
-    )
+    return <GameBoard />
   }
 
   // Tela de fim de jogo
   if (phase === 'ended') {
-    const { winner, resetGame, getGameStats } = useGameStore.getState()
     const stats = getGameStats()
 
     return (

@@ -87,7 +87,7 @@ export function GameBoard() {
       />
 
       {/* Layout principal: Player1 | Pills | Player2 */}
-      <div className="grid grid-cols-[1fr_2fr_1fr] gap-6 items-start">
+      <div className="flex flex-col-reverse md:flex-row gap-6 items-center md:items-start">
         {/* Player 1 - Esquerda (card auto-suficiente) */}
         <AnimatedPlayerArea
           player={player1}

@@ -151,7 +151,7 @@
 
 ## Fase 7: Selecao de Alvo e Efeitos
 
-- [ ] TASK-IS-027: Criar `src/components/game/ItemTargetSelector.tsx`
+- [x] TASK-IS-027: Criar `src/components/game/ItemTargetSelector.tsx`
   - Overlay de selecao de alvo
   - Highlight em alvos validos
   - Botao cancelar

@@ -7,15 +7,15 @@
   - ItemDefinition, InventoryItem, PlayerInventory
   - TargetSelectionState, ItemEffectResult
 
-- [ ] TASK-IS-002: Criar arquivo `src/utils/itemCatalog.ts`
+- [x] TASK-IS-002: Criar arquivo `src/utils/itemCatalog.ts`
   - ITEM_CATALOG com todos os 9 itens
   - ITEMS_BY_CATEGORY para agrupamento
   - Cores e icones por categoria
 
-- [ ] TASK-IS-003: Atualizar `src/types/player.ts`
+- [x] TASK-IS-003: Atualizar `src/types/player.ts`
   - Adicionar `inventory: PlayerInventory` ao Player
   - Adicionar `effects: PlayerEffect[]` ao Player
-  - Criar interface PlayerEffect
+  - Criar interface PlayerEffect e PlayerEffectType
 
 - [ ] TASK-IS-004: Atualizar `src/types/game.ts`
   - Adicionar fase `itemSelection` ao GamePhase

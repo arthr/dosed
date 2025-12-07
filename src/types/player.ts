@@ -1,7 +1,24 @@
+import type { PlayerInventory } from './item'
+
 /**
  * Identificador unico do jogador
  */
 export type PlayerId = 'player1' | 'player2'
+
+/**
+ * Tipo de efeito ativo no jogador
+ */
+export type PlayerEffectType = 'shield' | 'handcuffed'
+
+/**
+ * Efeito ativo no jogador (ex: Shield, Handcuffs)
+ */
+export interface PlayerEffect {
+  /** Tipo do efeito */
+  type: PlayerEffectType
+  /** Rodadas restantes do efeito */
+  roundsRemaining: number
+}
 
 /**
  * Representa um jogador no jogo
@@ -21,6 +38,10 @@ export interface Player {
   maxResistance: number
   /** Se o jogador e controlado por IA */
   isAI: boolean
+  /** Inventario de itens do jogador */
+  inventory: PlayerInventory
+  /** Efeitos ativos no jogador */
+  effects: PlayerEffect[]
 }
 
 /**

@@ -1,5 +1,5 @@
 import type { PillType } from '@/types'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@/components/ui/8bit/badge'
 import { PILL_LABELS } from '@/utils/constants'
 
 interface TypeCounterProps {

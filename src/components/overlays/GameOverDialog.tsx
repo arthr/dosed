@@ -7,8 +7,8 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+} from '@/components/ui/8bit/dialog'
+import { Button } from '@/components/ui/8bit/button'
 import type { Player, PlayerId, GameStats } from '@/types'
 
 interface GameOverDialogProps {
@@ -45,8 +45,7 @@ export function GameOverDialog({
   return (
     <Dialog open>
       <DialogContent
-        showCloseButton={false}
-        className="sm:max-w-md bg-background/95 backdrop-blur-sm border-primary/20"
+        className="sm:max-w-md bg-background/95 backdrop-blur-sm"
       >
         <DialogHeader className="text-center sm:text-center">
           {/* Icone animado */}

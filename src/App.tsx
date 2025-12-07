@@ -1,5 +1,5 @@
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { Button } from '@/components/ui/button'
+import { TooltipProvider } from '@/components/ui/8bit/tooltip'
+import { Button } from '@/components/ui/8bit/button'
 import { GameLayout } from '@/components/layout/GameLayout'
 import { useGameActions, useGamePhase, useGameStats, useWinner, usePlayers } from '@/hooks'
 import { InfoPanel } from '@/components/game/InfoPanel'

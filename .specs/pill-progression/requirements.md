@@ -1,7 +1,11 @@
 # Requirements: Sistema de Progressao Dinamica de Pilulas
 
 ## Visao Geral
-Sistema de balanceamento que ajusta dinamicamente a distribuicao de probabilidades das pilulas com base na rodada atual, criando uma curva de dificuldade progressiva que transiciona de "seguro" para "caos controlado".
+Sistema de balanceamento que ajusta dinamicamente a distribuicao de probabilidades e a quantidade de pilulas com base na rodada atual, criando uma curva de dificuldade progressiva que transiciona de "seguro" para "caos controlado".
+
+O sistema possui dois eixos de progressao:
+1. **Progressao de Tipos**: Probabilidades de cada tipo de pilula mudam por rodada
+2. **Progressao de Quantidade**: O pool de pilulas cresce em degraus conforme as rodadas avancam
 
 > **Referencia:** Especificacao completa em `docs/GAME-BALANCE.md`
 
@@ -107,6 +111,55 @@ interface ProgressionConfig {
 
 ---
 
+### RF-007: Escalonamento de Quantidade de Pilulas (Pool Scaling)
+**EARS:** O sistema DEVE ajustar a quantidade de pilulas no pool usando uma Step Function baseada na rodada atual.
+
+**Comportamento Step Function:**
+- A quantidade aumenta em degraus, nao linearmente
+- O aumento ocorre a cada X rodadas (frequencia configuravel)
+- Existe um limite maximo para proteger UI e performance
+
+**Formula:**
+```
+pillCount = baseCount + floor((round - 1) / frequency) * increaseBy
+pillCount = min(pillCount, maxCap)
+```
+
+**Estrutura de Configuracao:**
+```typescript
+interface PoolScalingConfig {
+  /** Quantidade inicial de pilulas na rodada 1 */
+  baseCount: number
+  /** Quantas pilulas adicionar a cada ciclo */
+  increaseBy: number
+  /** A cada quantas rodadas o aumento acontece */
+  frequency: number
+  /** Limite maximo para nao quebrar UI */
+  maxCap?: number
+}
+```
+
+**Exemplo - Configuracao Padrao:**
+```
+baseCount: 5, increaseBy: 1, frequency: 3, maxCap: 12
+
+Rodada 1-3:  5 pilulas
+Rodada 4-6:  6 pilulas
+Rodada 7-9:  7 pilulas
+Rodada 10-12: 8 pilulas
+...
+Rodada 22+: 12 pilulas (cap)
+```
+
+**Criterios:**
+- Quantidade inicial configuravel (padrao: 5)
+- Incremento configuravel (padrao: +1)
+- Frequencia de incremento configuravel (padrao: a cada 3 rodadas)
+- Limite maximo respeitado (padrao: 12)
+- Funcao pura e deterministica
+
+---
+
 ## Requisitos Nao-Funcionais
 
 ### RNF-001: Performance
@@ -131,14 +184,24 @@ interface ProgressionConfig {
 
 ## Criterios de Aceitacao
 
+### Progressao de Tipos
 - [ ] Probabilidades mudam conforme rodada avanca
 - [ ] Tipos sao desbloqueados na rodada correta
 - [ ] Soma de probabilidades sempre igual a 100%
 - [ ] Tipo LIFE implementado mas desativado
 - [ ] Configuracao centralizada em PROGRESSION
-- [ ] Geracao de pilulas usa rodada atual
+
+### Pool Scaling
+- [ ] Quantidade de pilulas aumenta em degraus
+- [ ] Frequencia de aumento configuravel
+- [ ] Limite maximo (cap) respeitado
+- [ ] Configuracao centralizada em POOL_SCALING
+
+### Geral
+- [ ] Geracao de pilulas usa rodada atual para tipo E quantidade
 - [ ] Testes unitarios para funcoes de calculo
 - [ ] Comportamento de IA nao afetado
+- [ ] UI de PillPool adapta-se a quantidades variaveis
 
 ---
 
@@ -151,7 +214,8 @@ interface ProgressionConfig {
 
 ### Arquivos Afetados
 - `src/types/pill.ts` - Adicionar tipo LIFE
-- `src/utils/constants.ts` - Adicionar cores/labels para LIFE
-- `src/utils/pillGenerator.ts` - Refatorar para usar progressao
-- `src/utils/pillProgression.ts` - NOVO: Logica de interpolacao
-- `src/stores/gameStore.ts` - Passar round para geracao
+- `src/utils/constants.ts` - Adicionar cores/labels para LIFE, remover pillsPerRound fixo
+- `src/utils/pillGenerator.ts` - Refatorar para usar progressao de tipos
+- `src/utils/pillProgression.ts` - NOVO: Logica de interpolacao e pool scaling
+- `src/stores/gameStore.ts` - Usar getPillCount() para quantidade dinamica
+- `src/components/game/PillPool.tsx` - Adaptar layout para quantidade variavel

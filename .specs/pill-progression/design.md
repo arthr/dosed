@@ -15,11 +15,14 @@
 │      ▼                                                                  │
 │  [pillProgression.ts]                                                   │
 │      │                                                                  │
-│      │ getPillChances(round) → { SAFE: 25%, DMG_LOW: 20%, ... }         │
+│      ├─► getPillChances(round) → { SAFE: 25%, DMG_LOW: 20%, ... }       │
+│      │                                                                  │
+│      └─► getPillCount(round) → 6  (quantidade baseada em step function) │
+│      │                                                                  │
 │      ▼                                                                  │
 │  [pillGenerator.ts]                                                     │
 │      │                                                                  │
-│      │ generatePillPool(count, round) → Pill[]                          │
+│      │ generatePillPool(round) → Pill[]  (usa count e chances internas) │
 │      ▼                                                                  │
 │  [gameStore.pillPool]                                                   │
 │                                                                         │
@@ -113,6 +116,49 @@ export const PROGRESSION: ProgressionConfig = {
 // Para ativar LIFE no futuro, basta mudar para:
 // LIFE: { unlockRound: 8, startPct: 10, endPct: 15 }
 ```
+
+### Pool Scaling Configuration (`src/utils/pillProgression.ts`)
+
+```typescript
+/**
+ * Configuracao de escalonamento do pool de pilulas
+ * Usa Step Function para aumentar quantidade em degraus
+ */
+export interface PoolScalingConfig {
+  /** Quantidade inicial de pilulas na rodada 1 */
+  baseCount: number
+  /** Quantas pilulas adicionar a cada ciclo */
+  increaseBy: number
+  /** A cada quantas rodadas o aumento acontece (tamanho do ciclo) */
+  frequency: number
+  /** Limite maximo para proteger UI e performance */
+  maxCap?: number
+}
+
+/**
+ * Configuracao padrao de pool scaling
+ * "Comeca com 5, aumenta +1 a cada 3 rodadas, max 12"
+ */
+export const POOL_SCALING: PoolScalingConfig = {
+  baseCount: 5,
+  increaseBy: 1,
+  frequency: 3,
+  maxCap: 12,
+}
+```
+
+**Tabela de Referencia - Pool Scaling:**
+
+| Rodadas | Pilulas | Calculo |
+|---------|---------|---------|
+| 1-3     | 5       | 5 + floor(0/3) * 1 = 5 |
+| 4-6     | 6       | 5 + floor(3/3) * 1 = 6 |
+| 7-9     | 7       | 5 + floor(6/3) * 1 = 7 |
+| 10-12   | 8       | 5 + floor(9/3) * 1 = 8 |
+| 13-15   | 9       | 5 + floor(12/3) * 1 = 9 |
+| 16-18   | 10      | 5 + floor(15/3) * 1 = 10 |
+| 19-21   | 11      | 5 + floor(18/3) * 1 = 11 |
+| 22+     | 12      | cap atingido |
 
 ---
 
@@ -213,6 +259,51 @@ export function rollPillType(
 }
 ```
 
+### Funcao: getPillCount (Step Function)
+
+```typescript
+/**
+ * Calcula a quantidade de pilulas para uma rodada usando Step Function
+ * @param round - Numero da rodada atual
+ * @param config - Configuracao de scaling (opcional, usa POOL_SCALING)
+ * @returns Quantidade de pilulas para o pool
+ * 
+ * Formula: baseCount + floor((round - 1) / frequency) * increaseBy
+ * Resultado limitado por maxCap se definido
+ */
+export function getPillCount(
+  round: number,
+  config: PoolScalingConfig = POOL_SCALING
+): number {
+  const { baseCount, increaseBy, frequency, maxCap } = config
+
+  // Garante round minimo de 1
+  const safeRound = Math.max(1, round)
+
+  // Calcula quantos ciclos completos passaram
+  const cyclesPassed = Math.floor((safeRound - 1) / frequency)
+
+  // Calcula quantidade total
+  let count = baseCount + cyclesPassed * increaseBy
+
+  // Aplica cap se definido
+  if (maxCap !== undefined) {
+    count = Math.min(count, maxCap)
+  }
+
+  return count
+}
+```
+
+**Exemplos de uso:**
+```typescript
+getPillCount(1)   // 5 (base)
+getPillCount(3)   // 5 (ainda no primeiro ciclo)
+getPillCount(4)   // 6 (primeiro aumento)
+getPillCount(10)  // 8 (terceiro aumento)
+getPillCount(100) // 12 (cap atingido)
+```
+
 ---
 
 ## Refatoracao do pillGenerator.ts
@@ -226,9 +317,8 @@ export function generatePillPool(
   config: PillConfig = PILL_CONFIG
 ): Pill[]
 
-// DEPOIS
+// DEPOIS - Simplificada: apenas round, calcula count internamente
 export function generatePillPool(
-  count: number,
   round: number = 1,
   config?: PillConfig
 ): Pill[]
@@ -237,12 +327,37 @@ export function generatePillPool(
 ### Nova Implementacao
 
 ```typescript
-import { rollPillType, PROGRESSION } from './pillProgression'
+import { rollPillType, getPillCount, PROGRESSION, POOL_SCALING } from './pillProgression'
 
 /**
- * Gera pool de pilulas com probabilidades baseadas na rodada
+ * Gera pool de pilulas com quantidade e probabilidades baseadas na rodada
+ * 
+ * @param round - Numero da rodada atual (determina quantidade E tipos)
+ * @param config - Configuracao de dano/cura (opcional)
+ * @returns Array de pilulas para a rodada
  */
 export function generatePillPool(
+  round: number = 1,
+  config: PillConfig = PILL_CONFIG
+): Pill[] {
+  // Quantidade dinamica baseada na rodada
+  const count = getPillCount(round)
+  
+  const pills: Pill[] = []
+
+  for (let i = 0; i < count; i++) {
+    // Tipo dinamico baseado na rodada
+    const type = rollPillType(round)
+    pills.push(createPill(type, config))
+  }
+
+  return pills
+}
+
+/**
+ * Variante que permite override da quantidade (para testes ou modos especiais)
+ */
+export function generatePillPoolWithCount(
   count: number,
   round: number = 1,
   config: PillConfig = PILL_CONFIG
@@ -250,7 +365,6 @@ export function generatePillPool(
   const pills: Pill[] = []
 
   for (let i = 0; i < count; i++) {
-    // Usa progressao dinamica ao inves de probabilidades estaticas
     const type = rollPillType(round)
     pills.push(createPill(type, config))
   }
@@ -270,17 +384,35 @@ export function generatePillPool(
 3. **resetRound** - Usa `state.round + 1` para nova rodada
 
 ```typescript
+// ANTES (count fixo):
+const newPillPool = generatePillPool(DEFAULT_GAME_CONFIG.pillsPerRound, PILL_CONFIG)
+
+// DEPOIS (apenas round, count calculado internamente):
+
 // Em resetRound():
-const newPillPool = generatePillPool(
-  DEFAULT_GAME_CONFIG.pillsPerRound,
-  state.round + 1  // NOVO: passa rodada para progressao
-)
+const newPillPool = generatePillPool(state.round + 1)
 
 // Em confirmItemSelection():
-const pillPool = generatePillPool(
-  DEFAULT_GAME_CONFIG.pillsPerRound,
-  1  // Rodada 1
-)
+const pillPool = generatePillPool(1)  // Rodada 1
+
+// Em initGame():
+const pillPool = generatePillPool(1)  // Rodada 1
+```
+
+### Remocao de pillsPerRound
+
+O campo `pillsPerRound` em `DEFAULT_GAME_CONFIG` pode ser **removido** ou **depreciado**, 
+pois a quantidade agora e determinada dinamicamente por `POOL_SCALING`.
+
+```typescript
+// ANTES
+export const DEFAULT_GAME_CONFIG: GameConfig = {
+  // ...
+  pillsPerRound: 6,  // REMOVER - agora usa POOL_SCALING
+}
+
+// Se precisar manter para retrocompatibilidade, pode ignorar:
+// pillsPerRound: 6,  // @deprecated - usar POOL_SCALING
 ```
 
 ### Atualizacao de typeCounts
@@ -421,20 +553,28 @@ Referencia visual do comportamento esperado:
 │       │                                                                 │
 │       │ round++                                                         │
 │       ▼                                                                 │
-│  [getPillChances(round)]                                                │
+│  [generatePillPool(round)]                                              │
 │       │                                                                 │
-│       │ Calcula lerp para cada tipo                                     │
-│       │ Normaliza para 100%                                             │
+│       ├─► [getPillCount(round)]                                         │
+│       │       │                                                         │
+│       │       │ Step Function: base + floor((r-1)/freq) * inc           │
+│       │       │ Aplica maxCap                                           │
+│       │       ▼                                                         │
+│       │   count = 7 (exemplo: rodada 8)                                 │
+│       │                                                                 │
+│       └─► [getPillChances(round)]                                       │
+│               │                                                         │
+│               │ Calcula lerp para cada tipo                             │
+│               │ Normaliza para 100%                                     │
+│               ▼                                                         │
+│           { SAFE: 17.5%, DMG_LOW: 15%, ... }                            │
+│       │                                                                 │
 │       ▼                                                                 │
-│  { SAFE: 35%, DMG_LOW: 20%, DMG_HIGH: 17.5%, HEAL: 7.5%, FATAL: 5% }    │
+│  [Loop count vezes: rollPillType(round)]                                │
 │       │                                                                 │
-│       ▼                                                                 │
-│  [generatePillPool(6, round)]                                           │
-│       │                                                                 │
-│       │ Loop 6x: rollPillType(round)                                    │
 │       │ Cria pilulas com tipos sorteados                                │
 │       ▼                                                                 │
-│  [Pill[], Pill[], Pill[], Pill[], Pill[], Pill[]]                       │
+│  [Pill[], Pill[], Pill[], Pill[], Pill[], Pill[], Pill[]]  (7 pilulas)  │
 │       │                                                                 │
 │       ▼                                                                 │
 │  [gameStore.pillPool = newPillPool]                                     │
@@ -443,10 +583,10 @@ Referencia visual do comportamento esperado:
 │  [countPillTypes(pillPool)]                                             │
 │       │                                                                 │
 │       ▼                                                                 │
-│  [gameStore.typeCounts = { SAFE: 2, DMG_LOW: 2, ... }]                  │
+│  [gameStore.typeCounts = { SAFE: 1, DMG_LOW: 2, ... }]                  │
 │       │                                                                 │
 │       ▼                                                                 │
-│  [UI Atualiza: TypeCounter, PillPool]                                   │
+│  [UI Atualiza: TypeCounter, PillPool (layout adapta a 7 pilulas)]       │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
@@ -455,6 +595,8 @@ Referencia visual do comportamento esperado:
 
 ## Riscos e Mitigacoes
 
+### Progressao de Tipos
+
 | Risco | Impacto | Mitigacao |
 |-------|---------|-----------|
 | Rodadas iniciais muito faceis | Baixo | Ajustar startPct do DMG_LOW para 35-40% |
@@ -462,6 +604,16 @@ Referencia visual do comportamento esperado:
 | LIFE desbalanceado quando ativo | Medio | Testar extensivamente antes de ativar |
 | Mudanca brusca de comportamento | Alto | Rodada 1 similar ao sistema atual |
 | Config nao reflete na UI | Baixo | TypeCounter ja usa countPillTypes() |
+
+### Pool Scaling
+
+| Risco | Impacto | Mitigacao |
+|-------|---------|-----------|
+| UI quebra com muitas pilulas | Alto | maxCap de 12 pilulas, testar layout |
+| Rodadas muito longas no late game | Medio | Ajustar frequency/increaseBy se necessario |
+| Memoria/performance com pools grandes | Baixo | 12 pilulas e trivial, nao e problema |
+| Jogador confuso com quantidade variavel | Baixo | UX clara, talvez mostrar "Rodada X (N pilulas)" |
+| Step Function muito agressiva | Medio | Comecar conservador (freq: 3) e ajustar |
 
 ---
 
@@ -523,6 +675,53 @@ describe('pillProgression', () => {
       }
     })
   })
+
+  describe('getPillCount', () => {
+    it('retorna baseCount na rodada 1', () => {
+      expect(getPillCount(1)).toBe(5)
+    })
+
+    it('mantem mesmo valor dentro do ciclo', () => {
+      // Rodadas 1-3 devem retornar 5 (primeiro ciclo)
+      expect(getPillCount(1)).toBe(5)
+      expect(getPillCount(2)).toBe(5)
+      expect(getPillCount(3)).toBe(5)
+    })
+
+    it('aumenta apos completar ciclo', () => {
+      // Rodada 4 inicia segundo ciclo
+      expect(getPillCount(4)).toBe(6)
+      expect(getPillCount(5)).toBe(6)
+      expect(getPillCount(6)).toBe(6)
+    })
+
+    it('respeita maxCap', () => {
+      // Rodada 100 deve retornar maxCap (12)
+      expect(getPillCount(100)).toBe(12)
+    })
+
+    it('funciona com config customizada', () => {
+      const customConfig: PoolScalingConfig = {
+        baseCount: 3,
+        increaseBy: 2,
+        frequency: 2,
+        maxCap: 10,
+      }
+      expect(getPillCount(1, customConfig)).toBe(3)
+      expect(getPillCount(3, customConfig)).toBe(5)  // 3 + 1*2
+      expect(getPillCount(5, customConfig)).toBe(7)  // 3 + 2*2
+      expect(getPillCount(100, customConfig)).toBe(10) // cap
+    })
+
+    it('funciona sem maxCap', () => {
+      const noCapConfig: PoolScalingConfig = {
+        baseCount: 5,
+        increaseBy: 1,
+        frequency: 3,
+      }
+      expect(getPillCount(100, noCapConfig)).toBe(38) // 5 + 33*1
+    })
+  })
 })
 ```
 
@@ -530,10 +729,16 @@ describe('pillProgression', () => {
 
 ## Consideracoes de UX
 
+### Progressao de Tipos
 1. **Nao mostrar probabilidades ao jogador** - Manter misterio
 2. **TypeCounter continua funcionando** - Mostra contagem real, nao probabilidades
 3. **Tooltips de pilula nao mudam** - Descricoes fixas por tipo
-4. **Nova rodada banner** - Pode mostrar "Rodada X" sem indicar dificuldade
+
+### Pool Scaling
+4. **PillPool layout flexivel** - Grid deve adaptar-se a 5-12 pilulas
+5. **Feedback visual sutil** - Jogador percebe mais pilulas naturalmente
+6. **Nova rodada banner** - Pode mostrar "Rodada X" ou "Rodada X (N pilulas)" para clareza
+7. **Nao sobrecarregar tela** - maxCap de 12 garante que UI nao quebre
 
 ---
 
@@ -549,7 +754,36 @@ describe('pillProgression', () => {
 
 ### Modos de Jogo Alternativos
 
-A configuracao `ProgressionConfig` pode ser substituida para criar modos:
+As configuracoes `ProgressionConfig` e `PoolScalingConfig` podem ser substituidas para criar modos:
+
+**Progressao de Tipos:**
 - **Hardcore:** Cianeto desde rodada 1
 - **Casual:** Mais HEAL, menos FATAL
 - **Infinito:** maxRound = 100, curva esticada
+
+**Pool Scaling:**
+```typescript
+// Modo Rapido: menos pilulas, aumenta devagar
+const FAST_MODE: PoolScalingConfig = {
+  baseCount: 4,
+  increaseBy: 1,
+  frequency: 5,
+  maxCap: 8,
+}
+
+// Modo Caos: muitas pilulas, aumenta rapido
+const CHAOS_MODE: PoolScalingConfig = {
+  baseCount: 6,
+  increaseBy: 2,
+  frequency: 2,
+  maxCap: 16,
+}
+
+// Modo Classico: quantidade fixa
+const CLASSIC_MODE: PoolScalingConfig = {
+  baseCount: 6,
+  increaseBy: 0,
+  frequency: 1,
+  // sem maxCap necessario pois nao aumenta
+}
+```

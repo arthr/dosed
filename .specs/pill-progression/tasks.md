@@ -29,7 +29,7 @@
 
 ## Fase 2: Modulo de Progressao (Core Logic)
 
-### 2.1 Criar Novo Modulo
+### 2.1 Criar Novo Modulo - Progressao de Tipos
 
 - [ ] TASK-PP-010: Criar arquivo `src/utils/pillProgression.ts`
 - [ ] TASK-PP-011: Definir interface `PillRule` com campos `unlockRound`, `startPct`, `endPct`
@@ -38,6 +38,12 @@
 - [ ] TASK-PP-014: Implementar funcao `lerp(start, end, t)` para interpolacao linear
 - [ ] TASK-PP-015: Implementar funcao `getPillChances(round, config?)` com normalizacao
 - [ ] TASK-PP-016: Implementar funcao `rollPillType(round, config?)` para sorteio
+
+### 2.2 Pool Scaling (Step Function)
+
+- [ ] TASK-PP-054: Definir interface `PoolScalingConfig` com `baseCount`, `increaseBy`, `frequency`, `maxCap`
+- [ ] TASK-PP-055: Implementar constante `POOL_SCALING` com configuracao padrao (5, +1, freq 3, cap 12)
+- [ ] TASK-PP-056: Implementar funcao `getPillCount(round, config?)` com step function
 - [ ] TASK-PP-017: Exportar todas as funcoes e tipos necessarios
 
 ---
@@ -48,9 +54,10 @@
 
 - [ ] TASK-PP-018: Atualizar `calculatePillStats()` para suportar tipo `LIFE`
 - [ ] TASK-PP-019: Atualizar `createPill()` para incluir `livesRestore` no stats
-- [ ] TASK-PP-020: Modificar assinatura de `generatePillPool(count, round?, config?)`
+- [ ] TASK-PP-020: Modificar assinatura de `generatePillPool(round, config?)` - usar `getPillCount()` internamente
 - [ ] TASK-PP-021: Substituir `selectPillType()` por `rollPillType()` importado de pillProgression
 - [ ] TASK-PP-022: Atualizar `countPillTypes()` para incluir contagem de `LIFE`
+- [ ] TASK-PP-057: Criar funcao auxiliar `generatePillPoolWithCount(count, round, config?)` para override manual
 
 ---
 
@@ -74,9 +81,14 @@
 
 ### 5.2 Atualizar Geracao de Pilulas
 
-- [ ] TASK-PP-029: Modificar `initGame()` para passar `round: 1` ao `generatePillPool()`
-- [ ] TASK-PP-030: Modificar `confirmItemSelection()` para passar `round: 1` ao `generatePillPool()`
-- [ ] TASK-PP-031: Modificar `resetRound()` para passar `state.round + 1` ao `generatePillPool()`
+- [ ] TASK-PP-029: Modificar `initGame()` para usar `generatePillPool(1)` - quantidade dinamica
+- [ ] TASK-PP-030: Modificar `confirmItemSelection()` para usar `generatePillPool(1)` - quantidade dinamica
+- [ ] TASK-PP-031: Modificar `resetRound()` para usar `generatePillPool(state.round + 1)` - quantidade dinamica
+
+### 5.3 Limpeza de Configuracao
+
+- [ ] TASK-PP-058: Remover ou depreciar `pillsPerRound` de `DEFAULT_GAME_CONFIG`
+- [ ] TASK-PP-059: Atualizar tipo `GameConfig` para remover `pillsPerRound` (se aplicavel)
 
 ---
 
@@ -93,7 +105,7 @@
 
 ## Fase 7: Testes e Validacao
 
-### 7.1 Testes Unitarios
+### 7.1 Testes Unitarios - Progressao de Tipos
 
 - [ ] TASK-PP-036: Criar arquivo `src/utils/__tests__/pillProgression.test.ts`
 - [ ] TASK-PP-037: Testar `getPillChances()` retorna apenas tipos desbloqueados
@@ -102,19 +114,31 @@
 - [ ] TASK-PP-040: Testar progressao de probabilidades por rodada
 - [ ] TASK-PP-041: Testar LIFE desativado por padrao
 
-### 7.2 Testes de Integracao
+### 7.2 Testes Unitarios - Pool Scaling
 
-- [ ] TASK-PP-042: Verificar geracao de pilulas na rodada 1 (sem FATAL)
-- [ ] TASK-PP-043: Verificar geracao de pilulas na rodada 5 (com FATAL)
+- [ ] TASK-PP-060: Testar `getPillCount()` retorna baseCount na rodada 1
+- [ ] TASK-PP-061: Testar `getPillCount()` mantem valor dentro do ciclo (rodadas 1-3 = 5)
+- [ ] TASK-PP-062: Testar `getPillCount()` aumenta apos ciclo (rodada 4 = 6)
+- [ ] TASK-PP-063: Testar `getPillCount()` respeita maxCap
+- [ ] TASK-PP-064: Testar `getPillCount()` com config customizada
+- [ ] TASK-PP-065: Testar `getPillCount()` sem maxCap definido
+
+### 7.3 Testes de Integracao
+
+- [ ] TASK-PP-042: Verificar geracao de pilulas na rodada 1 (sem FATAL, 5 pilulas)
+- [ ] TASK-PP-043: Verificar geracao de pilulas na rodada 5 (com FATAL, 6 pilulas)
 - [ ] TASK-PP-044: Verificar transicao de rodada mantem consistencia
 - [ ] TASK-PP-045: Verificar itens funcionam com novos tipos (Scanner, Inverter, etc)
+- [ ] TASK-PP-066: Verificar quantidade de pilulas aumenta corretamente entre rodadas
 
-### 7.3 Validacao Manual
+### 7.4 Validacao Manual
 
 - [ ] TASK-PP-046: Jogar partida completa (10+ rodadas)
 - [ ] TASK-PP-047: Verificar curva de dificuldade perceptivel
 - [ ] TASK-PP-048: Verificar IA funciona normalmente
 - [ ] TASK-PP-049: Verificar todos os overlays e toasts
+- [ ] TASK-PP-067: Verificar UI de PillPool adapta-se a quantidade variavel (5-12 pilulas)
+- [ ] TASK-PP-068: Verificar que cap de 12 pilulas nao quebra layout
 
 ---
 
@@ -134,7 +158,7 @@
 ### Novos Arquivos
 | Arquivo | Descricao |
 |---------|-----------|
-| `src/utils/pillProgression.ts` | Logica de interpolacao e configuracao |
+| `src/utils/pillProgression.ts` | Logica de interpolacao, pool scaling e configuracoes |
 | `src/utils/__tests__/pillProgression.test.ts` | Testes unitarios |
 
 ### Arquivos Modificados
@@ -142,11 +166,12 @@
 |---------|----------|
 | `src/types/pill.ts` | Adicionar `LIFE`, `livesRestore` |
 | `src/types/player.ts` | Adicionar `livesRestored` ao result |
-| `src/utils/constants.ts` | Cores, labels, shapes para LIFE |
-| `src/utils/pillGenerator.ts` | Usar `rollPillType`, nova assinatura |
+| `src/utils/constants.ts` | Cores, labels, shapes para LIFE; remover/depreciar `pillsPerRound` |
+| `src/utils/pillGenerator.ts` | Nova assinatura `generatePillPool(round)`, usar `getPillCount` e `rollPillType` |
 | `src/utils/gameLogic.ts` | Logica de efeito LIFE |
-| `src/stores/gameStore.ts` | Passar round, typeCounts com LIFE |
+| `src/stores/gameStore.ts` | Usar `generatePillPool(round)` sem count explicito |
 | `src/components/game/TypeCounter.tsx` | Exibir LIFE (opcional) |
+| `src/components/game/PillPool.tsx` | Layout flexivel para 5-12 pilulas |
 | `src/components/overlays/PillReveal.tsx` | Visual de LIFE |
 | `src/components/game/FloatingNumber.tsx` | "+1 Vida" |
 
@@ -158,22 +183,22 @@
 Fase 1 (Types)
      │
      ▼
-Fase 2 (Progressao) ─────────┐
-     │                       │
-     ▼                       │
-Fase 3 (Generator)           │ Podem ser
-     │                       │ paralelizadas
-     ▼                       │
-Fase 4 (GameLogic) ──────────┘
+Fase 2 (Progressao + Pool Scaling) ───┐
+     │                                │
+     ▼                                │
+Fase 3 (Generator)                    │ Podem ser
+     │                                │ paralelizadas
+     ▼                                │
+Fase 4 (GameLogic) ───────────────────┘
      │
      ▼
-Fase 5 (GameStore)
+Fase 5 (GameStore + Limpeza Config)
      │
      ▼
-Fase 7 (Testes)
+Fase 7 (Testes - Tipos + Pool Scaling)
      │
      ▼
-Fase 6 (Visual) ─── Opcional, pode ser feito apos testes
+Fase 6 (Visual) ─── Inclui PillPool layout flexivel
      │
      ▼
 Fase 8 (LIFE) ─── Futura, quando decidir ativar
@@ -186,13 +211,13 @@ Fase 8 (LIFE) ─── Futura, quando decidir ativar
 | Fase | Complexidade | Tempo Estimado |
 |------|--------------|----------------|
 | Fase 1 | Baixa | 30 min |
-| Fase 2 | Media | 1h |
+| Fase 2 | Media | 1h 15min (+15min para pool scaling) |
 | Fase 3 | Media | 45 min |
 | Fase 4 | Baixa | 30 min |
-| Fase 5 | Baixa | 30 min |
-| Fase 6 | Baixa | 45 min |
-| Fase 7 | Media | 1h |
-| **Total** | - | **~5h** |
+| Fase 5 | Baixa | 45 min (+15min para limpeza config) |
+| Fase 6 | Media | 1h (+15min para layout flexivel) |
+| Fase 7 | Media | 1h 30min (+30min para testes pool scaling) |
+| **Total** | - | **~6h 15min** |
 
 ---
 
@@ -232,5 +257,42 @@ export const LEGACY_PROGRESSION: ProgressionConfig = {
     FATAL:    { unlockRound: 1, startPct: 10, endPct: 10 },
     LIFE:     { unlockRound: 99, startPct: 0, endPct: 0 },
   }
+}
+```
+
+---
+
+### Configuracao POOL_SCALING
+
+A configuracao padrao e conservadora para nao impactar muito a experiencia:
+
+```typescript
+export const POOL_SCALING: PoolScalingConfig = {
+  baseCount: 5,    // Comeca com menos que antes (era 6)
+  increaseBy: 1,   // Aumenta devagar
+  frequency: 3,    // A cada 3 rodadas
+  maxCap: 12,      // Limite para UI
+}
+```
+
+**Tabela de referencia rapida:**
+| Rodadas | Pilulas |
+|---------|---------|
+| 1-3     | 5       |
+| 4-6     | 6       |
+| 7-9     | 7       |
+| 10-12   | 8       |
+| 13-15   | 9       |
+| 16-18   | 10      |
+| 19-21   | 11      |
+| 22+     | 12 (cap)|
+
+Se quiser quantidade fixa como antes:
+
+```typescript
+export const FIXED_POOL: PoolScalingConfig = {
+  baseCount: 6,
+  increaseBy: 0,  // Nunca aumenta
+  frequency: 1,
 }
 ```

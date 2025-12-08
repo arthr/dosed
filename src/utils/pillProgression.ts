@@ -131,3 +131,77 @@ export function rollPillType(
 
   return 'SAFE' // Fallback de seguranca
 }
+
+// ============================================
+// Pool Scaling (Step Function)
+// ============================================
+
+/**
+ * Configuracao de escalonamento do pool de pilulas
+ * Usa Step Function para aumentar quantidade em degraus
+ */
+export interface PoolScalingConfig {
+  /** Quantidade inicial de pilulas na rodada 1 */
+  baseCount: number
+  /** Quantas pilulas adicionar a cada ciclo */
+  increaseBy: number
+  /** A cada quantas rodadas o aumento acontece (tamanho do ciclo) */
+  frequency: number
+  /** Limite maximo para proteger UI e performance */
+  maxCap?: number
+}
+
+/**
+ * Configuracao padrao de pool scaling
+ * Retrocompativel: comeca com 6 (igual ao sistema atual)
+ *
+ * Tabela de referencia:
+ * | Rodadas | Pilulas |
+ * |---------|---------|
+ * | 1-3     | 6       |
+ * | 4-6     | 7       |
+ * | 7-9     | 8       |
+ * | 10-12   | 9       |
+ * | 13-15   | 10      |
+ * | 16-18   | 11      |
+ * | 19+     | 12 (cap)|
+ */
+export const POOL_SCALING: PoolScalingConfig = {
+  baseCount: 6,
+  increaseBy: 1,
+  frequency: 3,
+  maxCap: 12,
+}
+
+/**
+ * Calcula a quantidade de pilulas para uma rodada usando Step Function
+ *
+ * Formula: baseCount + floor((round - 1) / frequency) * increaseBy
+ * Resultado limitado por maxCap se definido
+ *
+ * @param round - Numero da rodada atual
+ * @param config - Configuracao de scaling (opcional, usa POOL_SCALING)
+ * @returns Quantidade de pilulas para o pool
+ */
+export function getPillCount(
+  round: number,
+  config: PoolScalingConfig = POOL_SCALING
+): number {
+  const { baseCount, increaseBy, frequency, maxCap } = config
+
+  // Garante round minimo de 1
+  const safeRound = Math.max(1, round)
+
+  // Calcula quantos ciclos completos passaram
+  const cyclesPassed = Math.floor((safeRound - 1) / frequency)
+
+  // Calcula quantidade total
+  let count = baseCount + cyclesPassed * increaseBy
+
+  // Aplica cap se definido
+  if (maxCap !== undefined) {
+    count = Math.min(count, maxCap)
+  }
+
+  return count
+}

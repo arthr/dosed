@@ -41,10 +41,10 @@
 
 ### 2.2 Pool Scaling (Step Function)
 
-- [ ] TASK-PP-054: Definir interface `PoolScalingConfig` com `baseCount`, `increaseBy`, `frequency`, `maxCap`
-- [ ] TASK-PP-055: Implementar constante `POOL_SCALING` com configuracao padrao (5, +1, freq 3, cap 12)
-- [ ] TASK-PP-056: Implementar funcao `getPillCount(round, config?)` com step function
-- [ ] TASK-PP-017: Exportar todas as funcoes e tipos necessarios
+- [x] TASK-PP-054: Definir interface `PoolScalingConfig` com `baseCount`, `increaseBy`, `frequency`, `maxCap`
+- [x] TASK-PP-055: Implementar constante `POOL_SCALING` com configuracao padrao (6, +1, freq 3, cap 12)
+- [x] TASK-PP-056: Implementar funcao `getPillCount(round, config?)` com step function
+- [x] TASK-PP-017: Exportar todas as funcoes e tipos necessarios
 
 ---
 

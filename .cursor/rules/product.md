@@ -23,10 +23,7 @@ Jogo de estrategia por turnos onde dois jogadores competem para ser o ultimo sob
 | DMG_HIGH | -3 a -4 resistencia       | Laranja  | Rodada 1  |
 | HEAL     | +2 resistencia            | Ciano    | Rodada 2  |
 | FATAL    | Zera resistencia          | Roxo     | Rodada 4  |
-| LIFE     | +1 vida (desativado)      | Rosa     | Rodada 99 |
-
-> **Nota:** O tipo LIFE esta implementado mas desativado por padrao.
-> Para ativar, modificar `PROGRESSION.rules.LIFE` em `src/utils/pillProgression.ts`.
+| LIFE     | +1 vida                   | Rosa     | Rodada 5  |
 
 ### Sistema de Progressao
 
@@ -64,4 +61,3 @@ Cada jogador seleciona 5 itens antes da partida. Itens podem ser usados durante 
 - Modo PvP (multiplayer)
 - Sistema de sons
 - Leaderboard/ranking
-- Ativacao da pilula LIFE

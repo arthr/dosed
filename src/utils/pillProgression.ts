@@ -29,7 +29,7 @@ export interface ProgressionConfig {
  * - Rodada 1 ja tem algum risco (DMG_HIGH 15%) para criar tensao imediata
  * - HEAL desbloqueia rodada 2, ANTES de FATAL, como "valvula de escape"
  * - FATAL limitado a 18% max para evitar late game muito punitivo/aleatorio
- * - LIFE desativado (unlockRound: 99) - ativar quando pronto
+ * - LIFE desbloqueia rodada 5 (apos FATAL) como recompensa rara de late game
  * - maxRound 15 para evitar estagnacao em partidas longas
  */
 export const PROGRESSION: ProgressionConfig = {
@@ -40,7 +40,7 @@ export const PROGRESSION: ProgressionConfig = {
     DMG_HIGH: { unlockRound: 1, startPct: 15, endPct: 25 },
     HEAL: { unlockRound: 2, startPct: 10, endPct: 15 },
     FATAL: { unlockRound: 4, startPct: 5, endPct: 18 },
-    LIFE: { unlockRound: 99, startPct: 0, endPct: 0 },
+    LIFE: { unlockRound: 5, startPct: 6, endPct: 17 },
   },
 }
 

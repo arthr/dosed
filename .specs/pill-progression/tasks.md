@@ -142,14 +142,12 @@
 
 ---
 
-## Fase 8: Feature Flag LIFE (Futura)
+## Fase 8: Ativacao da Pilula LIFE
 
-> **NOTA:** Estas tasks sao para quando decidirmos ativar a pilula LIFE.
-
-- [ ] TASK-PP-050: Alterar `PROGRESSION.rules.LIFE` para { unlockRound: 10, startPct: 10, endPct: 15 }
-- [ ] TASK-PP-051: Atualizar CSS para cor `bg-pill-life` visivel
-- [ ] TASK-PP-052: Testar balanceamento com LIFE ativo
-- [ ] TASK-PP-053: Ajustar porcentagens se necessario
+- [x] TASK-PP-050: Alterar `PROGRESSION.rules.LIFE` para { unlockRound: 5, startPct: 5, endPct: 10 }
+- [x] TASK-PP-051: Verificar CSS para cor `bg-pill-life` (ja estava configurado)
+- [ ] TASK-PP-052: Testar balanceamento com LIFE ativo (MANUAL)
+- [ ] TASK-PP-053: Ajustar porcentagens se necessario (CONDICIONAL)
 
 ---
 

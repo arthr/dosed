@@ -2,15 +2,6 @@
 
 Este documento define a curva de dificuldade e a distribuicao proporcional das pilulas ao longo das rodadas, visando um equilibrio entre sorte e estrategia.
 
-> **Feature Flag: Pilulas LIFE**
-> O tipo LIFE esta implementado mas **desativado por padrao** (`unlockRound: 99`).
-> Para ativar, alterar em `src/utils/pillProgression.ts`:
-> ```typescript
-> LIFE: { unlockRound: 10, startPct: 10, endPct: 15 }
-> ```
-
----
-
 ## 1. Tipos de Pilulas
 
 | Codigo | Label | Efeito | Cor |
@@ -20,7 +11,7 @@ Este documento define a curva de dificuldade e a distribuicao proporcional das p
 | DMG_HIGH | Toxina | -3 a -4 resistencia | Laranja |
 | FATAL | Cianeto | Zera resistencia | Roxo |
 | HEAL | Antidoto | +2 resistencia | Ciano |
-| LIFE | Vida | +1 vida (desativado) | Rosa |
+| LIFE | Vida | +1 vida | Rosa |
 
 ---
 
@@ -37,7 +28,7 @@ export const PROGRESSION: ProgressionConfig = {
     DMG_HIGH: { unlockRound: 1, startPct: 15, endPct: 25 },
     HEAL:     { unlockRound: 2, startPct: 10, endPct: 15 },
     FATAL:    { unlockRound: 4, startPct: 5,  endPct: 18 },
-    LIFE:     { unlockRound: 99, startPct: 0, endPct: 0 },  // Desativado
+    LIFE:     { unlockRound: 5, startPct: 5,  endPct: 10 },
   }
 }
 ```
@@ -46,6 +37,7 @@ export const PROGRESSION: ProgressionConfig = {
 - **Rodada 1**: Apenas SAFE, DMG_LOW, DMG_HIGH (sem HEAL/FATAL para tutorial suave)
 - **Rodada 2**: HEAL desbloqueia como "valvula de escape"
 - **Rodada 4**: FATAL desbloqueia (atraso intencional para buildup de tensao)
+- **Rodada 5**: LIFE desbloqueia como recompensa rara de late game
 - **maxRound 15**: Evita estagnacao em partidas longas
 
 ---
@@ -163,7 +155,7 @@ const HARDCORE: ProgressionConfig = {
     DMG_HIGH: { unlockRound: 1, startPct: 20, endPct: 30 },
     HEAL:     { unlockRound: 3, startPct: 10, endPct: 10 },
     FATAL:    { unlockRound: 2, startPct: 5,  endPct: 25 },
-    LIFE:     { unlockRound: 99, startPct: 0, endPct: 0 },
+    LIFE:     { unlockRound: 5, startPct: 5,  endPct: 10 },
   }
 }
 ```

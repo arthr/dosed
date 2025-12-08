@@ -99,7 +99,7 @@
 - [x] TASK-PP-032: Atualizar `TypeCounter.tsx` para exibir contador de LIFE (quando ativo)
 - [x] TASK-PP-033: Atualizar `PillReveal.tsx` para feedback visual de LIFE
 - [x] TASK-PP-034: Atualizar `FloatingNumber.tsx` para exibir "+1 Vida" (cor rosa)
-- [ ] TASK-PP-035: Adicionar icone para pilula LIFE (sugestao: Heart)
+- [x] TASK-PP-035: Adicionar icone para pilula LIFE (sugestao: Heart)
 
 ---
 

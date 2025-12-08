@@ -1,7 +1,7 @@
 # Planejar Nova Feature
 
 ## Descricao
-Gera um plano de desenvolvimento estruturado para uma nova funcionalidade do jogo Dosed, garantindo alinhamento com a arquitetura existente.
+Gera um plano de desenvolvimento estruturado para uma nova funcionalidade (Requisitos, Design e Tarefas) do jogo Dosed, garantindo alinhamento com a arquitetura existente e seguindo a metodologia orientada por especificações (Spec-Driven Development).
 
 ## Instrucoes
 

@@ -86,22 +86,23 @@ Quando Force Feed e usado, o `consumePill` era chamado diretamente no store, sem
 
 ## Bug #4: (A investigar) Outros comportamentos inesperados da IA
 
-**Status:** Pendente investigacao
+**Status:** VERIFICADO - Nenhum bug adicional encontrado
 **Severidade:** Media
 
 ### Descricao
-Usuario reportou que "alguns itens estao causando comportamentos inesperados na IA". Bugs #1 e #2 foram identificados, mas pode haver outros.
+Usuario reportou que "alguns itens estao causando comportamentos inesperados na IA". Bugs #1, #2, #3 e #5 foram identificados e corrigidos.
 
-### Itens a Verificar
+### Itens Verificados
 - [x] Handcuffs - CORRIGIDO (Bug #1)
 - [x] Force Feed - Stale closure CORRIGIDO (Bug #2), feedback visual CORRIGIDO (Bug #3)
-- [ ] Scanner/Inverter/Double - Verificar selecao de alvo
-- [ ] Shield - Verificar auto-aplicacao
+- [x] Scanner/Inverter/Double - Funcionando corretamente
+- [x] Shield - Funcionando corretamente
 - [x] Discard - CORRIGIDO (Bug #5: nao iniciava nova rodada quando pool esvaziava)
-- [ ] Shuffle - Verificar comportamento apos uso
+- [x] Shuffle - Funcionando corretamente
+- [x] Pocket Pill - Funcionando corretamente
 
-### Acao
-Realizar testes manuais focados em cada item usado pela IA.
+### Conclusao
+Todos os itens foram testados e estao funcionando conforme especificado.
 
 ---
 
@@ -155,5 +156,13 @@ case 'discard': {
 - [x] Fix #2: Corrigir stale closure no setTimeout
 - [x] Fix #3: Adicionar feedback visual para Force Feed
 - [x] Fix #5: Discard na ultima pilula inicia nova rodada
-- [ ] Investigar outros itens que podem causar travamento
-- [ ] Testar cenarios de edge case (handcuffs + shield, etc)
+- [x] Investigar outros itens que podem causar travamento
+- [x] Testar cenarios de edge case (handcuffs + shield, etc)
+
+---
+
+## Status Final
+
+**Feature item-system: CONCLUIDA**
+
+Todos os bugs identificados foram corrigidos e todos os itens estao funcionando conforme especificado.

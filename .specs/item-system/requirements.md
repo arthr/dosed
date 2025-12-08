@@ -128,11 +128,11 @@ Sistema de itens consumiveis que adiciona camada estrategica ao jogo, permitindo
 
 ## Criterios de Aceitacao
 
-- [ ] Jogador pode selecionar ate 5 itens antes da partida
-- [ ] Inventario e visivel durante o jogo
-- [ ] Todos os 9 itens funcionam conforme especificado
-- [ ] IA usa itens de forma coerente
-- [ ] Feedback visual para cada tipo de item
-- [ ] Itens com alvo permitem selecao de alvo
-- [ ] Itens consumidos sao removidos do inventario
+- [x] Jogador pode selecionar ate 5 itens antes da partida
+- [x] Inventario e visivel durante o jogo
+- [x] Todos os 9 itens funcionam conforme especificado
+- [x] IA usa itens de forma coerente
+- [x] Feedback visual para cada tipo de item
+- [x] Itens com alvo permitem selecao de alvo
+- [x] Itens consumidos sao removidos do inventario
 

@@ -1,7 +1,7 @@
 # Planejar Funcionalidade (Kiro Style)
 
 ## Descrição
-Gera um plano de desenvolvimento estruturado (Requisitos, Design e Tarefas) para uma nova funcionalidade/tarefa, seguindo a metodologia orientada por especificações do Kiro.
+Gera um plano de desenvolvimento estruturado (Requisitos, Design e Tarefas) para uma nova funcionalidade ou tarefa, seguindo a metodologia orientada por especificações (Spec-Driven Development).
 
 ## Instruções
 1.  Leia o prompt do usuário sobre a funcionalidade desejada.

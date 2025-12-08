@@ -4,16 +4,16 @@
 ```
 src/
   components/
-    game/          # Componentes do jogo (Pill, PillPool, GameBoard, etc.)
+    game/          # Componentes do jogo (Pill, PillPool, GameBoard, Item*, Inventory*)
     layout/        # Layout da aplicacao (GameLayout, Header, Footer)
-    overlays/      # Modais e overlays (PillReveal, GameOverDialog, NewRoundOverlay)
-    toasts/        # Sistema de notificacoes (Toast, ToastManager)
+    overlays/      # Modais e overlays (PillReveal, GameOverDialog, NewRoundOverlay, ItemEffectOverlay)
+    toasts/        # Sistema de notificacoes (Toast, ToastManager, PlayerToasts)
     ui/            # Componentes base shadcn/ui
       8bit/        # Componentes 8bit/ui (visual retro)
-  hooks/           # Custom hooks (useGameActions, usePillConsumption, useAIPlayer)
+  hooks/           # Custom hooks (useGameActions, usePillConsumption, useAIPlayer, useItem*)
   stores/          # Zustand stores (gameStore, toastStore, overlayStore)
-  types/           # TypeScript types (game.ts, pill.ts, player.ts)
-  utils/           # Funcoes utilitarias (constants, pillGenerator, gameLogic, aiLogic)
+  types/           # TypeScript types (game.ts, pill.ts, player.ts, item.ts)
+  utils/           # Funcoes utilitarias (constants, pillGenerator, gameLogic, aiLogic, itemCatalog, itemLogic)
 ```
 
 ## Convencoes de Nomenclatura

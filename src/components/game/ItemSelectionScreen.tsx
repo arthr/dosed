@@ -8,7 +8,7 @@ import { ItemCard } from './ItemCard'
 import {
   ITEMS_BY_CATEGORY,
   CATEGORY_LABELS,
-  CATEGORY_COLORS,
+  CATEGORY_TEXT_COLORS,
   getAllCategories,
 } from '@/utils/itemCatalog'
 import { cn } from '@/lib/utils'
@@ -196,7 +196,7 @@ function CategorySection({
 }: CategorySectionProps) {
   const items = ITEMS_BY_CATEGORY[category]
   const label = CATEGORY_LABELS[category]
-  const colorClass = CATEGORY_COLORS[category]
+  const textColor = CATEGORY_TEXT_COLORS[category]
 
   return (
     <motion.div
@@ -207,7 +207,7 @@ function CategorySection({
       }}
     >
       {/* Label da categoria */}
-      <h2 className={`text-base ${colorClass}`}>{label}</h2>
+      <h2 className={`text-base ${textColor}`}>{label}</h2>
 
       {/* Grid de itens */}
       <div className="flex flex-wrap gap-3">

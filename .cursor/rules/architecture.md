@@ -159,7 +159,7 @@ Selecao automatica de itens pela IA:
 ### itemCatalog.ts
 - `ITEM_CATALOG` - Definicoes de todos os 9 itens
 - `ITEMS_BY_CATEGORY` - Agrupamento por categoria
-- `CATEGORY_COLORS`, `CATEGORY_HEX_COLORS` - Cores por categoria
+- `CATEGORY_TEXT_COLORS`, `CATEGORY_HEX_COLORS` - Cores por categoria
 
 ### itemLogic.ts
 - Logica de aplicacao de efeitos de cada item

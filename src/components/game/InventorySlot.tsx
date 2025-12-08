@@ -1,30 +1,7 @@
 import { motion } from 'framer-motion'
-import {
-  Search,
-  RefreshCw,
-  CopyPlus,
-  Pill as PillIcon,
-  Shield,
-  Lock,
-  Utensils,
-  Shuffle,
-  Trash2,
-} from 'lucide-react'
 import type { InventoryItem } from '@/types'
 import { ITEM_CATALOG, CATEGORY_BG_COLORS } from '@/utils/itemCatalog'
-
-// Mapeamento de nomes de icones para componentes
-const ICON_MAP: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
-  Search,
-  RefreshCw,
-  CopyPlus,
-  Pill: PillIcon,
-  Shield,
-  Lock,
-  Utensils,
-  Shuffle,
-  Trash2,
-}
+import { ItemIcon } from './ItemIcon'
 
 interface InventorySlotProps {
   /** Item no slot (undefined = vazio) */
@@ -116,7 +93,6 @@ export function InventorySlot({
 
   // Slot com item
   const itemDef = ITEM_CATALOG[item.type]
-  const IconComponent = ICON_MAP[itemDef.icon]
   const bgColor = CATEGORY_BG_COLORS[itemDef.category]
 
   // Determina estado de animacao
@@ -154,12 +130,7 @@ export function InventorySlot({
       aria-label={`${itemDef.name}: ${itemDef.description}`}
       title={`${itemDef.name}: ${itemDef.description}`}
     >
-      {IconComponent && (
-        <IconComponent
-          size={20}
-          className={itemDef.color}
-        />
-      )}
+      <ItemIcon type={item.type} size={34} />
     </motion.button>
   )
 }

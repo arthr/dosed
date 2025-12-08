@@ -10,6 +10,13 @@ import type { ItemCategory, ItemDefinition, ItemType } from '@/types/item'
 // ============================================
 
 export const CATEGORY_COLORS: Record<ItemCategory, string> = {
+  intel: 'blue-400',
+  sustain: 'emerald-400',
+  control: 'yellow-400',
+  chaos: 'purple-400',
+}
+
+export const CATEGORY_TEXT_COLORS: Record<ItemCategory, string> = {
   intel: 'text-blue-400',
   sustain: 'text-emerald-400',
   control: 'text-yellow-400',

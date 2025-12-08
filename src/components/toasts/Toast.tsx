@@ -1,38 +1,13 @@
 import { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import {
-  Search,
-  RefreshCw,
-  CopyPlus,
-  Pill as PillIcon,
-  Shield,
-  Lock,
-  Utensils,
-  Shuffle,
-  Trash2,
-} from 'lucide-react'
 import type { Toast as ToastType, ToastType as ToastVariant } from '@/stores/toastStore'
 import type { ItemType } from '@/types'
 import { useToastDismiss } from '@/hooks/useToast'
 import { ITEM_CATALOG } from '@/utils/itemCatalog'
+import { ItemIcon } from '@/components/game/ItemIcon'
 
 interface ToastProps {
   toast: ToastType
-}
-
-/**
- * Mapa de icones por tipo de item
- */
-const ITEM_ICON_MAP: Record<ItemType, React.ComponentType<{ size?: number; className?: string }>> = {
-  scanner: Search,
-  inverter: RefreshCw,
-  double: CopyPlus,
-  pocket_pill: PillIcon,
-  shield: Shield,
-  handcuffs: Lock,
-  force_feed: Utensils,
-  shuffle: Shuffle,
-  discard: Trash2,
 }
 
 /**
@@ -75,7 +50,6 @@ export function Toast({ toast }: ToastProps) {
   const itemStyles = isItemToast ? getItemToastStyles(toast.itemType!) : null
   const styles = { ...baseStyles, ...(itemStyles || {}) }
 
-  const ItemIcon = isItemToast ? ITEM_ICON_MAP[toast.itemType!] : null
   const itemDef = isItemToast ? ITEM_CATALOG[toast.itemType!] : null
 
   useEffect(() => {
@@ -104,7 +78,9 @@ export function Toast({ toast }: ToastProps) {
         `}
       >
         {/* Icone do item */}
-        {ItemIcon && <ItemIcon size={14} className="shrink-0" />}
+        {isItemToast && (
+          <ItemIcon type={toast.itemType!} size={14} className="shrink-0" forceIcon />
+        )}
 
         {/* Valor numerico (para damage/heal) */}
         {toast.value !== undefined && (

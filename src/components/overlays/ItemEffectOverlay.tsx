@@ -1,18 +1,8 @@
 import { motion } from 'framer-motion'
 import { useEffect, useRef, useCallback } from 'react'
-import {
-  Search,
-  RefreshCw,
-  CopyPlus,
-  Pill as PillIcon,
-  Shield,
-  Lock,
-  Utensils,
-  Shuffle,
-  Trash2,
-} from 'lucide-react'
 import type { ItemType } from '@/types'
 import { ITEM_CATALOG, CATEGORY_HEX_COLORS } from '@/utils/itemCatalog'
+import { ItemIcon } from '@/components/game/ItemIcon'
 
 interface ItemEffectOverlayProps {
   /** Tipo do item usado */
@@ -25,19 +15,6 @@ interface ItemEffectOverlayProps {
 
 /** Delay antes de auto-dismiss (ms) */
 const AUTO_DISMISS_DELAY = 1500
-
-/** Mapa de icones por tipo de item */
-const ICON_MAP: Record<ItemType, React.ComponentType<{ size?: number; className?: string }>> = {
-  scanner: Search,
-  inverter: RefreshCw,
-  double: CopyPlus,
-  pocket_pill: PillIcon,
-  shield: Shield,
-  handcuffs: Lock,
-  force_feed: Utensils,
-  shuffle: Shuffle,
-  discard: Trash2,
-}
 
 /**
  * Overlay de feedback visual quando um item e usado
@@ -70,7 +47,6 @@ export function ItemEffectOverlay({
 
   // Dados do item
   const itemDef = ITEM_CATALOG[itemType]
-  const IconComponent = ICON_MAP[itemType]
   const categoryColor = CATEGORY_HEX_COLORS[itemDef.category]
 
   return (
@@ -105,7 +81,7 @@ export function ItemEffectOverlay({
           }}
           transition={{ duration: 0.8, repeat: Infinity }}
         >
-          <IconComponent size={48} className="text-white drop-shadow-lg" />
+          <ItemIcon type={itemType} size={48} className="text-white drop-shadow-lg" forceIcon />
         </motion.div>
 
         {/* Info do item */}

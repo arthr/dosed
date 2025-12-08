@@ -125,11 +125,11 @@
 
 ### 7.3 Testes de Integracao
 
-- [ ] TASK-PP-042: Verificar geracao de pilulas na rodada 1 (sem FATAL/HEAL, 6 pilulas)
-- [ ] TASK-PP-043: Verificar geracao de pilulas na rodada 4 (com FATAL, 7 pilulas)
-- [ ] TASK-PP-044: Verificar transicao de rodada mantem consistencia
-- [ ] TASK-PP-045: Verificar itens funcionam com novos tipos (Scanner, Inverter, etc)
-- [ ] TASK-PP-066: Verificar quantidade de pilulas aumenta corretamente entre rodadas
+- [x] TASK-PP-042: Verificar geracao de pilulas na rodada 1 (sem FATAL/HEAL, 6 pilulas)
+- [x] TASK-PP-043: Verificar geracao de pilulas na rodada 4 (com FATAL, 7 pilulas)
+- [ ] TASK-PP-044: Verificar transicao de rodada mantem consistencia (MANUAL)
+- [ ] TASK-PP-045: Verificar itens funcionam com novos tipos (Scanner, Inverter, etc) (MANUAL)
+- [x] TASK-PP-066: Verificar quantidade de pilulas aumenta corretamente entre rodadas
 
 ### 7.4 Validacao Manual
 

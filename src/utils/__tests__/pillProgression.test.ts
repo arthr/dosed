@@ -9,6 +9,10 @@ import {
   type ProgressionConfig,
   type PoolScalingConfig,
 } from '../pillProgression'
+import {
+  generatePillPool,
+  countPillTypes,
+} from '../pillGenerator'
 
 // ============================================
 // Testes de lerp()
@@ -309,5 +313,144 @@ describe('POOL_SCALING config', () => {
 
   it('e retrocompativel (comeca com 6)', () => {
     expect(POOL_SCALING.baseCount).toBe(6)
+  })
+})
+
+// ============================================
+// Testes de Integracao - generatePillPool
+// ============================================
+
+describe('generatePillPool - Integracao', () => {
+  // TASK-PP-042: Verificar geracao de pilulas na rodada 1
+  describe('rodada 1', () => {
+    it('gera exatamente 6 pilulas', () => {
+      const pills = generatePillPool(1)
+      expect(pills).toHaveLength(6)
+    })
+
+    it('nao contem FATAL (desbloqueia rodada 4)', () => {
+      // Roda 50 vezes para ter confianca estatistica
+      for (let i = 0; i < 50; i++) {
+        const pills = generatePillPool(1)
+        const counts = countPillTypes(pills)
+        expect(counts.FATAL).toBe(0)
+      }
+    })
+
+    it('nao contem HEAL (desbloqueia rodada 2)', () => {
+      for (let i = 0; i < 50; i++) {
+        const pills = generatePillPool(1)
+        const counts = countPillTypes(pills)
+        expect(counts.HEAL).toBe(0)
+      }
+    })
+
+    it('nao contem LIFE (desativado)', () => {
+      for (let i = 0; i < 50; i++) {
+        const pills = generatePillPool(1)
+        const counts = countPillTypes(pills)
+        expect(counts.LIFE).toBe(0)
+      }
+    })
+
+    it('contem apenas SAFE, DMG_LOW e DMG_HIGH', () => {
+      for (let i = 0; i < 50; i++) {
+        const pills = generatePillPool(1)
+        for (const pill of pills) {
+          expect(['SAFE', 'DMG_LOW', 'DMG_HIGH']).toContain(pill.type)
+        }
+      }
+    })
+  })
+
+  // TASK-PP-043: Verificar geracao de pilulas na rodada 4
+  describe('rodada 4', () => {
+    it('gera exatamente 7 pilulas', () => {
+      const pills = generatePillPool(4)
+      expect(pills).toHaveLength(7)
+    })
+
+    it('pode conter FATAL (desbloqueia rodada 4)', () => {
+      // Roda varias vezes ate encontrar FATAL
+      let foundFatal = false
+      for (let i = 0; i < 200; i++) {
+        const pills = generatePillPool(4)
+        const counts = countPillTypes(pills)
+        if (counts.FATAL > 0) {
+          foundFatal = true
+          break
+        }
+      }
+      expect(foundFatal).toBe(true)
+    })
+
+    it('pode conter HEAL (desbloqueia rodada 2)', () => {
+      let foundHeal = false
+      for (let i = 0; i < 200; i++) {
+        const pills = generatePillPool(4)
+        const counts = countPillTypes(pills)
+        if (counts.HEAL > 0) {
+          foundHeal = true
+          break
+        }
+      }
+      expect(foundHeal).toBe(true)
+    })
+
+    it('nao contem LIFE (desativado)', () => {
+      for (let i = 0; i < 50; i++) {
+        const pills = generatePillPool(4)
+        const counts = countPillTypes(pills)
+        expect(counts.LIFE).toBe(0)
+      }
+    })
+  })
+
+  // TASK-PP-066: Verificar quantidade de pilulas aumenta entre rodadas
+  describe('escalonamento de quantidade', () => {
+    it('quantidade aumenta conforme a rodada', () => {
+      expect(generatePillPool(1)).toHaveLength(6)
+      expect(generatePillPool(2)).toHaveLength(6)
+      expect(generatePillPool(3)).toHaveLength(6)
+      expect(generatePillPool(4)).toHaveLength(7)
+      expect(generatePillPool(7)).toHaveLength(8)
+      expect(generatePillPool(10)).toHaveLength(9)
+      expect(generatePillPool(13)).toHaveLength(10)
+      expect(generatePillPool(16)).toHaveLength(11)
+      expect(generatePillPool(19)).toHaveLength(12)
+    })
+
+    it('respeita cap de 12 pilulas', () => {
+      expect(generatePillPool(50)).toHaveLength(12)
+      expect(generatePillPool(100)).toHaveLength(12)
+    })
+  })
+
+  // Testes de propriedades das pilulas geradas
+  describe('propriedades das pilulas', () => {
+    it('todas pilulas comecam com isRevealed = false', () => {
+      const pills = generatePillPool(5)
+      for (const pill of pills) {
+        expect(pill.isRevealed).toBe(false)
+      }
+    })
+
+    it('todas pilulas tem id unico', () => {
+      const pills = generatePillPool(10)
+      const ids = pills.map(p => p.id)
+      const uniqueIds = new Set(ids)
+      expect(uniqueIds.size).toBe(pills.length)
+    })
+
+    it('todas pilulas tem stats definidos', () => {
+      const pills = generatePillPool(5)
+      for (const pill of pills) {
+        expect(pill.stats).toBeDefined()
+        expect(typeof pill.stats.damage).toBe('number')
+        expect(typeof pill.stats.heal).toBe('number')
+        expect(typeof pill.stats.isFatal).toBe('boolean')
+        expect(typeof pill.stats.livesRestore).toBe('number')
+      }
+    })
   })
 })

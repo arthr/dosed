@@ -7,6 +7,9 @@ import path from 'path'
 export default defineConfig({
   // Base path para GitHub Pages (nome do repositorio)
   base: '/dosed/',
+  server: {
+    host: '0.0.0.0',
+  },
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

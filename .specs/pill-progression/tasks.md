@@ -76,19 +76,19 @@
 
 ### 5.1 Atualizar Estado Inicial
 
-- [ ] TASK-PP-027: Adicionar `LIFE: 0` ao `typeCounts` no `initialState`
-- [ ] TASK-PP-028: Atualizar tipo `GameStats.pillsByType` para incluir `LIFE`
+- [x] TASK-PP-027: Adicionar `LIFE: 0` ao `typeCounts` no `initialState`
+- [x] TASK-PP-028: Atualizar tipo `GameStats.pillsByType` para incluir `LIFE`
 
 ### 5.2 Atualizar Geracao de Pilulas
 
-- [ ] TASK-PP-029: Modificar `initGame()` para usar `generatePillPool(1)` - quantidade dinamica
-- [ ] TASK-PP-030: Modificar `confirmItemSelection()` para usar `generatePillPool(1)` - quantidade dinamica
-- [ ] TASK-PP-031: Modificar `resetRound()` para usar `generatePillPool(state.round + 1)` - quantidade dinamica
+- [x] TASK-PP-029: Modificar `initGame()` para usar `generatePillPool(1)` - quantidade dinamica
+- [x] TASK-PP-030: Modificar `confirmItemSelection()` para usar `generatePillPool(1)` - quantidade dinamica
+- [x] TASK-PP-031: Modificar `resetRound()` para usar `generatePillPool(state.round + 1)` - quantidade dinamica
 
 ### 5.3 Limpeza de Configuracao
 
-- [ ] TASK-PP-058: Remover ou depreciar `pillsPerRound` de `DEFAULT_GAME_CONFIG`
-- [ ] TASK-PP-059: Atualizar tipo `GameConfig` para remover `pillsPerRound` (se aplicavel)
+- [x] TASK-PP-058: Remover ou depreciar `pillsPerRound` de `DEFAULT_GAME_CONFIG`
+- [x] TASK-PP-059: Atualizar tipo `GameConfig` para remover `pillsPerRound` (se aplicavel)
 
 ---
 
@@ -96,9 +96,9 @@
 
 ### 6.1 Componentes Visuais
 
-- [ ] TASK-PP-032: Atualizar `TypeCounter.tsx` para exibir contador de LIFE (quando ativo)
-- [ ] TASK-PP-033: Atualizar `PillReveal.tsx` para feedback visual de LIFE
-- [ ] TASK-PP-034: Atualizar `FloatingNumber.tsx` para exibir "+1 Vida" (cor rosa)
+- [x] TASK-PP-032: Atualizar `TypeCounter.tsx` para exibir contador de LIFE (quando ativo)
+- [x] TASK-PP-033: Atualizar `PillReveal.tsx` para feedback visual de LIFE
+- [x] TASK-PP-034: Atualizar `FloatingNumber.tsx` para exibir "+1 Vida" (cor rosa)
 - [ ] TASK-PP-035: Adicionar icone para pilula LIFE (sugestao: Heart)
 
 ---

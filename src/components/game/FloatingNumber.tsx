@@ -1,9 +1,14 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useRef } from 'react'
 
+/** Tipo de efeito para determinar a cor */
+type EffectType = 'resistance' | 'life'
+
 interface FloatingNumberProps {
   /** Valor a exibir (positivo para cura, negativo para dano) */
   value: number | null
+  /** Tipo de efeito: resistance (verde/vermelho) ou life (rosa) */
+  type?: EffectType
   /** Callback quando animacao termina */
   onComplete?: () => void
 }
@@ -15,7 +20,7 @@ interface FloatingNumberProps {
  * Usa um ID interno para controlar quando uma nova animacao deve iniciar,
  * evitando problemas com StrictMode e re-renders.
  */
-export function FloatingNumber({ value, onComplete }: FloatingNumberProps) {
+export function FloatingNumber({ value, type = 'resistance', onComplete }: FloatingNumberProps) {
   // ID unico para cada "sessao" de animacao
   const [animationId, setAnimationId] = useState<number | null>(null)
   const [displayValue, setDisplayValue] = useState<number | null>(null)
@@ -56,7 +61,13 @@ export function FloatingNumber({ value, onComplete }: FloatingNumberProps) {
 
   const isPositive = displayValue > 0
   const formattedValue = isPositive ? `+${displayValue}` : `${displayValue}`
-  const colorClass = isPositive ? 'text-emerald-400' : 'text-red-400'
+  
+  // Determina cor baseado no tipo de efeito
+  const getColorClass = () => {
+    if (type === 'life') return 'text-pink-400'
+    return isPositive ? 'text-emerald-400' : 'text-red-400'
+  }
+  const colorClass = getColorClass()
 
   return (
     <AnimatePresence>
@@ -81,18 +92,20 @@ export function FloatingNumber({ value, onComplete }: FloatingNumberProps) {
 interface FloatingNumberContainerProps {
   children: React.ReactNode
   value: number | null
+  type?: EffectType
   onComplete?: () => void
 }
 
 export function FloatingNumberContainer({
   children,
   value,
+  type = 'resistance',
   onComplete,
 }: FloatingNumberContainerProps) {
   return (
     <div className="relative">
       {children}
-      <FloatingNumber value={value} onComplete={onComplete} />
+      <FloatingNumber value={value} type={type} onComplete={onComplete} />
     </div>
   )
 }

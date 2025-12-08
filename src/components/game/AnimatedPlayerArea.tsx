@@ -17,6 +17,8 @@ interface AnimatedPlayerAreaProps {
   animationType?: 'damage' | 'heal' | 'collapse' | null
   /** Valor do efeito (dano negativo, cura positivo) para FloatingNumber */
   effectValue?: number | null
+  /** Tipo de efeito: resistance (verde/vermelho) ou life (rosa) */
+  effectType?: 'resistance' | 'life'
   /** Callback ao clicar em um item do inventario */
   onItemClick?: (itemId: string) => void
   /** ID do item sendo usado (para highlight) */
@@ -62,6 +64,7 @@ export function AnimatedPlayerArea({
   isCurrentTurn = false,
   animationType = null,
   effectValue = null,
+  effectType = 'resistance',
   onItemClick,
   usingItemId = null,
 }: AnimatedPlayerAreaProps) {
@@ -172,8 +175,8 @@ export function AnimatedPlayerArea({
         variants={variants}
         animate={animationType || 'idle'}
       >
-        {/* FloatingNumber para mostrar dano/cura */}
-        <FloatingNumber value={effectValue} />
+        {/* FloatingNumber para mostrar dano/cura/vida */}
+        <FloatingNumber value={effectValue} type={effectType} />
 
         {/* Conteudo do card */}
         <Card className={cn(

@@ -14,7 +14,7 @@ import type {
   PlayerEffectType,
   PlayerId,
 } from '@/types'
-import { DEFAULT_GAME_CONFIG, PILL_CONFIG, ROUND_TRANSITION_DELAY } from '@/utils/constants'
+import { DEFAULT_GAME_CONFIG, ROUND_TRANSITION_DELAY } from '@/utils/constants'
 import { applyPillEffect, applyHeal, createPlayer, hasPlayerEffect } from '@/utils/gameLogic'
 import {
   countPillTypes,
@@ -126,6 +126,7 @@ const initialState: GameState = {
     DMG_HIGH: 0,
     FATAL: 0,
     HEAL: 0,
+    LIFE: 0,
   },
   round: 0,
   winner: null,
@@ -172,10 +173,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       finalConfig.player2.isAI
     )
 
-    const pillPool = generatePillPool(finalConfig.pillsPerRound, {
-      ...PILL_CONFIG,
-      probabilities: finalConfig.pillProbabilities,
-    })
+    // Quantidade dinamica baseada na rodada (usa POOL_SCALING)
+    const pillPool = generatePillPool(1)
 
     const typeCounts = countPillTypes(pillPool)
 
@@ -430,10 +429,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       effects: player2.effects.filter((e) => e.type !== 'shield'),
     }
 
-    const newPillPool = generatePillPool(
-      DEFAULT_GAME_CONFIG.pillsPerRound,
-      PILL_CONFIG
-    )
+    // Quantidade dinamica baseada na rodada (usa POOL_SCALING)
+    const newPillPool = generatePillPool(state.round + 1)
     const newTypeCounts = countPillTypes(newPillPool)
 
     const roundAction: GameAction = {
@@ -566,11 +563,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return
     }
 
-    // Ambos confirmaram - gera pilulas e inicia o jogo
-    const pillPool = generatePillPool(
-      DEFAULT_GAME_CONFIG.pillsPerRound,
-      PILL_CONFIG
-    )
+    // Ambos confirmaram - gera pilulas e inicia o jogo (rodada 1)
+    const pillPool = generatePillPool(1)
     const typeCounts = countPillTypes(pillPool)
 
     const startAction: GameAction = {
@@ -1078,6 +1072,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       DMG_HIGH: 0,
       FATAL: 0,
       HEAL: 0,
+      LIFE: 0,
     }
 
     state.actionHistory

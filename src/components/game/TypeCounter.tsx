@@ -13,6 +13,7 @@ const typeStyles: Record<PillType, string> = {
   DMG_HIGH: 'bg-pill-dmg-high/20 text-pill-dmg-high hover:bg-pill-dmg-high/30 border-pill-dmg-high/30',
   FATAL: 'bg-pill-fatal/20 text-pill-fatal hover:bg-pill-fatal/30 border-pill-fatal/30',
   HEAL: 'bg-pill-heal/20 text-pill-heal hover:bg-pill-heal/30 border-pill-heal/30',
+  LIFE: 'bg-pill-life/20 text-pill-life hover:bg-pill-life/30 border-pill-life/30',
 }
 
 /**
@@ -20,7 +21,7 @@ const typeStyles: Record<PillType, string> = {
  * Mostra quantas de cada tipo existem sem revelar quais sao quais
  */
 export function TypeCounter({ counts }: TypeCounterProps) {
-  const types: PillType[] = ['SAFE', 'DMG_LOW', 'DMG_HIGH', 'FATAL', 'HEAL']
+  const types: PillType[] = ['SAFE', 'DMG_LOW', 'DMG_HIGH', 'FATAL', 'HEAL', 'LIFE']
 
   return (
     <div className="flex flex-wrap justify-center gap-4">

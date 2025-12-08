@@ -167,6 +167,16 @@ export function PillReveal({ pill, isAITurn, onComplete }: PillRevealProps) {
               Cura: +{pill.stats.heal}
             </motion.p>
           )}
+          {pill.stats.livesRestore > 0 && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-pink-400 font-medium"
+            >
+              Vida: +{pill.stats.livesRestore}
+            </motion.p>
+          )}
         </div>
 
         {/* Instrucao com contador */}

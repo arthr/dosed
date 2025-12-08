@@ -194,14 +194,24 @@ export function GameBoard() {
     return null
   }
 
-  // Calcula o valor do efeito para FloatingNumber (negativo para dano, positivo para cura)
+  // Calcula o valor do efeito para FloatingNumber (negativo para dano, positivo para cura/vida)
   const getEffectValue = (playerId: 'player1' | 'player2'): number | null => {
     if (phase !== 'feedback' || targetPlayer !== playerId) return null
     if (!effect) return null
 
     if (effect.damageDealt > 0) return -effect.damageDealt
     if (effect.healReceived > 0) return effect.healReceived
+    if (effect.livesRestored > 0) return effect.livesRestored
     return null
+  }
+
+  // Determina o tipo de efeito para FloatingNumber (resistance ou life)
+  const getEffectType = (playerId: 'player1' | 'player2'): 'resistance' | 'life' => {
+    if (phase !== 'feedback' || targetPlayer !== playerId) return 'resistance'
+    if (!effect) return 'resistance'
+
+    if (effect.livesRestored > 0) return 'life'
+    return 'resistance'
   }
 
   if (!player1 || !player2) return null
@@ -223,6 +233,7 @@ export function GameBoard() {
           isCurrentTurn={currentTurn === 'player1'}
           animationType={getPlayerAnimation('player1')}
           effectValue={getEffectValue('player1')}
+          effectType={getEffectType('player1')}
           onItemClick={handleItemClick}
           usingItemId={selectedItemId}
         />
@@ -253,6 +264,7 @@ export function GameBoard() {
           isCurrentTurn={currentTurn === 'player2'}
           animationType={getPlayerAnimation('player2')}
           effectValue={getEffectValue('player2')}
+          effectType={getEffectType('player2')}
         />
       </div>
 

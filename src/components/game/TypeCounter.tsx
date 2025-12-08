@@ -1,4 +1,5 @@
 import type { PillType } from '@/types'
+import { Heart } from 'lucide-react'
 import { Badge } from '@/components/ui/8bit/badge'
 import { PILL_LABELS } from '@/utils/constants'
 
@@ -35,8 +36,9 @@ export function TypeCounter({ counts }: TypeCounterProps) {
           <Badge
             key={type}
             variant="outline"
-            className={`${typeStyles[type]}`}
+            className={`${typeStyles[type]} flex items-center gap-1`}
           >
+            {type === 'LIFE' && <Heart size={12} fill="currentColor" />}
             {count} {PILL_LABELS[type]}
           </Badge>
         )

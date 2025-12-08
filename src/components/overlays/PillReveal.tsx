@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useEffect, useState, useRef, useCallback } from 'react'
+import { Heart } from 'lucide-react'
 import type { Pill } from '@/types'
 import { PILL_HEX_COLORS, PILL_LABELS, PILL_DESCRIPTIONS } from '@/utils/constants'
 
@@ -124,9 +125,13 @@ export function PillReveal({ pill, isAITurn, onComplete }: PillRevealProps) {
           }}
           transition={{ duration: 1, repeat: Infinity }}
         >
-          <span className="text-4xl font-bold text-white drop-shadow-lg">
-            {PILL_LABELS[pill.type].charAt(0)}
-          </span>
+          {pill.type === 'LIFE' ? (
+            <Heart className="w-12 h-12 text-white drop-shadow-lg" fill="currentColor" />
+          ) : (
+            <span className="text-4xl font-bold text-white drop-shadow-lg">
+              {PILL_LABELS[pill.type].charAt(0)}
+            </span>
+          )}
         </motion.div>
 
         {/* Info da pilula */}

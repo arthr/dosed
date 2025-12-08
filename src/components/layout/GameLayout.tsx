@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 
 interface GameLayoutProps {
   children: ReactNode
@@ -14,9 +15,11 @@ export function GameLayout({ children }: GameLayoutProps) {
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="font-normal text-foreground tracking-tight">
-            Dosed
-          </h1>
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <h1 className="font-normal text-foreground tracking-tight">
+              Dosed
+            </h1>
+          </Link>
           <span className="text-xs text-muted-foreground">Pill Roulette</span>
         </div>
       </header>

@@ -1,3 +1,4 @@
+import { HashRouter } from 'react-router-dom'
 import { TooltipProvider } from '@/components/ui/8bit/tooltip'
 import { Button } from '@/components/ui/8bit/button'
 import { GameLayout } from '@/components/layout/GameLayout'
@@ -64,15 +65,17 @@ function GameContent() {
 
 function App() {
   return (
-    <TooltipProvider>
-      <GameLayout>
-        <GameContent />
-      </GameLayout>
+    <HashRouter>
+      <TooltipProvider>
+        <GameLayout>
+          <GameContent />
+        </GameLayout>
 
-      {/* Sistemas globais de UI */}
-      <OverlayManager />
-      <ToastManager />
-    </TooltipProvider>
+        {/* Sistemas globais de UI */}
+        <OverlayManager />
+        <ToastManager />
+      </TooltipProvider>
+    </HashRouter>
   )
 }
 

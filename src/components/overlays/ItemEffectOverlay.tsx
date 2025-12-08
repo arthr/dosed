@@ -70,8 +70,8 @@ export function ItemEffectOverlay({
       >
         {/* Icone grande do item */}
         <motion.div
-          className="w-24 h-24 rounded-2xl flex items-center justify-center shadow-2xl"
-          style={{ backgroundColor: categoryColor }}
+          className="size-32 border-2 rounded-2xl overflow-hidden shadow-2xl"
+          style={{ backgroundColor: categoryColor, borderColor: categoryColor }}
           animate={{
             boxShadow: [
               `0 0 20px ${categoryColor}`,
@@ -81,7 +81,11 @@ export function ItemEffectOverlay({
           }}
           transition={{ duration: 0.8, repeat: Infinity }}
         >
-          <ItemIcon type={itemType} size={48} className="text-white drop-shadow-lg" forceIcon />
+          <ItemIcon 
+            type={itemType} 
+            size={128} 
+            className="w-full h-full object-cover"
+          />
         </motion.div>
 
         {/* Info do item */}

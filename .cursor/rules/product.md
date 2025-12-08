@@ -15,13 +15,28 @@ Jogo de estrategia por turnos onde dois jogadores competem para ser o ultimo sob
 - **Resistencia:** 6 pontos (zerar = perde 1 vida e reseta)
 
 ### Tipos de Pilulas
-| Tipo     | Efeito                    | Cor      |
-|----------|---------------------------|----------|
-| SAFE     | Nenhum (placebo)          | Verde    |
-| DMG_LOW  | -1 a -2 resistencia       | Amarelo  |
-| DMG_HIGH | -3 a -4 resistencia       | Laranja  |
-| FATAL    | Zera resistencia          | Roxo     |
-| HEAL     | +2 resistencia            | Ciano    |
+
+| Tipo     | Efeito                    | Cor      | Unlock    |
+|----------|---------------------------|----------|-----------|
+| SAFE     | Nenhum (placebo)          | Verde    | Rodada 1  |
+| DMG_LOW  | -1 a -2 resistencia       | Amarelo  | Rodada 1  |
+| DMG_HIGH | -3 a -4 resistencia       | Laranja  | Rodada 1  |
+| HEAL     | +2 resistencia            | Ciano    | Rodada 2  |
+| FATAL    | Zera resistencia          | Roxo     | Rodada 4  |
+| LIFE     | +1 vida (desativado)      | Rosa     | Rodada 99 |
+
+> **Nota:** O tipo LIFE esta implementado mas desativado por padrao.
+> Para ativar, modificar `PROGRESSION.rules.LIFE` em `src/utils/pillProgression.ts`.
+
+### Sistema de Progressao
+
+O jogo utiliza um sistema de progressao dinamica:
+
+- **Tipos por rodada:** Pilulas desbloqueiam gradualmente (HEAL na rodada 2, FATAL na rodada 4)
+- **Quantidade por rodada:** Comeca com 6 pilulas, aumenta +1 a cada 3 rodadas (max 12)
+- **Distribuicao proporcional:** A porcentagem define a quantidade exata de cada tipo no pool
+
+Ver `docs/GAME-BALANCE.md` para detalhes de balanceamento.
 
 ### Sistema de Itens (Power-ups)
 Cada jogador seleciona 5 itens antes da partida. Itens podem ser usados durante o turno.
@@ -49,3 +64,4 @@ Cada jogador seleciona 5 itens antes da partida. Itens podem ser usados durante 
 - Modo PvP (multiplayer)
 - Sistema de sons
 - Leaderboard/ranking
+- Ativacao da pilula LIFE

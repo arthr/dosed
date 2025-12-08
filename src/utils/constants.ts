@@ -14,17 +14,6 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
   },
   startingLives: 3,
   startingResistance: 6,
-  /** @deprecated Usar POOL_SCALING de pillProgression.ts para quantidade dinamica */
-  pillsPerRound: 6,
-  /** @deprecated Usar PROGRESSION de pillProgression.ts para probabilidades dinamicas */
-  pillProbabilities: {
-    SAFE: 0.35,
-    DMG_LOW: 0.25,
-    DMG_HIGH: 0.15,
-    FATAL: 0.10,
-    HEAL: 0.15,
-    LIFE: 0,  // Desativado por padrao - ativado via pillProgression
-  },
 }
 
 /**
@@ -36,7 +25,6 @@ export const PILL_CONFIG: PillConfig = {
     DMG_HIGH: [3, 4],
   },
   healAmount: 2,
-  probabilities: DEFAULT_GAME_CONFIG.pillProbabilities,
 }
 
 /**

@@ -1,159 +1,169 @@
-# Game Balance: Sistema de Progressão de Pílulas
+# Game Balance: Sistema de Progressao de Pilulas
 
-Este documento define a curva de dificuldade e a distribuição de probabilidade das pílulas ao longo das rodadas, visando um equilíbrio entre sorte e estratégia.
+Este documento define a curva de dificuldade e a distribuicao proporcional das pilulas ao longo das rodadas, visando um equilibrio entre sorte e estrategia.
 
-> **Roadmap Feature: Pílulas de Vida (L)**
-> Note que as pílulas do tipo **Vida (L)** listadas abaixo estão planejadas como uma **feature futura**.
->
->   * **No Código:** A estrutura já suporta esse tipo para facilitar a implementação posterior.
->   * **No Balanceamento Atual:** Elas aparecem apenas a partir da Rodada 8 ("Late Game"), mas podem ser facilmente desativadas ajustando o `endPct` para 0 na configuração inicial.
+> **Feature Flag: Pilulas LIFE**
+> O tipo LIFE esta implementado mas **desativado por padrao** (`unlockRound: 99`).
+> Para ativar, alterar em `src/utils/pillProgression.ts`:
+> ```typescript
+> LIFE: { unlockRound: 10, startPct: 10, endPct: 15 }
+> ```
 
------
+---
 
-## 1\. Tabela de Referência (Probabilidade Estática)
+## 1. Tipos de Pilulas
 
-Visão geral da distribuição desejada caso fosse hardcoded. O objetivo é transicionar de "Seguro" para "Caos Controlado".
+| Codigo | Label | Efeito | Cor |
+|--------|-------|--------|-----|
+| SAFE | Placebo | Nenhum efeito | Verde |
+| DMG_LOW | Veneno | -1 a -2 resistencia | Amarelo |
+| DMG_HIGH | Toxina | -3 a -4 resistencia | Laranja |
+| FATAL | Cianeto | Zera resistencia | Roxo |
+| HEAL | Antidoto | +2 resistencia | Ciano |
+| LIFE | Vida | +1 vida (desativado) | Rosa |
 
-**Legenda:**
+---
 
-  * **P** = Placebo (Neutro)
-  * **V** = Veneno (Dano Baixo)
-  * **T** = Toxina (Dano Médio)
-  * **C** = Cianeto (Fatal/Alto Risco)
-  * **A** = Antídoto (Cura/Proteção)
-  * **L** = Vida (Feature Futura)
+## 2. Configuracao Atual (PROGRESSION)
 
-| Rodada | P (Safe) | V (Low) | T (Mid) | C (Fatal) | A (Heal) | L (Life)\* | Fase do Jogo |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **1** | 70% | 30% | 0% | 0% | 0% | 0% | Tutorial / Aquecimento |
-| **2** | 50% | 50% | 0% | 0% | 0% | 0% | Introdução ao risco |
-| **3** | 40% | 30% | 20% | 0% | 10% | 0% | Toxinas desbloqueadas |
-| **4** | 30% | 30% | 25% | 0% | 15% | 0% | Aumento de complexidade |
-| **5** | 25% | 20% | 25% | 5% | 25% | 0% | **Cianeto desbloqueado** (Raro) |
-| **6** | 20% | 20% | 25% | 10% | 25% | 0% | Mid-game equilibrado |
-| **7** | 20% | 20% | 25% | 15% | 20% | 0% | Zona de perigo |
-| **8** | 15% | 15% | 20% | 15% | 25% | **10%** | Late game + **Vida** |
-| **9** | 10% | 15% | 25% | 20% | 20% | **10%** | Alta letalidade |
-| **10** | 10% | 15% | 25% | 25% | 10% | **15%** | Caos total |
-
------
-
-## 2\. Design Dinâmico (Implementação)
-
-Para evitar tabelas gigantes e permitir ajustes finos ("tunning") sem refatoração, utilizaremos um sistema de **Interpolação Linear (Lerp)** baseado em regras de configuração.
-
-### Definição de Tipos e Regras
-
-```typescript
-export type PillType = 'placebo' | 'veneno' | 'toxina' | 'cianeto' | 'antidoto' | 'vida';
-
-interface PillRule {
-  /** Round mínimo para a pílula começar a aparecer no pool */
-  unlockRound: number;
-  /** Probabilidade (%) exata no momento em que é desbloqueada */
-  startPct: number;
-  /** Probabilidade (%) alvo na última rodada (maxRound) */
-  endPct: number;
-}
-
-interface ProgressionConfig {
-  maxRound: number; // Define o teto para a interpolação (ex: Round 10)
-  rules: Record<PillType, PillRule>;
-}
-```
-
-### Configuração de Balanceamento
-
-Este objeto é a "Single Source of Truth" do balanceamento do jogo.
+Localizado em `src/utils/pillProgression.ts`:
 
 ```typescript
 export const PROGRESSION: ProgressionConfig = {
-  maxRound: 10,
+  maxRound: 15,
   rules: {
-    placebo: { unlockRound: 1, startPct: 70, endPct: 10 }, // Decai drasticamente
-    veneno:  { unlockRound: 1, startPct: 30, endPct: 15 }, // Estabiliza
-    toxina:  { unlockRound: 3, startPct: 20, endPct: 25 }, // Sobe no mid-game
-    antidoto:{ unlockRound: 3, startPct: 10, endPct: 10 }, // Constante após unlock
-    cianeto: { unlockRound: 5, startPct: 5,  endPct: 25 }, // Sobe perigosamente no fim
-    
-    // FEATURE FUTURA: Ajuste endPct para 0 caso queira desativar temporariamente
-    vida:    { unlockRound: 8, startPct: 10, endPct: 15 }, 
+    SAFE:     { unlockRound: 1, startPct: 45, endPct: 10 },
+    DMG_LOW:  { unlockRound: 1, startPct: 30, endPct: 15 },
+    DMG_HIGH: { unlockRound: 1, startPct: 15, endPct: 25 },
+    HEAL:     { unlockRound: 2, startPct: 10, endPct: 15 },
+    FATAL:    { unlockRound: 4, startPct: 5,  endPct: 18 },
+    LIFE:     { unlockRound: 99, startPct: 0, endPct: 0 },  // Desativado
   }
-};
+}
 ```
 
-### Lógica de Cálculo (Helpers)
+### Notas de Design:
+- **Rodada 1**: Apenas SAFE, DMG_LOW, DMG_HIGH (sem HEAL/FATAL para tutorial suave)
+- **Rodada 2**: HEAL desbloqueia como "valvula de escape"
+- **Rodada 4**: FATAL desbloqueia (atraso intencional para buildup de tensao)
+- **maxRound 15**: Evita estagnacao em partidas longas
 
-O algoritmo normaliza as porcentagens para garantir que a soma seja sempre 100%, prevenindo erros matemáticos na geração do pool.
+---
+
+## 3. Pool Scaling (Quantidade de Pilulas)
+
+Localizado em `src/utils/pillProgression.ts`:
 
 ```typescript
-/** Função auxiliar de Interpolação Linear */
-function lerp(start: number, end: number, t: number): number {
-  return start + (end - start) * t;
-}
-
-/** * Calcula a distribuição de probabilidades para um determinado round.
- * Retorna um objeto normalizado onde a soma de valores é 100.
- */
-export function getPillChances(round: number, config = PROGRESSION): Record<PillType, number> {
-  const { maxRound, rules } = config;
-  // Garante que não passamos do round máximo configurado para o cálculo
-  const clampedRound = Math.max(1, Math.min(round, maxRound));
-
-  const rawWeights: Record<PillType, number> = {
-    placebo: 0, veneno: 0, toxina: 0, cianeto: 0, antidoto: 0, vida: 0,
-  };
-
-  let totalWeight = 0;
-
-  // 1. Calcula os pesos brutos baseados na interpolação
-  for (const [key, rule] of Object.entries(rules)) {
-    const pill = key as PillType;
-
-    if (clampedRound < rule.unlockRound) {
-      rawWeights[pill] = 0;
-      continue;
-    }
-
-    const roundSpan = maxRound - rule.unlockRound;
-    // Se o span for 0 (unlock no último round), t = 1
-    const t = roundSpan <= 0 ? 1 : (clampedRound - rule.unlockRound) / roundSpan; 
-    
-    const value = lerp(rule.startPct, rule.endPct, t);
-    rawWeights[pill] = value;
-    totalWeight += value;
-  }
-
-  // 2. Normalização para 100%
-  const normalizedChances = { ...rawWeights };
-  if (totalWeight > 0) {
-    (Object.keys(normalizedChances) as PillType[]).forEach(pill => {
-      normalizedChances[pill] = Number(((normalizedChances[pill] * 100) / totalWeight).toFixed(2));
-    });
-  }
-
-  return normalizedChances;
-}
-
-/** Sorteia um tipo de pílula baseado nas chances do round atual */
-export function rollPillType(round: number): PillType {
-  const chances = getPillChances(round);
-  const randomValue = Math.random() * 100;
-  
-  let accumulatedChance = 0;
-  for (const [pill, chance] of Object.entries(chances)) {
-    accumulatedChance += chance;
-    if (randomValue <= accumulatedChance) return pill as PillType;
-  }
-
-  return 'placebo'; // Fallback de segurança
+export const POOL_SCALING: PoolScalingConfig = {
+  baseCount: 6,
+  increaseBy: 1,
+  frequency: 3,
+  maxCap: 12,
 }
 ```
 
------
+### Tabela de Referencia:
 
-## 3\. Benefícios desta Arquitetura
+| Rodadas | Pilulas |
+|---------|---------|
+| 1-3 | 6 |
+| 4-6 | 7 |
+| 7-9 | 8 |
+| 10-12 | 9 |
+| 13-15 | 10 |
+| 16-18 | 11 |
+| 19+ | 12 (cap) |
 
-1.  **Escalabilidade Infinita:** Se decidirmos criar um "Modo Infinito" que vai até a rodada 50, basta alterar `maxRound: 50` e o sistema recalcula a curva suavemente, sem necessidade de criar 40 novas linhas na tabela.
-2.  **Toggle de Features (Feature Flag):** Como mencionado na seção de **Vida (L)**, podemos ativar ou desativar tipos inteiros de pílulas apenas alterando seus valores na `PROGRESSION`, sem mexer na lógica de sorteio (`rollPillType`).
-3.  **Hot-Tunning:** É possível ajustar o "feeling" do jogo (ex: deixar o jogo mais agressivo mais cedo) alterando apenas o `unlockRound` do Cianeto, por exemplo.
+---
+
+## 4. Distribuicao Proporcional por Rodada
+
+O sistema usa **distribuicao proporcional** (nao sorteio). A porcentagem define a quantidade exata de cada tipo no pool.
+
+### Rodada 1 (6 pilulas)
+
+| Tipo | % Normalizado | Quantidade |
+|------|---------------|------------|
+| SAFE | ~50% | 3 |
+| DMG_LOW | ~33% | 2 |
+| DMG_HIGH | ~17% | 1 |
+| HEAL | 0% | 0 |
+| FATAL | 0% | 0 |
+
+### Rodada 4 (7 pilulas)
+
+| Tipo | % Normalizado | Quantidade |
+|------|---------------|------------|
+| SAFE | ~39% | 3 |
+| DMG_LOW | ~27% | 2 |
+| DMG_HIGH | ~18% | 1 |
+| HEAL | ~11% | 1 |
+| FATAL | ~5% | 0 |
+
+### Rodada 10 (9 pilulas)
+
+| Tipo | % Normalizado | Quantidade |
+|------|---------------|------------|
+| SAFE | ~24% | 2 |
+| DMG_LOW | ~19% | 2 |
+| DMG_HIGH | ~22% | 2 |
+| HEAL | ~14% | 1 |
+| FATAL | ~12% | 1 |
+
+---
+
+## 5. Funcoes Principais
+
+### distributePillTypes(count, round)
+Calcula a distribuicao proporcional de tipos para uma rodada.
+
+### getPillCount(round)
+Retorna a quantidade de pilulas baseado na rodada (step function).
+
+### getPillChances(round)
+Retorna as porcentagens normalizadas de cada tipo.
+
+---
+
+## 6. Ajustes de Balanceamento
+
+Para ajustar a dificuldade, modifique `PROGRESSION` em `pillProgression.ts`:
+
+### Jogo mais facil:
+- Aumentar `startPct` de SAFE
+- Aumentar `unlockRound` de FATAL
+- Aumentar `endPct` de HEAL
+
+### Jogo mais dificil:
+- Diminuir `startPct` de SAFE
+- Diminuir `unlockRound` de FATAL
+- Aumentar `endPct` de DMG_HIGH e FATAL
+
+---
+
+## 7. Extensibilidade
+
+O sistema suporta configs customizadas para modos alternativos:
+
+```typescript
+// Modo Classico (quantidade fixa)
+const CLASSIC_SCALING: PoolScalingConfig = {
+  baseCount: 6,
+  increaseBy: 0,
+  frequency: 1,
+}
+
+// Modo Hardcore (mais agressivo)
+const HARDCORE: ProgressionConfig = {
+  maxRound: 10,
+  rules: {
+    SAFE:     { unlockRound: 1, startPct: 30, endPct: 5 },
+    DMG_LOW:  { unlockRound: 1, startPct: 35, endPct: 20 },
+    DMG_HIGH: { unlockRound: 1, startPct: 20, endPct: 30 },
+    HEAL:     { unlockRound: 3, startPct: 10, endPct: 10 },
+    FATAL:    { unlockRound: 2, startPct: 5,  endPct: 25 },
+    LIFE:     { unlockRound: 99, startPct: 0, endPct: 0 },
+  }
+}
+```

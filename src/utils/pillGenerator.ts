@@ -7,7 +7,7 @@ import {
   PILL_HEX_COLORS,
   PILL_SHAPES,
 } from './constants'
-import { rollPillType, getPillCount, distributePillTypes } from './pillProgression'
+import { getPillCount, distributePillTypes } from './pillProgression'
 
 /**
  * Gera um numero aleatorio dentro de um range [min, max]
@@ -165,40 +165,6 @@ export function revealPill(pill: Pill): Pill {
       label: pill.type,
     },
   }
-}
-
-/**
- * Gera um pool garantindo pelo menos uma pilula de cada tipo especificado
- * Util para balanceamento em partidas
- *
- * @param count - Quantidade de pilulas a gerar
- * @param round - Numero da rodada (determina tipos disponiveis para o resto)
- * @param guaranteedTypes - Tipos garantidos no pool
- * @param config - Configuracao de dano/cura (opcional)
- */
-export function generateBalancedPillPool(
-  count: number,
-  round: number = 1,
-  guaranteedTypes: PillType[] = ['SAFE', 'HEAL'],
-  config: PillConfig = PILL_CONFIG
-): Pill[] {
-  const pills: Pill[] = []
-
-  // Adiciona pilulas garantidas
-  for (const type of guaranteedTypes) {
-    if (pills.length < count) {
-      pills.push(createPill(type, config))
-    }
-  }
-
-  // Preenche o resto com pilulas aleatorias baseadas na rodada
-  while (pills.length < count) {
-    const type = rollPillType(round)
-    pills.push(createPill(type, config))
-  }
-
-  // Embaralha o array para nao ter ordem previsivel
-  return shuffleArray(pills)
 }
 
 /**

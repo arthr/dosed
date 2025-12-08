@@ -66,7 +66,5 @@ export interface PillConfig {
   }
   /** Quantidade de cura para HEAL */
   healAmount: number
-  /** Probabilidades de cada tipo (devem somar 1) */
-  probabilities: Record<PillType, number>
 }
 

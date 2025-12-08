@@ -88,16 +88,6 @@ export interface GameConfig {
   startingLives: number
   /** Resistencia inicial por jogador */
   startingResistance: number
-  /**
-   * Quantidade de pilulas por rodada
-   * @deprecated Usar POOL_SCALING de pillProgression.ts para quantidade dinamica
-   */
-  pillsPerRound: number
-  /**
-   * Probabilidades de tipos de pilulas
-   * @deprecated Usar PROGRESSION de pillProgression.ts para probabilidades dinamicas
-   */
-  pillProbabilities: Record<PillType, number>
 }
 
 /**

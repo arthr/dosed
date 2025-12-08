@@ -329,34 +329,36 @@ export function generatePillPool(
 ): Pill[]
 ```
 
-### Nova Implementacao
+### Nova Implementacao (Distribuicao Proporcional)
 
 ```typescript
-import { rollPillType, getPillCount, PROGRESSION, POOL_SCALING } from './pillProgression'
+import { getPillCount, distributePillTypes } from './pillProgression'
 
 /**
- * Gera pool de pilulas com quantidade e probabilidades baseadas na rodada
+ * Gera pool de pilulas com distribuicao PROPORCIONAL
+ * A porcentagem define a quantidade exata de cada tipo (nao chance de sorteio)
  * 
  * @param round - Numero da rodada atual (determina quantidade E tipos)
  * @param config - Configuracao de dano/cura (opcional)
- * @returns Array de pilulas para a rodada
+ * @returns Array de pilulas embaralhado
  */
 export function generatePillPool(
   round: number = 1,
   config: PillConfig = PILL_CONFIG
 ): Pill[] {
-  // Quantidade dinamica baseada na rodada
   const count = getPillCount(round)
-  
+  const distribution = distributePillTypes(count, round)
   const pills: Pill[] = []
 
-  for (let i = 0; i < count; i++) {
-    // Tipo dinamico baseado na rodada
-    const type = rollPillType(round)
-    pills.push(createPill(type, config))
+  // Cria pilulas baseado na distribuicao proporcional
+  for (const [type, typeCount] of Object.entries(distribution)) {
+    for (let i = 0; i < typeCount; i++) {
+      pills.push(createPill(type as PillType, config))
+    }
   }
 
-  return pills
+  // Embaralha para ordem nao previsivel
+  return shuffleArray(pills)
 }
 
 /**
@@ -367,16 +369,21 @@ export function generatePillPoolWithCount(
   round: number = 1,
   config: PillConfig = PILL_CONFIG
 ): Pill[] {
+  const distribution = distributePillTypes(count, round)
   const pills: Pill[] = []
 
-  for (let i = 0; i < count; i++) {
-    const type = rollPillType(round)
-    pills.push(createPill(type, config))
+  for (const [type, typeCount] of Object.entries(distribution)) {
+    for (let i = 0; i < typeCount; i++) {
+      pills.push(createPill(type as PillType, config))
+    }
   }
 
-  return pills
+  return shuffleArray(pills)
 }
 ```
+
+> **NOTA:** A funcao `rollPillType()` ainda existe para casos de sorteio individual
+> (ex: pilula bonus, item especial), mas nao e mais usada para geracao do pool principal.
 
 ---
 
@@ -587,17 +594,18 @@ Referencia visual do comportamento esperado (valores aproximados, normalizados):
 │       │       ▼                                                         │
 │       │   count = 7 (exemplo: rodada 8)                                 │
 │       │                                                                 │
-│       └─► [getPillChances(round)]                                       │
+│       └─► [distributePillTypes(count, round)]                           │
 │               │                                                         │
-│               │ Calcula lerp para cada tipo                             │
-│               │ Normaliza para 100%                                     │
+│               │ Usa getPillChances() para calcular porcentagens         │
+│               │ Converte % em quantidades proporcionais                 │
+│               │ Arredonda e ajusta para garantir soma = count           │
 │               ▼                                                         │
-│           { SAFE: 17.5%, DMG_LOW: 15%, ... }                            │
+│           { SAFE: 2, DMG_LOW: 2, DMG_HIGH: 1, HEAL: 1, FATAL: 1 }       │
 │       │                                                                 │
 │       ▼                                                                 │
-│  [Loop count vezes: rollPillType(round)]                                │
+│  [Cria pilulas por tipo, embaralha array]                               │
 │       │                                                                 │
-│       │ Cria pilulas com tipos sorteados                                │
+│       │ Distribuicao PROPORCIONAL (deterministica)                      │
 │       ▼                                                                 │
 │  [Pill[], Pill[], Pill[], Pill[], Pill[], Pill[], Pill[]]  (7 pilulas)  │
 │       │                                                                 │
@@ -608,7 +616,7 @@ Referencia visual do comportamento esperado (valores aproximados, normalizados):
 │  [countPillTypes(pillPool)]                                             │
 │       │                                                                 │
 │       ▼                                                                 │
-│  [gameStore.typeCounts = { SAFE: 1, DMG_LOW: 2, ... }]                  │
+│  [gameStore.typeCounts = { SAFE: 2, DMG_LOW: 2, ... }]                  │
 │       │                                                                 │
 │       ▼                                                                 │
 │  [UI Atualiza: TypeCounter, PillPool (layout adapta a 7 pilulas)]       │

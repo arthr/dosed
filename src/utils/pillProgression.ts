@@ -43,3 +43,91 @@ export const PROGRESSION: ProgressionConfig = {
     LIFE: { unlockRound: 99, startPct: 0, endPct: 0 },
   },
 }
+
+/**
+ * Interpolacao linear entre dois valores
+ * @param start - Valor inicial
+ * @param end - Valor final
+ * @param t - Progresso (0 a 1)
+ */
+export function lerp(start: number, end: number, t: number): number {
+  return start + (end - start) * t
+}
+
+/**
+ * Calcula distribuicao de probabilidades para uma rodada
+ * @param round - Numero da rodada atual
+ * @param config - Configuracao de progressao (opcional, usa PROGRESSION)
+ * @returns Record com probabilidades normalizadas (soma = 100)
+ */
+export function getPillChances(
+  round: number,
+  config: ProgressionConfig = PROGRESSION
+): Record<PillType, number> {
+  const { maxRound, rules } = config
+  const clampedRound = Math.max(1, Math.min(round, maxRound))
+
+  // 1. Calcula pesos brutos
+  const rawWeights: Record<PillType, number> = {
+    SAFE: 0,
+    DMG_LOW: 0,
+    DMG_HIGH: 0,
+    FATAL: 0,
+    HEAL: 0,
+    LIFE: 0,
+  }
+
+  let totalWeight = 0
+
+  for (const [type, rule] of Object.entries(rules)) {
+    const pillType = type as PillType
+
+    // Tipo nao desbloqueado ainda
+    if (clampedRound < rule.unlockRound) {
+      rawWeights[pillType] = 0
+      continue
+    }
+
+    // Calcula progresso (t) da interpolacao
+    const roundSpan = maxRound - rule.unlockRound
+    const t = roundSpan <= 0 ? 1 : (clampedRound - rule.unlockRound) / roundSpan
+
+    const value = lerp(rule.startPct, rule.endPct, t)
+    rawWeights[pillType] = value
+    totalWeight += value
+  }
+
+  // 2. Normaliza para 100%
+  const normalized: Record<PillType, number> = { ...rawWeights }
+
+  if (totalWeight > 0) {
+    for (const type of Object.keys(normalized) as PillType[]) {
+      normalized[type] = Number(((normalized[type] * 100) / totalWeight).toFixed(2))
+    }
+  }
+
+  return normalized
+}
+
+/**
+ * Sorteia um tipo de pilula baseado nas chances da rodada
+ * @param round - Numero da rodada atual
+ * @param config - Configuracao de progressao
+ */
+export function rollPillType(
+  round: number,
+  config: ProgressionConfig = PROGRESSION
+): PillType {
+  const chances = getPillChances(round, config)
+  const randomValue = Math.random() * 100
+
+  let accumulated = 0
+  for (const [type, chance] of Object.entries(chances)) {
+    accumulated += chance
+    if (randomValue <= accumulated) {
+      return type as PillType
+    }
+  }
+
+  return 'SAFE' // Fallback de seguranca
+}

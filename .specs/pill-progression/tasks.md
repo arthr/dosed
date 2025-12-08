@@ -35,9 +35,9 @@
 - [x] TASK-PP-011: Definir interface `PillRule` com campos `unlockRound`, `startPct`, `endPct`
 - [x] TASK-PP-012: Definir interface `ProgressionConfig` com `maxRound` e `rules`
 - [x] TASK-PP-013: Implementar constante `PROGRESSION` com regras de balanceamento
-- [ ] TASK-PP-014: Implementar funcao `lerp(start, end, t)` para interpolacao linear
-- [ ] TASK-PP-015: Implementar funcao `getPillChances(round, config?)` com normalizacao
-- [ ] TASK-PP-016: Implementar funcao `rollPillType(round, config?)` para sorteio
+- [x] TASK-PP-014: Implementar funcao `lerp(start, end, t)` para interpolacao linear
+- [x] TASK-PP-015: Implementar funcao `getPillChances(round, config?)` com normalizacao
+- [x] TASK-PP-016: Implementar funcao `rollPillType(round, config?)` para sorteio
 
 ### 2.2 Pool Scaling (Step Function)
 

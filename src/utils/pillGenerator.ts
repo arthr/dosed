@@ -7,7 +7,7 @@ import {
   PILL_HEX_COLORS,
   PILL_SHAPES,
 } from './constants'
-import { rollPillType, getPillCount } from './pillProgression'
+import { rollPillType, getPillCount, distributePillTypes } from './pillProgression'
 
 /**
  * Gera um numero aleatorio dentro de um range [min, max]
@@ -78,48 +78,55 @@ export function createPill(type: PillType, config: PillConfig = PILL_CONFIG): Pi
 
 /**
  * Gera um pool de pilulas para uma rodada com progressao dinamica
+ * Usa distribuicao PROPORCIONAL - a porcentagem define a quantidade exata de cada tipo
  *
  * @param round - Numero da rodada (determina quantidade e tipos disponiveis)
  * @param config - Configuracao de dano/cura (opcional)
- * @returns Array de pilulas com isRevealed = false
+ * @returns Array de pilulas embaralhado com isRevealed = false
  */
 export function generatePillPool(
   round: number = 1,
   config: PillConfig = PILL_CONFIG
 ): Pill[] {
   const count = getPillCount(round)
+  const distribution = distributePillTypes(count, round)
   const pills: Pill[] = []
 
-  for (let i = 0; i < count; i++) {
-    const type = rollPillType(round)
-    pills.push(createPill(type, config))
+  // Cria pilulas baseado na distribuicao proporcional
+  for (const [type, typeCount] of Object.entries(distribution)) {
+    for (let i = 0; i < typeCount; i++) {
+      pills.push(createPill(type as PillType, config))
+    }
   }
 
-  return pills
+  // Embaralha para ordem nao previsivel
+  return shuffleArray(pills)
 }
 
 /**
  * Gera um pool de pilulas com quantidade especifica (override manual)
- * Util para testes ou modos especiais
+ * Usa distribuicao PROPORCIONAL - util para testes ou modos especiais
  *
  * @param count - Quantidade de pilulas a gerar
  * @param round - Numero da rodada (determina tipos disponiveis)
  * @param config - Configuracao de dano/cura (opcional)
- * @returns Array de pilulas com isRevealed = false
+ * @returns Array de pilulas embaralhado com isRevealed = false
  */
 export function generatePillPoolWithCount(
   count: number,
   round: number = 1,
   config: PillConfig = PILL_CONFIG
 ): Pill[] {
+  const distribution = distributePillTypes(count, round)
   const pills: Pill[] = []
 
-  for (let i = 0; i < count; i++) {
-    const type = rollPillType(round)
-    pills.push(createPill(type, config))
+  for (const [type, typeCount] of Object.entries(distribution)) {
+    for (let i = 0; i < typeCount; i++) {
+      pills.push(createPill(type as PillType, config))
+    }
   }
 
-  return pills
+  return shuffleArray(pills)
 }
 
 /**

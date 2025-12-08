@@ -111,6 +111,9 @@ export function getPillChances(
 
 /**
  * Sorteia um tipo de pilula baseado nas chances da rodada
+ * NOTA: Usar para sorteios individuais (ex: pilula bonus).
+ * Para gerar pool completo, usar distributePillTypes().
+ *
  * @param round - Numero da rodada atual
  * @param config - Configuracao de progressao
  */
@@ -130,6 +133,69 @@ export function rollPillType(
   }
 
   return 'SAFE' // Fallback de seguranca
+}
+
+/**
+ * Distribui pilulas proporcionalmente baseado nas porcentagens da rodada
+ * Converte porcentagens em quantidades fixas, garantindo que a soma seja exata.
+ *
+ * Algoritmo:
+ * 1. Calcula quantidade ideal (fracionaria) para cada tipo
+ * 2. Atribui a parte inteira de cada quantidade
+ * 3. Distribui o resto para tipos com maior parte fracionaria
+ *
+ * @param count - Quantidade total de pilulas a distribuir
+ * @param round - Numero da rodada (determina tipos disponiveis)
+ * @param config - Configuracao de progressao
+ * @returns Record com quantidade de cada tipo (soma = count)
+ */
+export function distributePillTypes(
+  count: number,
+  round: number,
+  config: ProgressionConfig = PROGRESSION
+): Record<PillType, number> {
+  const chances = getPillChances(round, config)
+
+  // Resultado inicial zerado
+  const distribution: Record<PillType, number> = {
+    SAFE: 0,
+    DMG_LOW: 0,
+    DMG_HIGH: 0,
+    FATAL: 0,
+    HEAL: 0,
+    LIFE: 0,
+  }
+
+  // Calcula quantidade ideal (fracionaria) para cada tipo
+  const idealAmounts: Array<{ type: PillType; ideal: number; floor: number; remainder: number }> = []
+
+  for (const [type, chance] of Object.entries(chances)) {
+    const pillType = type as PillType
+    if (chance <= 0) continue
+
+    const ideal = (count * chance) / 100
+    const floor = Math.floor(ideal)
+    const remainder = ideal - floor
+
+    distribution[pillType] = floor
+    idealAmounts.push({ type: pillType, ideal, floor, remainder })
+  }
+
+  // Calcula quantas pilulas ja foram distribuidas
+  let distributed = Object.values(distribution).reduce((a, b) => a + b, 0)
+  let remaining = count - distributed
+
+  // Ordena por maior resto fracionario (quem mais "merece" a pilula extra)
+  idealAmounts.sort((a, b) => b.remainder - a.remainder)
+
+  // Distribui as pilulas restantes
+  for (const item of idealAmounts) {
+    if (remaining <= 0) break
+    distribution[item.type]++
+    remaining--
+  }
+
+  return distribution
 }
 
 // ============================================

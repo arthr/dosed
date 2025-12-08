@@ -107,21 +107,21 @@
 
 ### 7.1 Testes Unitarios - Progressao de Tipos
 
-- [ ] TASK-PP-036: Criar arquivo `src/utils/__tests__/pillProgression.test.ts`
-- [ ] TASK-PP-037: Testar `getPillChances()` retorna apenas tipos desbloqueados
-- [ ] TASK-PP-038: Testar `getPillChances()` soma sempre 100%
-- [ ] TASK-PP-039: Testar `rollPillType()` nunca retorna tipo bloqueado
-- [ ] TASK-PP-040: Testar progressao de probabilidades por rodada
-- [ ] TASK-PP-041: Testar LIFE desativado por padrao
+- [x] TASK-PP-036: Criar arquivo `src/utils/__tests__/pillProgression.test.ts`
+- [x] TASK-PP-037: Testar `getPillChances()` retorna apenas tipos desbloqueados
+- [x] TASK-PP-038: Testar `getPillChances()` soma sempre 100%
+- [x] TASK-PP-039: Testar `rollPillType()` nunca retorna tipo bloqueado
+- [x] TASK-PP-040: Testar progressao de probabilidades por rodada
+- [x] TASK-PP-041: Testar LIFE desativado por padrao
 
 ### 7.2 Testes Unitarios - Pool Scaling
 
-- [ ] TASK-PP-060: Testar `getPillCount()` retorna baseCount na rodada 1 (6)
-- [ ] TASK-PP-061: Testar `getPillCount()` mantem valor dentro do ciclo (rodadas 1-3 = 6)
-- [ ] TASK-PP-062: Testar `getPillCount()` aumenta apos ciclo (rodada 4 = 7)
-- [ ] TASK-PP-063: Testar `getPillCount()` respeita maxCap
-- [ ] TASK-PP-064: Testar `getPillCount()` com config customizada
-- [ ] TASK-PP-065: Testar `getPillCount()` sem maxCap definido
+- [x] TASK-PP-060: Testar `getPillCount()` retorna baseCount na rodada 1 (6)
+- [x] TASK-PP-061: Testar `getPillCount()` mantem valor dentro do ciclo (rodadas 1-3 = 6)
+- [x] TASK-PP-062: Testar `getPillCount()` aumenta apos ciclo (rodada 4 = 7)
+- [x] TASK-PP-063: Testar `getPillCount()` respeita maxCap
+- [x] TASK-PP-064: Testar `getPillCount()` com config customizada
+- [x] TASK-PP-065: Testar `getPillCount()` sem maxCap definido
 
 ### 7.3 Testes de Integracao
 

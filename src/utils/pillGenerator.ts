@@ -1,13 +1,13 @@
 import { v4 as uuidv4 } from 'uuid'
-import type { Pill, PillConfig, PillType } from '@/types'
+import type { Pill, PillConfig, PillShape, PillType } from '@/types'
 import {
   FATAL_DAMAGE,
   HIDDEN_PILL_HEX,
   PILL_CONFIG,
   PILL_HEX_COLORS,
-  PILL_SHAPES,
 } from './constants'
 import { getPillCount, distributePillTypes } from './pillProgression'
+import { distributeShapes } from './shapeProgression'
 
 /**
  * Gera um numero aleatorio dentro de um range [min, max]
@@ -52,9 +52,17 @@ function calculatePillStats(
 }
 
 /**
- * Cria uma unica pilula com tipo especifico
+ * Cria uma unica pilula com tipo e shape especificos
+ *
+ * @param type - Tipo da pilula
+ * @param shape - Shape da pilula
+ * @param config - Configuracao de dano/cura (opcional)
  */
-export function createPill(type: PillType, config: PillConfig = PILL_CONFIG): Pill {
+export function createPillWithShape(
+  type: PillType,
+  shape: PillShape,
+  config: PillConfig = PILL_CONFIG
+): Pill {
   const stats = calculatePillStats(type, config)
 
   return {
@@ -68,19 +76,27 @@ export function createPill(type: PillType, config: PillConfig = PILL_CONFIG): Pi
       livesRestore: stats.livesRestore,
     },
     visuals: {
-      // Cor oculta por padrao (sera revelada quando isRevealed = true)
       color: HIDDEN_PILL_HEX,
-      shape: PILL_SHAPES[type] as Pill['visuals']['shape'],
+      shape,
       label: '???',
     },
   }
 }
 
 /**
+ * Cria uma unica pilula com tipo especifico
+ * @deprecated Use createPillWithShape() para controle explicito da shape
+ */
+export function createPill(type: PillType, config: PillConfig = PILL_CONFIG): Pill {
+  // Fallback para round shape (retrocompatibilidade)
+  return createPillWithShape(type, 'round', config)
+}
+
+/**
  * Gera um pool de pilulas para uma rodada com progressao dinamica
- * Usa distribuicao PROPORCIONAL - a porcentagem define a quantidade exata de cada tipo
+ * Usa distribuicao PROPORCIONAL para tipos E shapes
  *
- * @param round - Numero da rodada (determina quantidade e tipos disponiveis)
+ * @param round - Numero da rodada (determina quantidade, tipos e shapes disponiveis)
  * @param config - Configuracao de dano/cura (opcional)
  * @returns Array de pilulas embaralhado com isRevealed = false
  */
@@ -89,13 +105,26 @@ export function generatePillPool(
   config: PillConfig = PILL_CONFIG
 ): Pill[] {
   const count = getPillCount(round)
-  const distribution = distributePillTypes(count, round)
-  const pills: Pill[] = []
+  const typeDistribution = distributePillTypes(count, round)
+  const shapeDistribution = distributeShapes(count, round)
 
-  // Cria pilulas baseado na distribuicao proporcional
-  for (const [type, typeCount] of Object.entries(distribution)) {
+  // Cria pool de shapes embaralhado para atribuicao aleatoria
+  const shapePool: PillShape[] = []
+  for (const [shape, shapeCount] of Object.entries(shapeDistribution)) {
+    for (let i = 0; i < shapeCount; i++) {
+      shapePool.push(shape as PillShape)
+    }
+  }
+  const shuffledShapes = shuffleArray(shapePool)
+
+  // Cria pilulas com tipos distribuidos e shapes aleatorias
+  const pills: Pill[] = []
+  let shapeIndex = 0
+
+  for (const [type, typeCount] of Object.entries(typeDistribution)) {
     for (let i = 0; i < typeCount; i++) {
-      pills.push(createPill(type as PillType, config))
+      const shape = shuffledShapes[shapeIndex++]
+      pills.push(createPillWithShape(type as PillType, shape, config))
     }
   }
 
@@ -105,10 +134,10 @@ export function generatePillPool(
 
 /**
  * Gera um pool de pilulas com quantidade especifica (override manual)
- * Usa distribuicao PROPORCIONAL - util para testes ou modos especiais
+ * Usa distribuicao PROPORCIONAL para tipos E shapes
  *
  * @param count - Quantidade de pilulas a gerar
- * @param round - Numero da rodada (determina tipos disponiveis)
+ * @param round - Numero da rodada (determina tipos e shapes disponiveis)
  * @param config - Configuracao de dano/cura (opcional)
  * @returns Array de pilulas embaralhado com isRevealed = false
  */
@@ -117,12 +146,25 @@ export function generatePillPoolWithCount(
   round: number = 1,
   config: PillConfig = PILL_CONFIG
 ): Pill[] {
-  const distribution = distributePillTypes(count, round)
-  const pills: Pill[] = []
+  const typeDistribution = distributePillTypes(count, round)
+  const shapeDistribution = distributeShapes(count, round)
 
-  for (const [type, typeCount] of Object.entries(distribution)) {
+  // Cria pool de shapes embaralhado
+  const shapePool: PillShape[] = []
+  for (const [shape, shapeCount] of Object.entries(shapeDistribution)) {
+    for (let i = 0; i < shapeCount; i++) {
+      shapePool.push(shape as PillShape)
+    }
+  }
+  const shuffledShapes = shuffleArray(shapePool)
+
+  const pills: Pill[] = []
+  let shapeIndex = 0
+
+  for (const [type, typeCount] of Object.entries(typeDistribution)) {
     for (let i = 0; i < typeCount; i++) {
-      pills.push(createPill(type as PillType, config))
+      const shape = shuffledShapes[shapeIndex++]
+      pills.push(createPillWithShape(type as PillType, shape, config))
     }
   }
 

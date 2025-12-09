@@ -38,17 +38,17 @@
 
 ### 1.2 Integracao com pillGenerator
 
-- [ ] TASK-SS-002: Criar funcao `countPillShapes(pills)` em shapeProgression.ts
+- [x] TASK-SS-002: Criar funcao `countPillShapes(pills)` em shapeProgression.ts
   - Retorna `Record<PillShape, number>`
 
-- [ ] TASK-SS-003: Modificar `generatePillPool()` para usar `distributeShapes()`
+- [x] TASK-SS-003: Modificar `generatePillPool()` para usar `distributeShapes()`
   - Distribuir shapes proporcionalmente baseado na rodada
   - Atribuir shapes aleatoriamente as pilulas (embaralhar)
 
-- [ ] TASK-SS-003B: Criar funcao `createPillWithShape(type, shape, config)`
+- [x] TASK-SS-003B: Criar funcao `createPillWithShape(type, shape, config)`
   - Cria pilula com shape especifica (nao aleatoria)
 
-- [ ] TASK-SS-004: Depreciar constante `PILL_SHAPES` em `src/utils/constants.ts`
+- [x] TASK-SS-004: Depreciar constante `PILL_SHAPES` em `src/utils/constants.ts`
   - Adicionar comentario @deprecated
   - Manter para retrocompatibilidade temporaria
 

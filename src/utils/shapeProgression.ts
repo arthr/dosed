@@ -1,4 +1,4 @@
-import type { PillShape } from '@/types'
+import type { Pill, PillShape } from '@/types'
 
 /**
  * Regra de progressao para uma shape
@@ -182,5 +182,27 @@ export function distributeShapes(
   }
 
   return distribution
+}
+
+/**
+ * Conta quantidade de cada shape no pool de pilulas
+ *
+ * @param pills - Array de pilulas
+ * @returns Contagem de cada shape
+ */
+export function countPillShapes(pills: Pill[]): Record<PillShape, number> {
+  const counts: Record<PillShape, number> = {
+    round: 0,
+    capsule: 0,
+    oval: 0,
+    triangle: 0,
+    hexagon: 0,
+  }
+
+  for (const pill of pills) {
+    counts[pill.visuals.shape]++
+  }
+
+  return counts
 }
 

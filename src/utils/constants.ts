@@ -101,6 +101,9 @@ export const PILL_DESCRIPTIONS: Record<PillType, string> = {
 
 /**
  * Formas associadas a cada tipo de pilula
+ * @deprecated Shapes agora sao desacopladas dos tipos.
+ * Use distributeShapes() de shapeProgression.ts para obter shapes baseadas na rodada.
+ * Mantido temporariamente para retrocompatibilidade.
  */
 export const PILL_SHAPES: Record<PillType, string> = {
   SAFE: 'round',

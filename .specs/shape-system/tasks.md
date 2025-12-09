@@ -75,35 +75,35 @@
 
 ### 2.1 Constantes de Estilo
 
-- [ ] TASK-SS-012: Criar `SHAPE_CLASSES: Record<PillShape, string>` em `src/utils/constants.ts`
+- [x] TASK-SS-012: Criar `SHAPE_CLASSES: Record<PillShape, string>` em `src/utils/constants.ts`
   - round: 'rounded-full aspect-square'
   - capsule: 'rounded-full aspect-[1.6]'
   - oval: 'rounded-full aspect-[1.3]'
   - triangle: '' (usa clip-path)
   - hexagon: '' (usa clip-path)
 
-- [ ] TASK-SS-013: Criar `SHAPE_CLIP_PATHS: Record<PillShape, string | null>` em `src/utils/constants.ts`
+- [x] TASK-SS-013: Criar `SHAPE_CLIP_PATHS: Record<PillShape, string | null>` em `src/utils/constants.ts`
   - triangle: 'polygon(50% 0%, 0% 100%, 100% 100%)'
   - hexagon: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)'
 
-- [ ] TASK-SS-014: Criar `SHAPE_LABELS: Record<PillShape, string>` em `src/utils/constants.ts`
+- [x] TASK-SS-014: Criar `SHAPE_LABELS: Record<PillShape, string>` em `src/utils/constants.ts`
 
 ### 2.2 Componente Pill
 
-- [ ] TASK-SS-015: Refatorar `Pill.tsx` para usar shape da pilula
+- [x] TASK-SS-015: Refatorar `Pill.tsx` para usar shape da pilula
   - Importar SHAPE_CLASSES e SHAPE_CLIP_PATHS
   - Aplicar classes e style.clipPath baseado em pill.visuals.shape
   - Ajustar sizeClasses para funcionar com aspect ratios variados
 
-- [ ] TASK-SS-016: Testar animacoes (hover, tap, pulse) com todas 5 shapes
+- [x] TASK-SS-016: Testar animacoes (hover, tap, pulse) com todas 5 shapes
 
-- [ ] TASK-SS-017: Verificar posicionamento de badges (inverted, doubled) em todas shapes
+- [x] TASK-SS-017: Verificar posicionamento de badges (inverted, doubled) em todas shapes
 
-- [ ] TASK-SS-018: Testar cores sobre todas shapes (pilula oculta e revelada)
+- [x] TASK-SS-018: Testar cores sobre todas shapes (pilula oculta e revelada)
 
 ### 2.3 Componente ShapeIcon
 
-- [ ] TASK-SS-019: Criar componente `ShapeIcon.tsx` em `src/components/game/`
+- [x] TASK-SS-019: Criar componente `ShapeIcon.tsx` em `src/components/game/`
   - Props: shape, size (sm/md/lg), className, color
   - Renderiza forma isolada (para uso em quest display e seletores)
 

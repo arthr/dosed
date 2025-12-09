@@ -1,4 +1,4 @@
-import type { GameConfig, PillConfig, PillType } from '@/types'
+import type { GameConfig, PillConfig, PillShape, PillType } from '@/types'
 
 /**
  * Configuracao padrao do jogo
@@ -112,6 +112,41 @@ export const PILL_SHAPES: Record<PillType, string> = {
   FATAL: 'triangle',
   HEAL: 'hexagon',
   LIFE: 'capsule',
+}
+
+/**
+ * Classes CSS para cada shape
+ * Usadas pelo componente Pill.tsx para renderizar formato visual
+ */
+export const SHAPE_CLASSES: Record<PillShape, string> = {
+  round: 'rounded-full aspect-square',
+  capsule: 'rounded-full aspect-[1.6]',
+  oval: 'rounded-full aspect-[1.3]',
+  triangle: 'aspect-square', // Usa clip-path
+  hexagon: 'aspect-square',  // Usa clip-path
+}
+
+/**
+ * Clip-paths CSS para shapes nao-circulares
+ * null = usa apenas border-radius (round, capsule, oval)
+ */
+export const SHAPE_CLIP_PATHS: Record<PillShape, string | null> = {
+  round: null,
+  capsule: null,
+  oval: null,
+  triangle: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+  hexagon: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
+}
+
+/**
+ * Labels de exibicao para cada shape (para UI e acessibilidade)
+ */
+export const SHAPE_LABELS: Record<PillShape, string> = {
+  round: 'Circulo',
+  capsule: 'Capsula',
+  oval: 'Oval',
+  triangle: 'Triangulo',
+  hexagon: 'Hexagono',
 }
 
 /**

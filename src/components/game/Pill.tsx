@@ -1,7 +1,14 @@
 import { motion } from 'framer-motion'
 import { RefreshCw } from 'lucide-react'
 import type { Pill as PillType } from '@/types'
-import { PILL_COLORS, PILL_LABELS, HIDDEN_PILL_COLOR } from '@/utils/constants'
+import {
+  PILL_COLORS,
+  PILL_LABELS,
+  HIDDEN_PILL_COLOR,
+  SHAPE_CLASSES,
+  SHAPE_CLIP_PATHS,
+  SHAPE_LABELS,
+} from '@/utils/constants'
 
 interface PillProps {
   /** Dados da pilula */
@@ -20,10 +27,13 @@ interface PillProps {
   isValidTarget?: boolean
 }
 
+/**
+ * Classes de tamanho base (altura fixa, largura ajustada pelo aspect ratio)
+ */
 const sizeClasses = {
-  sm: 'w-10 h-10 text-xs',
-  md: 'w-12 h-12 text-sm',
-  lg: 'w-16 h-16 text-base',
+  sm: 'h-10 min-w-10 text-xs',
+  md: 'h-12 min-w-12 text-sm',
+  lg: 'h-16 min-w-16 text-base',
 }
 
 /**
@@ -45,6 +55,12 @@ export function Pill({
   const label = showType ? PILL_LABELS[pill.type] : '???'
   const displayChar = showType ? pill.type.charAt(0) : '?'
 
+  // Shape visual (sempre visivel, mesmo quando pilula oculta)
+  const shape = pill.visuals.shape
+  const shapeClass = SHAPE_CLASSES[shape]
+  const clipPath = SHAPE_CLIP_PATHS[shape]
+  const shapeLabel = SHAPE_LABELS[shape]
+
   // Modifiers visuais
   const hasInverted = pill.inverted === true
   const hasDoubled = pill.doubled === true
@@ -61,9 +77,11 @@ export function Pill({
     <motion.button
       onClick={onClick}
       disabled={disabled && !isValidTarget}
+      style={clipPath ? { clipPath } : undefined}
       className={`
         ${sizeClasses[size]}
-        rounded-full border-2 
+        ${shapeClass}
+        border-2 
         flex items-center justify-center
         font-normal text-foreground
         transition-colors duration-200
@@ -112,8 +130,8 @@ export function Pill({
           },
         },
       })}
-      aria-label={`Pílula ${label}${showType ? '' : ' (oculta)'}${hasInverted ? ' (invertida)' : ''}${hasDoubled ? ' (dobrada)' : ''}`}
-      title={label}
+      aria-label={`Pílula ${shapeLabel}${showType ? ` - ${label}` : ' (oculta)'}${hasInverted ? ' (invertida)' : ''}${hasDoubled ? ' (dobrada)' : ''}`}
+      title={`${shapeLabel}${showType ? ` - ${label}` : ''}`}
     >
       <span className="select-none">{displayChar}</span>
 

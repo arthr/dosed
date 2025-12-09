@@ -58,45 +58,76 @@ As pilulas devem ser tratadas como objetos com propriedades de efeito.
 
 Cada pilula possui uma **forma visual** (shape) independente do seu tipo de efeito.
 
-### 5.1 Formas Disponiveis
-| Shape | Visual |
-| :--- | :--- |
-| `capsule` | Capsula alongada |
-| `round` | Circulo |
-| `triangle` | Triangulo |
-| `oval` | Oval |
-| `hexagon` | Hexagono |
+### 5.1 Formas Disponiveis (16 Shapes)
 
-### 5.2 Mecanicas de Shape
+| Shape | Arquivo | Desbloqueio | Descricao |
+| :--- | :--- | :--- | :--- |
+| `capsule` | shape_1.png | Rodada 1 | Capsula azul horizontal |
+| `round` | shape_6.png | Rodada 1 | Pilula redonda azul |
+| `triangle` | shape_8.png | Rodada 2 | Triangulo vermelho |
+| `oval` | shape_11.png | Rodada 2 | Oval amarela |
+| `cross` | shape_2.png | Rodada 3 | Cruz roxa |
+| `heart` | shape_9.png | Rodada 3 | Coracao vermelho |
+| `flower` | shape_4.png | Rodada 4 | Flor rosa |
+| `star` | shape_13.png | Rodada 4 | Estrela verde |
+| `pumpkin` | shape_12.png | Rodada 5 | Abobora laranja |
+| `coin` | shape_14.png | Rodada 5 | Moeda dourada |
+| `bear` | shape_5.png | Rodada 6 | Urso verde |
+| `gem` | shape_15.png | Rodada 6 | Gema roxa |
+| `skull` | shape_3.png | Rodada 7 | Caveira roxa |
+| `domino` | shape_16.png | Rodada 7 | Domino laranja |
+| `pineapple` | shape_7.png | Rodada 8 | Abacaxi rosa |
+| `fruit` | shape_10.png | Rodada 8 | Fruta rosa |
+
+> **Nota:** Shapes sao renderizadas via imagens PNG com fundo transparente (`src/assets/shapes/`).
+
+### 5.2 Progressao de Shapes
+
+| Rodada | Shapes Disponiveis | Total |
+| :--- | :--- | :--- |
+| 1 | capsule, round | 2 |
+| 2 | + triangle, oval | 4 |
+| 3 | + cross, heart | 6 |
+| 4 | + flower, star | 8 |
+| 5 | + pumpkin, coin | 10 |
+| 6 | + bear, gem | 12 |
+| 7 | + skull, domino | 14 |
+| 8+ | + pineapple, fruit | 16 (todas) |
+
+> **Nota:** Algumas shapes podem estar desabilitadas na versao atual e serao liberadas em fases futuras do jogo.
+
+### 5.3 Mecanicas de Shape
 
 **A. Shapes Aleatorias:**
 * A forma de cada pilula e atribuida **aleatoriamente** na geracao do pool.
 * Nao ha correlacao entre shape e tipo de efeito (adiciona camada de incerteza).
+* Distribuicao usa sistema de progressao similar ao de tipos de pilulas.
 
 **B. Itens Baseados em Shape:**
-* Novos itens podem interagir com shapes (ex: "Elimina todas pilulas triangulares").
+* Novos itens podem interagir com shapes (ex: "Shape Bomb" - elimina todas pilulas de uma forma).
 * Permite estrategias baseadas em informacao visual.
 
 **C. Sistema de Objetivos (Shape Combos):**
 * Jogadores recebem objetivos de sequencia de shapes a consumir.
 * Completar um objetivo concede bonus aleatorio.
-* Novo objetivo e atribuido apos conclusao.
+* Novo objetivo e atribuido apenas no inicio de cada rodada.
 
-### 5.3 Objetivos de Shape (Shape Quests)
+### 5.4 Objetivos de Shape (Shape Quests)
 
 | Exemplo de Objetivo | Recompensa Possivel |
 | :--- | :--- |
-| Consumir: Triangle -> Round -> Hexagon | +1 Vida |
-| Consumir: 3 Capsulas consecutivas | Reabastecer 1 Item usado |
-| Consumir: Oval -> Triangle | +2 Resistencia |
+| Consumir: Triangle -> Round -> Capsule | +1 Vida |
+| Consumir: Flower -> Star | Reabastecer 1 Item usado |
+| Consumir: Oval -> Heart | +2 Resistencia |
 
 **Regras:**
 * Apenas UM objetivo ativo por vez.
-* Objetivo concluido = bonus aplicado + novo objetivo atribuido.
+* Objetivo concluido = bonus aplicado, aguarda proxima rodada para novo objetivo.
 * Objetivos sao pessoais (cada jogador tem o seu).
 * Bonus sao aleatorios dentro de um pool definido.
+* Sequencia gerada apenas com shapes disponiveis no pool atual.
 
-> **Nota:** Sistema de objetivos sera detalhado em especificacao separada.
+> **Nota:** Sistema de objetivos sera detalhado em `.specs/shape-system/`.
 
 ---
 

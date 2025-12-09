@@ -19,12 +19,16 @@
 
 - [x] TASK-SS-001C: Definir interface `ShapeProgressionConfig` com maxRound e rules
 
-- [x] TASK-SS-001D: Implementar constante `SHAPE_PROGRESSION` com regras:
-  - round: { unlockRound: 1, startPct: 50, endPct: 15 }
-  - capsule: { unlockRound: 1, startPct: 50, endPct: 20 }
-  - oval: { unlockRound: 2, startPct: 20, endPct: 20 }
-  - triangle: { unlockRound: 3, startPct: 15, endPct: 25 }
-  - hexagon: { unlockRound: 5, startPct: 10, endPct: 20 }
+- [x] TASK-SS-001D: Implementar constante `SHAPE_PROGRESSION` com regras para 16 shapes:
+  - Rodada 1: capsule, round (shapes basicas)
+  - Rodada 2: + triangle, oval
+  - Rodada 3: + cross, heart
+  - Rodada 4: + flower, star
+  - Rodada 5: + pumpkin, coin
+  - Rodada 6: + bear, gem
+  - Rodada 7: + skull, domino
+  - Rodada 8+: + pineapple, fruit (todas 16 disponiveis)
+  - **Nota:** Algumas shapes podem estar desabilitadas (pct: 0) para liberacao em fases futuras
 
 - [x] TASK-SS-001E: Implementar funcao `getShapeChances(round, config?)`
   - Calcula probabilidades normalizadas por rodada
@@ -76,15 +80,16 @@
 ### 2.1 Constantes de Estilo
 
 - [x] TASK-SS-012: Criar `SHAPE_CLASSES: Record<PillShape, string>` em `src/utils/constants.ts`
-  - round: 'rounded-full aspect-square'
-  - capsule: 'rounded-full aspect-[1.6]'
-  - oval: 'rounded-full aspect-[1.3]'
-  - triangle: '' (usa clip-path)
-  - hexagon: '' (usa clip-path)
+  - Classes CSS para todas 16 shapes (aspect ratios, border-radius)
+  - Usado como fallback se imagem PNG nao carregar
 
 - [x] TASK-SS-013: Criar `SHAPE_CLIP_PATHS: Record<PillShape, string | null>` em `src/utils/constants.ts`
-  - triangle: 'polygon(50% 0%, 0% 100%, 100% 100%)'
-  - hexagon: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)'
+  - Clip-paths CSS para shapes complexas (triangle, cross, gem)
+  - null para shapes que usam apenas border-radius
+
+- [x] TASK-SS-013B: Criar `SHAPE_IMAGES: Record<PillShape, string>` em `src/utils/constants.ts`
+  - Mapeamento de shapes para imagens PNG (16 shapes)
+  - Arquivos em `src/assets/shapes/shape_*.png`
 
 - [x] TASK-SS-014: Criar `SHAPE_LABELS: Record<PillShape, string>` em `src/utils/constants.ts`
 
@@ -95,7 +100,7 @@
   - Aplicar classes e style.clipPath baseado em pill.visuals.shape
   - Ajustar sizeClasses para funcionar com aspect ratios variados
 
-- [x] TASK-SS-016: Testar animacoes (hover, tap, pulse) com todas 5 shapes
+- [x] TASK-SS-016: Testar animacoes (hover, tap, pulse) com todas shapes ativas
 
 - [x] TASK-SS-017: Verificar posicionamento de badges (inverted, doubled) em todas shapes
 
@@ -267,7 +272,7 @@
 - [ ] TASK-SS-054: Testar `getShapeChances()` retorna apenas shapes desbloqueadas
   - Rodada 1: apenas round e capsule (soma 100%)
   - Rodada 3: round, capsule, oval, triangle (soma 100%)
-  - Rodada 5+: todas 5 shapes
+  - Rodada 8+: todas 16 shapes (conforme ativadas em SHAPE_PROGRESSION)
 
 - [ ] TASK-SS-054B: Testar `getShapeChances()` soma sempre 100%
 
@@ -441,36 +446,59 @@ Fase 7 (Polish) - Refinamento
 
 ## Notas de Implementacao
 
-### Ordem e Progressao das Shapes
+### Ordem e Progressao das Shapes (16 Shapes)
 
 A ordem de desbloqueio das shapes e:
 ```typescript
 // Rodada 1: formas basicas
-round, capsule
+capsule, round
 
-// Rodada 2: forma intermediaria
-oval
+// Rodada 2: + formas intermediarias
+triangle, oval
 
-// Rodada 3: forma angular
-triangle
+// Rodada 3: + formas simbolicas
+cross, heart
 
-// Rodada 5: forma complexa
-hexagon
+// Rodada 4: + formas tematicas
+flower, star
+
+// Rodada 5: + formas festivas
+pumpkin, coin
+
+// Rodada 6: + formas criativas
+bear, gem
+
+// Rodada 7: + formas avancadas
+skull, domino
+
+// Rodada 8+: + formas finais
+pineapple, fruit
 ```
 
 Tabela de desbloqueio rapida:
-| Rodada | Novas Shapes |
-|--------|--------------|
-| 1 | round, capsule |
-| 2 | oval |
-| 3 | triangle |
-| 5 | hexagon |
+| Rodada | Novas Shapes | Total |
+|--------|--------------|-------|
+| 1 | capsule, round | 2 |
+| 2 | triangle, oval | 4 |
+| 3 | cross, heart | 6 |
+| 4 | flower, star | 8 |
+| 5 | pumpkin, coin | 10 |
+| 6 | bear, gem | 12 |
+| 7 | skull, domino | 14 |
+| 8+ | pineapple, fruit | 16 |
+
+> **Nota:** Algumas shapes podem estar desabilitadas (startPct: 0, endPct: 0) em `SHAPE_PROGRESSION`
+> para serem liberadas em fases futuras do jogo. A tabela acima representa o plano final.
 
 Manter consistencia em todos os arquivos.
 
-### Fallback para Clip-path
+### Renderizacao via Imagens PNG
 
-Se browser nao suportar clip-path, shapes complexas (triangle, hexagon) farao fallback para circulo. Isso e aceitavel para MVP.
+A implementacao atual usa imagens PNG em vez de CSS puro:
+- Arquivos em `src/assets/shapes/shape_*.png`
+- `SHAPE_IMAGES` mapeia cada PillShape para seu arquivo PNG
+- `SHAPE_CLASSES` e `SHAPE_CLIP_PATHS` servem como fallback
+- Componente `Pill.tsx` renderiza imagem com drop-shadow colorido baseado no tipo
 
 ### Quest Progress e Force Feed
 

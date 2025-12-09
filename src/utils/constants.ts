@@ -117,20 +117,6 @@ export const PILL_DESCRIPTIONS: Record<PillType, string> = {
   LIFE: 'Restaura +1 vida perdida.',
 }
 
-/**
- * Formas associadas a cada tipo de pilula
- * @deprecated Shapes agora sao desacopladas dos tipos.
- * Use distributeShapes() de shapeProgression.ts para obter shapes baseadas na rodada.
- * Mantido temporariamente para retrocompatibilidade.
- */
-export const PILL_SHAPES: Record<PillType, string> = {
-  SAFE: 'round',
-  DMG_LOW: 'capsule',
-  DMG_HIGH: 'oval',
-  FATAL: 'triangle',
-  HEAL: 'star',
-  LIFE: 'capsule',
-}
 
 // ============================================
 // SHAPE IMAGES (16 shapes com PNG)

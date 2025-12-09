@@ -1,5 +1,12 @@
 # Design: Sistema de Formas (Shape System)
 
+> **ATUALIZADO:** Este documento foi originalmente escrito para 5 shapes. A implementacao
+> atual suporta **16 shapes** com imagens PNG. Exemplos de codigo neste documento podem
+> estar desatualizados - consulte os arquivos fonte para a implementacao atual:
+> - `src/utils/shapeProgression.ts` - Configuracao de progressao
+> - `src/types/pill.ts` - Tipo PillShape com 16 shapes
+> - `src/utils/constants.ts` - SHAPE_IMAGES, SHAPE_CLASSES, SHAPE_LABELS
+
 ## Arquitetura Proposta
 
 ### Visao Geral da Integracao
@@ -206,23 +213,29 @@ export interface ShapeProgressionConfig {
 }
 
 /**
- * Configuracao padrao de progressao de shapes
+ * Configuracao padrao de progressao de shapes (16 shapes)
  * 
- * NOTAS DE DESIGN:
- * - Rodada 1: apenas round e capsule (formas basicas, faceis de distinguir)
- * - Rodada 2: oval entra (forma intermediaria)
- * - Rodada 3: triangle entra (forma angular, mais distinta)
- * - Rodada 5: hexagon entra (forma complexa, late game)
- * - Late game: distribuicao mais equilibrada entre todas shapes
+ * NOTAS DE DESIGN (ATUALIZADO):
+ * - Rodada 1: capsule, round (formas basicas)
+ * - Rodada 2: + triangle, oval
+ * - Rodada 3: + cross, heart
+ * - Rodada 4: + flower, star
+ * - Rodada 5: + pumpkin, coin
+ * - Rodada 6: + bear, gem
+ * - Rodada 7: + skull, domino
+ * - Rodada 8+: + pineapple, fruit (todas 16 disponiveis)
+ * 
+ * NOTA: Algumas shapes podem estar desabilitadas (pct: 0) para liberacao em fases futuras.
+ * Consulte src/utils/shapeProgression.ts para configuracao atual.
  */
+// Exemplo simplificado - implementacao real em src/utils/shapeProgression.ts
 export const SHAPE_PROGRESSION: ShapeProgressionConfig = {
   maxRound: 15,
   rules: {
-    round:    { unlockRound: 1, startPct: 50, endPct: 15 },
-    capsule:  { unlockRound: 1, startPct: 50, endPct: 20 },
-    oval:     { unlockRound: 2, startPct: 20, endPct: 20 },
-    triangle: { unlockRound: 3, startPct: 15, endPct: 25 },
-    hexagon:  { unlockRound: 5, startPct: 10, endPct: 20 },
+    // 16 shapes - ver implementacao completa em shapeProgression.ts
+    capsule:   { unlockRound: 1, startPct: X, endPct: Y },
+    round:     { unlockRound: 1, startPct: X, endPct: Y },
+    // ... demais 14 shapes
   },
 }
 

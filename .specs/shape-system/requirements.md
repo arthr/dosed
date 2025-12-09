@@ -469,8 +469,8 @@ export interface ShapeQuest {
 
 - [ ] Shapes sao distribuidas seguindo progressao por rodada
 - [ ] Rodada 1 tem apenas round e capsule
-- [ ] Todas 5 shapes desbloqueadas na rodada 5+
-- [ ] Todas 5 shapes sao visualmente distintas e reconheciveis
+- [ ] Todas 16 shapes desbloqueadas na rodada 8+ (conforme ativadas em SHAPE_PROGRESSION)
+- [ ] Todas shapes ativas sao visualmente distintas e reconheciveis
 - [ ] Sistema de Shape Quests funciona sem bugs de progresso
 - [ ] Quests usam apenas shapes disponiveis na rodada
 - [ ] Novos itens integrados ao catalogo e funcionais
@@ -492,7 +492,7 @@ O sistema de shapes progressivo segue a mesma filosofia do sistema de pills:
 **Comparativo:**
 | Aspecto | Aleatorio Uniforme | Progressivo |
 | :--- | :--- | :--- |
-| Rodada 1 | 5 shapes possiveis | 2 shapes (round, capsule) |
+| Rodada 1 | 16 shapes possiveis | 2 shapes (capsule, round) |
 | Previsibilidade | Baixa desde inicio | Aumenta gradualmente |
 | Curva de aprendizado | Abrupta | Suave |
 | Quests iniciais | Podem pedir qualquer shape | Apenas shapes disponiveis |

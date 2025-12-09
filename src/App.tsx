@@ -1,4 +1,4 @@
-import { HashRouter } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { TooltipProvider } from '@/components/ui/8bit/tooltip'
 import { Button } from '@/components/ui/8bit/button'
 import { GameLayout } from '@/components/layout/GameLayout'
@@ -9,6 +9,7 @@ import { ItemSelectionScreen } from '@/components/game/ItemSelectionScreen'
 import { OverlayManager } from '@/components/overlays'
 import { ToastManager } from '@/components/toasts'
 import { useOverlayStore } from '@/stores/overlayStore'
+import { DevPage } from '@/components/dev'
 import { useEffect } from 'react'
 
 function GameContent() {
@@ -63,17 +64,28 @@ function GameContent() {
   return <GameBoard />
 }
 
+function GamePage() {
+  return (
+    <>
+      <GameLayout>
+        <GameContent />
+      </GameLayout>
+
+      {/* Sistemas globais de UI */}
+      <OverlayManager />
+      <ToastManager />
+    </>
+  )
+}
+
 function App() {
   return (
     <HashRouter>
       <TooltipProvider>
-        <GameLayout>
-          <GameContent />
-        </GameLayout>
-
-        {/* Sistemas globais de UI */}
-        <OverlayManager />
-        <ToastManager />
+        <Routes>
+          <Route path="/" element={<GamePage />} />
+          <Route path="/dev" element={<DevPage />} />
+        </Routes>
       </TooltipProvider>
     </HashRouter>
   )

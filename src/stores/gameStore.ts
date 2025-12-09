@@ -21,6 +21,7 @@ import {
   generatePillPool,
   revealPill,
 } from '@/utils/pillGenerator'
+import { countPillShapes } from '@/utils/shapeProgression'
 import { ITEM_CATALOG } from '@/utils/itemCatalog'
 import { POCKET_PILL_HEAL } from '@/utils/itemLogic'
 
@@ -128,6 +129,13 @@ const initialState: GameState = {
     HEAL: 0,
     LIFE: 0,
   },
+  shapeCounts: {
+    round: 0,
+    capsule: 0,
+    oval: 0,
+    triangle: 0,
+    hexagon: 0,
+  },
   round: 0,
   winner: null,
   actionHistory: [],
@@ -177,6 +185,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const pillPool = generatePillPool(1)
 
     const typeCounts = countPillTypes(pillPool)
+    const shapeCounts = countPillShapes(pillPool)
 
     const startAction: GameAction = {
       type: 'GAME_START',
@@ -192,6 +201,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       players: { player1, player2 },
       pillPool,
       typeCounts,
+      shapeCounts,
       round: 0,
       winner: null,
       actionHistory: [startAction],
@@ -238,6 +248,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Remove pilula do pool
     const newPillPool = state.pillPool.filter((p) => p.id !== pillId)
     const newTypeCounts = countPillTypes(newPillPool)
+    const newShapeCounts = countPillShapes(newPillPool)
 
     // Registra acao
     const consumeAction: GameAction = {
@@ -288,6 +299,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         },
         pillPool: newPillPool,
         typeCounts: newTypeCounts,
+        shapeCounts: newShapeCounts,
         phase: 'ended',
         winner: winnerId,
         actionHistory: [...state.actionHistory, ...actions],
@@ -307,6 +319,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         },
         pillPool: newPillPool,
         typeCounts: newTypeCounts,
+        shapeCounts: newShapeCounts,
         actionHistory: [...state.actionHistory, ...actions],
       })
 
@@ -350,6 +363,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       },
       pillPool: newPillPool,
       typeCounts: newTypeCounts,
+      shapeCounts: newShapeCounts,
       currentTurn: actualNextTurn,
       actionHistory: [...state.actionHistory, ...actions],
     })
@@ -432,6 +446,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Quantidade dinamica baseada na rodada (usa POOL_SCALING)
     const newPillPool = generatePillPool(state.round + 1)
     const newTypeCounts = countPillTypes(newPillPool)
+    const newShapeCounts = countPillShapes(newPillPool)
 
     const roundAction: GameAction = {
       type: 'NEW_ROUND',
@@ -444,6 +459,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       phase: 'playing', // Volta para playing
       pillPool: newPillPool,
       typeCounts: newTypeCounts,
+      shapeCounts: newShapeCounts,
       round: state.round + 1,
       actionHistory: [...state.actionHistory, roundAction],
       revealedPills: [], // Limpa pilulas reveladas da rodada anterior
@@ -566,6 +582,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Ambos confirmaram - gera pilulas e inicia o jogo (rodada 1)
     const pillPool = generatePillPool(1)
     const typeCounts = countPillTypes(pillPool)
+    const shapeCounts = countPillShapes(pillPool)
 
     const startAction: GameAction = {
       type: 'GAME_START',
@@ -577,6 +594,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       phase: 'playing',
       pillPool,
       typeCounts,
+      shapeCounts,
       round: 1,
       itemSelectionConfirmed: newConfirmed,
       actionHistory: [...state.actionHistory, startAction],
@@ -819,8 +837,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         if (targetId) {
           const newPillPool = state.pillPool.filter((p) => p.id !== targetId)
           const newTypeCounts = countPillTypes(newPillPool)
+          const newShapeCounts = countPillShapes(newPillPool)
           newState.pillPool = newPillPool
           newState.typeCounts = newTypeCounts
+          newState.shapeCounts = newShapeCounts
 
           // Remove da lista de reveladas tambem
           newState.revealedPills = state.revealedPills.filter((id) => id !== targetId)

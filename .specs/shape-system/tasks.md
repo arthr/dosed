@@ -54,20 +54,20 @@
 
 ### 1.2 Estado Global
 
-- [ ] TASK-SS-005: Adicionar `shapeCounts: Record<PillShape, number>` ao `GameState` em `src/types/game.ts`
+- [x] TASK-SS-005: Adicionar `shapeCounts: Record<PillShape, number>` ao `GameState` em `src/types/game.ts`
 
-- [ ] TASK-SS-006: Adicionar `shapeCounts` ao `initialState` em `src/stores/gameStore.ts`
+- [x] TASK-SS-006: Adicionar `shapeCounts` ao `initialState` em `src/stores/gameStore.ts`
   - Inicializar com zeros para cada shape
 
-- [ ] TASK-SS-007: Atualizar `initGame()` para calcular `shapeCounts` com `countPillShapes()`
+- [x] TASK-SS-007: Atualizar `initGame()` para calcular `shapeCounts` com `countPillShapes()`
 
-- [ ] TASK-SS-008: Atualizar `confirmItemSelection()` para calcular `shapeCounts`
+- [x] TASK-SS-008: Atualizar `confirmItemSelection()` para calcular `shapeCounts`
 
-- [ ] TASK-SS-009: Atualizar `resetRound()` para recalcular `shapeCounts`
+- [x] TASK-SS-009: Atualizar `resetRound()` para recalcular `shapeCounts`
 
-- [ ] TASK-SS-010: Atualizar `consumePill()` para decrementar `shapeCounts`
+- [x] TASK-SS-010: Atualizar `consumePill()` para decrementar `shapeCounts`
 
-- [ ] TASK-SS-011: Atualizar itens que removem pilulas (Discard) para decrementar `shapeCounts`
+- [x] TASK-SS-011: Atualizar itens que removem pilulas (Discard) para decrementar `shapeCounts`
 
 ---
 

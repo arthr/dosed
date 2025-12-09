@@ -1,5 +1,5 @@
 import type { TargetSelectionState } from './item'
-import type { Pill, PillType } from './pill'
+import type { Pill, PillShape, PillType } from './pill'
 import type { Player, PlayerId } from './player'
 
 /**
@@ -28,6 +28,8 @@ export interface GameState {
   pillPool: Pill[]
   /** Contagem publica de tipos de pilulas (visivel para ambos jogadores) */
   typeCounts: Record<PillType, number>
+  /** Contagem publica de shapes de pilulas (visivel para ambos jogadores) */
+  shapeCounts: Record<PillShape, number>
   /** Numero da rodada atual */
   round: number
   /** ID do vencedor (null se jogo em andamento) */

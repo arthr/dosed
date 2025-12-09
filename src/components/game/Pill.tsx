@@ -3,6 +3,7 @@ import { RefreshCw } from 'lucide-react'
 import type { Pill as PillType } from '@/types'
 import {
   PILL_LABELS,
+  PILL_HEX_COLORS,
   SHAPE_IMAGES,
   SHAPE_LABELS,
 } from '@/utils/constants'
@@ -42,11 +43,12 @@ export function Pill({
   pill,
   onClick,
   disabled = false,
-  selected = false,
+  selected: _selected = false, // Mantido para compatibilidade mas nao usado com shapes de imagem
   size = 'md',
   isScanned = false,
   isValidTarget = false,
 }: PillProps) {
+  void _selected // Suprimir warning - prop mantida para API compativel
   // Pilula visivel se: revelada normalmente OU escaneada
   const showType = pill.isRevealed || isScanned
   const label = showType ? PILL_LABELS[pill.type] : '???'
@@ -56,17 +58,12 @@ export function Pill({
   const shapeImage = SHAPE_IMAGES[shape]
   const shapeLabel = SHAPE_LABELS[shape]
 
+  // Cor do tipo para drop-shadow (quando visivel)
+  const typeColor = showType ? PILL_HEX_COLORS[pill.type] : null
+
   // Modifiers visuais
   const hasInverted = pill.inverted === true
   const hasDoubled = pill.doubled === true
-
-  // Classes de estado
-  const targetClasses = isValidTarget
-    ? 'ring-2 ring-primary ring-offset-2 ring-offset-background cursor-pointer'
-    : ''
-  const scannedClasses = isScanned && !pill.isRevealed
-    ? 'ring-2 ring-blue-400 ring-offset-1 ring-offset-background'
-    : ''
 
   return (
     <motion.button
@@ -76,24 +73,25 @@ export function Pill({
         ${sizeClasses[size]}
         flex items-center justify-center
         transition-all duration-200
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background
+        focus:outline-none
         ${disabled && !isValidTarget
           ? 'opacity-50 cursor-not-allowed' 
           : 'cursor-pointer'
         }
-        ${selected 
-          ? 'ring-2 ring-primary/50' 
-          : ''
-        }
-        ${targetClasses}
-        ${scannedClasses}
         relative
       `}
       // Animacoes Framer Motion
       initial={{ scale: 0, opacity: 0 }}
       animate={{ 
-        scale: 1, 
+        scale: isValidTarget ? [1, 1.08, 1] : 1, 
         opacity: disabled && !isValidTarget ? 0.5 : 1,
+        transition: isValidTarget ? {
+          scale: {
+            duration: 0.8,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          },
+        } : undefined,
       }}
       exit={{ 
         scale: 0, 
@@ -107,27 +105,33 @@ export function Pill({
       whileTap={(!disabled || isValidTarget) ? { 
         scale: 0.95 
       } : undefined}
-      // Animacao de pulse quando selecionada ou alvo valido
-      {...((selected || isValidTarget) && {
-        animate: {
-          scale: [1, 1.05, 1],
-          opacity: 1,
-          transition: {
-            duration: 1,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          },
-        },
-      })}
       aria-label={`Pilula ${shapeLabel}${showType ? ` - ${label}` : ' (oculta)'}${hasInverted ? ' (invertida)' : ''}${hasDoubled ? ' (dobrada)' : ''}`}
       title={`${shapeLabel}${showType ? ` - ${label}` : ''}`}
     >
-      {/* Imagem da Shape */}
-      <img
+      {/* Imagem da Shape com drop-shadow colorido baseado no tipo */}
+      <motion.img
         src={shapeImage}
         alt={shapeLabel}
-        className="w-full h-full object-contain drop-shadow-lg drop-shadow-black select-none pointer-events-none"
+        className="w-full h-full object-contain select-none pointer-events-none"
+        style={{
+          filter: typeColor 
+            ? `drop-shadow(0 0 4px ${typeColor}) drop-shadow(0 0 8px ${typeColor}) drop-shadow(0 0 16px ${typeColor}80)`
+            : 'drop-shadow(0 2px 3px rgba(0,0,0,0.6))',
+        }}
         draggable={false}
+        // Animacao de pulse quando revelada por scanner (temporario)
+        animate={isScanned && !pill.isRevealed ? {
+          scale: [1, 1.08, 1],
+          transition: {
+            duration: 0.8,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          },
+        } : {
+          scale: 1,
+        }}
+        // Transicao suave do filtro
+        transition={{ filter: { duration: 0.3 } }}
       />
 
       {/* Badge de Invertido */}

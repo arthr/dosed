@@ -12,28 +12,28 @@
 
 ### 1.1 Modulo de Progressao
 
-- [ ] TASK-SS-001: Criar arquivo `src/utils/shapeProgression.ts`
+- [x] TASK-SS-001: Criar arquivo `src/utils/shapeProgression.ts`
   - Estrutura similar a `pillProgression.ts`
 
-- [ ] TASK-SS-001B: Definir interface `ShapeRule` com unlockRound, startPct, endPct
+- [x] TASK-SS-001B: Definir interface `ShapeRule` com unlockRound, startPct, endPct
 
-- [ ] TASK-SS-001C: Definir interface `ShapeProgressionConfig` com maxRound e rules
+- [x] TASK-SS-001C: Definir interface `ShapeProgressionConfig` com maxRound e rules
 
-- [ ] TASK-SS-001D: Implementar constante `SHAPE_PROGRESSION` com regras:
+- [x] TASK-SS-001D: Implementar constante `SHAPE_PROGRESSION` com regras:
   - round: { unlockRound: 1, startPct: 50, endPct: 15 }
   - capsule: { unlockRound: 1, startPct: 50, endPct: 20 }
   - oval: { unlockRound: 2, startPct: 20, endPct: 20 }
   - triangle: { unlockRound: 3, startPct: 15, endPct: 25 }
   - hexagon: { unlockRound: 5, startPct: 10, endPct: 20 }
 
-- [ ] TASK-SS-001E: Implementar funcao `getShapeChances(round, config?)`
+- [x] TASK-SS-001E: Implementar funcao `getShapeChances(round, config?)`
   - Calcula probabilidades normalizadas por rodada
   - Usa interpolacao linear (lerp)
 
-- [ ] TASK-SS-001F: Implementar funcao `rollShape(round, config?)`
+- [x] TASK-SS-001F: Implementar funcao `rollShape(round, config?)`
   - Sorteia shape baseada nas chances da rodada
 
-- [ ] TASK-SS-001G: Implementar funcao `distributeShapes(count, round, config?)`
+- [x] TASK-SS-001G: Implementar funcao `distributeShapes(count, round, config?)`
   - Distribui shapes proporcionalmente (mesmo algoritmo de distributePillTypes)
 
 ### 1.2 Integracao com pillGenerator

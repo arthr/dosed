@@ -34,3 +34,6 @@ export type {
   TargetSelectionState,
 } from './item'
 
+// Quest types
+export type { QuestConfig, ShapeQuest } from './quest'
+

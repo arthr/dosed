@@ -59,7 +59,7 @@ src/
 |   +-- pill.ts                # EXISTENTE: PillShape ja definido
 |   +-- game.ts                # MODIFICADO: shapeCounts, shapeQuests
 |   +-- item.ts                # MODIFICADO: novos ItemTypes
-|   +-- quest.ts               # NOVO: ShapeQuest, QuestReward
+|   +-- quest.ts               # NOVO: ShapeQuest, QuestConfig
 |   +-- index.ts               # MODIFICADO: exportar novos tipos
 |
 +-- utils/
@@ -91,27 +91,8 @@ src/
 import type { PillShape } from './pill'
 
 /**
- * Tipos de recompensa disponiveis para Shape Quests
- */
-export type QuestRewardType = 
-  | 'heal'           // +N resistencia
-  | 'resistance_max' // Resistencia vai para MAX
-  | 'reveal_random'  // Revela 1 pilula aleatoria
-  | 'extra_turn'     // Jogador joga novamente
-
-/**
- * Recompensa de um objetivo
- */
-export interface QuestReward {
-  type: QuestRewardType
-  /** Valor associado (ex: quantidade de cura) */
-  value?: number
-  /** Descricao para exibicao */
-  description: string
-}
-
-/**
  * Objetivo de sequencia de shapes
+ * Ao completar, jogador recebe +1 Pill Coin
  */
 export interface ShapeQuest {
   /** ID unico */
@@ -120,10 +101,8 @@ export interface ShapeQuest {
   sequence: PillShape[]
   /** Indice da proxima shape esperada (0 = inicio) */
   progress: number
-  /** Se o objetivo foi completado */
+  /** Se o objetivo foi completado nesta rodada */
   completed: boolean
-  /** Recompensa ao completar */
-  reward: QuestReward
 }
 
 /**
@@ -136,13 +115,71 @@ export interface QuestConfig {
   maxLength: number
   /** Rodada a partir da qual sequencias maiores podem aparecer */
   increaseLengthAfterRound: number
-  /** Pool de recompensas com pesos */
-  rewards: Array<{
-    type: QuestRewardType
-    weight: number
-    value?: number
-    description: string
-  }>
+}
+```
+
+### Novos Tipos: Store (`src/types/store.ts`)
+
+```typescript
+import type { ItemType } from './item'
+import type { Player } from './player'
+import type { PlayerId } from './player'
+import type { LucideIcon } from 'lucide-react'
+
+/**
+ * Tipos de Boosts (efeitos imediatos)
+ */
+export type BoostType = 
+  | 'life_up'         // +1 vida
+  | 'full_resistance' // Resistencia MAX
+  | 'reveal_start'    // Inicia rodada com N pills reveladas
+
+/**
+ * Tipos de itens na loja
+ */
+export type StoreItemType = 'power_up' | 'boost'
+
+/**
+ * Item vendido na Pill Store
+ */
+export interface StoreItem {
+  id: string
+  type: StoreItemType
+  name: string
+  description: string
+  cost: number
+  icon: LucideIcon
+  /** Para power_up: qual ItemType adicionar */
+  itemType?: ItemType
+  /** Para boost: qual efeito aplicar */
+  boostType?: BoostType
+  /** Condicao para estar disponivel */
+  isAvailable?: (player: Player) => boolean
+}
+
+/**
+ * Estado da Pill Store (apenas fase shopping)
+ * Nota: wantsStore fica no Player, nao aqui
+ */
+export interface StoreState {
+  /** Jogadores que confirmaram compras */
+  confirmed: Record<PlayerId, boolean>
+  /** Timestamp de inicio do timer */
+  timerStartedAt: number | null
+  /** Duracao atual do timer (ms) */
+  timerDuration: number
+  /** Boosts comprados para aplicar na proxima rodada */
+  pendingBoosts: Record<PlayerId, BoostType[]>
+}
+
+/**
+ * Configuracao da loja
+ */
+export interface StoreConfig {
+  items: StoreItem[]
+  powerUpBaseCost: number
+  shoppingTime: number       // 30000ms
+  reduceMultiplier: number   // 0.5
 }
 ```
 
@@ -151,7 +188,16 @@ export interface QuestConfig {
 ```typescript
 import type { PillShape } from './pill'
 import type { ShapeQuest } from './quest'
+import type { StoreState } from './store'
 import type { PlayerId } from './player'
+
+export type GamePhase = 
+  | 'setup' 
+  | 'itemSelection' 
+  | 'playing' 
+  | 'roundEnding' 
+  | 'shopping'       // NOVA: fazendo compras na Pill Store
+  | 'ended'
 
 export interface GameState {
   // ... campos existentes ...
@@ -162,8 +208,22 @@ export interface GameState {
   /** Objetivo de shape de cada jogador */
   shapeQuests: Record<PlayerId, ShapeQuest | null>
   
-  /** Flag para pular alternancia de turno (extra_turn reward) */
-  skipNextTurnSwitch: boolean
+  /** Estado da Pill Store */
+  storeState: StoreState | null
+}
+```
+
+### Alteracoes em Player (`src/types/player.ts`)
+
+```typescript
+export interface Player {
+  // ... campos existentes ...
+  
+  /** Quantidade de Pill Coins acumuladas */
+  pillCoins: number
+  
+  /** Toggle: jogador quer visitar Pill Store ao fim da rodada */
+  wantsStore: boolean
 }
 ```
 
@@ -453,9 +513,7 @@ export function createPillWithShape(
 
 ```typescript
 import { v4 as uuidv4 } from 'uuid'
-import type { PillShape, ShapeQuest, QuestReward, QuestConfig } from '@/types'
-
-import { getShapeChances } from './shapeProgression'
+import type { PillShape, ShapeQuest, QuestConfig } from '@/types'
 
 /**
  * Configuracao padrao de quests
@@ -464,27 +522,16 @@ export const DEFAULT_QUEST_CONFIG: QuestConfig = {
   minLength: 2,
   maxLength: 3,
   increaseLengthAfterRound: 5,
-  rewards: [
-    { type: 'heal', weight: 35, value: 2, description: '+2 Resistencia' },
-    { type: 'resistance_max', weight: 25, description: 'Resistencia MAX' },
-    { type: 'reveal_random', weight: 25, description: 'Revela 1 pilula' },
-    { type: 'extra_turn', weight: 15, description: 'Turno extra' },
-  ],
 }
 
 /**
  * Gera uma sequencia aleatoria de shapes BASEADA no pool disponivel
  * Garante que a sequencia seja realizavel
- * 
- * NOTA: shapeCounts ja reflete a progressao da rodada (shapes nao desbloqueadas tem count 0)
  */
 function generateSequenceFromPool(
   length: number, 
   shapeCounts: Record<PillShape, number>
 ): PillShape[] {
-  // Cria pool expandido baseado nas contagens
-  // Ex: { round: 2, capsule: 1, oval: 0 } -> ['round', 'round', 'capsule']
-  // Shapes nao desbloqueadas ou sem pilulas no pool nao aparecem
   const availablePool: PillShape[] = []
   for (const [shape, count] of Object.entries(shapeCounts)) {
     for (let i = 0; i < count; i++) {
@@ -492,68 +539,34 @@ function generateSequenceFromPool(
     }
   }
   
-  // Se pool menor que length desejado, ajusta
   const actualLength = Math.min(length, availablePool.length)
-  
-  // Seleciona shapes aleatorias do pool (sem reposicao para garantir realizavel)
   const sequence: PillShape[] = []
   const poolCopy = [...availablePool]
   
   for (let i = 0; i < actualLength; i++) {
     const randomIndex = Math.floor(Math.random() * poolCopy.length)
     sequence.push(poolCopy[randomIndex])
-    poolCopy.splice(randomIndex, 1) // Remove para nao repetir alem do disponivel
+    poolCopy.splice(randomIndex, 1)
   }
   
   return sequence
 }
 
 /**
- * Seleciona recompensa baseado em pesos
- */
-function selectReward(config: QuestConfig): QuestReward {
-  const totalWeight = config.rewards.reduce((sum, r) => sum + r.weight, 0)
-  let random = Math.random() * totalWeight
-  
-  for (const reward of config.rewards) {
-    random -= reward.weight
-    if (random <= 0) {
-      return {
-        type: reward.type,
-        value: reward.value,
-        description: reward.description,
-      }
-    }
-  }
-  
-  // Fallback
-  return config.rewards[0]
-}
-
-/**
- * Gera um novo Shape Quest BASEADO nas shapes disponiveis no pool
- * Garante que a quest seja realizavel
- * 
- * @param round - Numero da rodada (afeta tamanho da sequencia)
- * @param shapeCounts - Contagem de shapes no pool atual
- * @param config - Configuracao de quest
+ * Gera um novo Shape Quest
+ * Ao completar, jogador recebe +1 Pill Coin
  */
 export function generateShapeQuest(
   round: number,
   shapeCounts: Record<PillShape, number>,
   config: QuestConfig = DEFAULT_QUEST_CONFIG
 ): ShapeQuest {
-  // Calcula total de pilulas disponiveis
   const totalPills = Object.values(shapeCounts).reduce((sum, count) => sum + count, 0)
   
-  // Determina tamanho da sequencia (limitado pelo pool)
   let length = config.minLength
   if (round >= config.increaseLengthAfterRound) {
-    // 50% chance de sequencia maior apos rodada X
     length = Math.random() < 0.5 ? config.minLength : config.maxLength
   }
-  
-  // Limita ao tamanho do pool
   length = Math.min(length, totalPills)
   
   return {
@@ -561,21 +574,18 @@ export function generateShapeQuest(
     sequence: generateSequenceFromPool(length, shapeCounts),
     progress: 0,
     completed: false,
-    reward: selectReward(config),
   }
 }
 
 /**
  * Verifica progresso do quest ao consumir pilula
- * Retorna o quest atualizado e se completou
- * 
- * NOTA: Ao completar, NAO gera novo quest. Jogador aguarda proxima rodada.
+ * @returns updatedQuest e justCompleted
+ * Se justCompleted = true, caller deve dar +1 Pill Coin ao jogador
  */
 export function checkQuestProgress(
   quest: ShapeQuest,
   consumedShape: PillShape
 ): { updatedQuest: ShapeQuest; justCompleted: boolean } {
-  // Se quest ja completado, ignora (jogador aguarda proxima rodada)
   if (quest.completed) {
     return { updatedQuest: quest, justCompleted: false }
   }
@@ -590,21 +600,300 @@ export function checkQuestProgress(
       updatedQuest: {
         ...quest,
         progress: newProgress,
-        completed: justCompleted, // Marca como completado, NAO gera novo
+        completed: justCompleted,
       },
       justCompleted,
     }
   } else {
-    // Shape errada: reset progresso
     return {
-      updatedQuest: {
-        ...quest,
-        progress: 0,
-      },
+      updatedQuest: { ...quest, progress: 0 },
       justCompleted: false,
     }
   }
 }
+```
+
+---
+
+## Logica da Pill Store
+
+### Modulo: storeConfig.ts (`src/utils/storeConfig.ts`)
+
+```typescript
+import type { StoreConfig, StoreItem } from '@/types'
+import { Heart, Shield, Eye, Bomb, Syringe, Scan } from 'lucide-react'
+
+export const STORE_ITEMS: StoreItem[] = [
+  // BOOSTS (efeitos imediatos)
+  {
+    id: 'life_up',
+    type: 'boost',
+    name: '1-Up',
+    description: '+1 vida',
+    cost: 3,
+    icon: Heart,
+    boostType: 'life_up',
+    isAvailable: (player) => player.lives < 3, // MAX_LIVES
+  },
+  {
+    id: 'full_resistance',
+    type: 'boost',
+    name: 'Reboot',
+    description: 'Resistencia MAX',
+    cost: 2,
+    icon: Shield,
+    boostType: 'full_resistance',
+    isAvailable: (player) => player.resistance < player.maxResistance,
+  },
+  {
+    id: 'reveal_start',
+    type: 'boost',
+    name: 'Scanner-2X',
+    description: 'Proxima rodada inicia com 2 pills reveladas',
+    cost: 2,
+    icon: Scan,
+    boostType: 'reveal_start',
+  },
+  
+  // POWER-UPS (adiciona ao inventario)
+  {
+    id: 'power_antidote',
+    type: 'power_up',
+    name: 'Antidoto',
+    description: 'Adiciona Antidote ao inventario',
+    cost: 2,
+    icon: Syringe,
+    itemType: 'antidote',
+    isAvailable: (player) => player.items.length < 2, // MAX_ITEMS
+  },
+  {
+    id: 'power_reveal',
+    type: 'power_up',
+    name: 'Revelador',
+    description: 'Adiciona Reveal ao inventario',
+    cost: 2,
+    icon: Eye,
+    itemType: 'reveal',
+    isAvailable: (player) => player.items.length < 2,
+  },
+  {
+    id: 'power_bomb',
+    type: 'power_up',
+    name: 'Bomba',
+    description: 'Adiciona Bomb ao inventario',
+    cost: 2,
+    icon: Bomb,
+    itemType: 'bomb',
+    isAvailable: (player) => player.items.length < 2,
+  },
+]
+
+export const DEFAULT_STORE_CONFIG: StoreConfig = {
+  items: STORE_ITEMS,
+  powerUpBaseCost: 2,
+  shoppingTime: 30000,      // 30 segundos para comprar
+  reduceMultiplier: 0.5,    // Reduz pela metade quando outro confirma
+}
+```
+
+### Modulo: storeActions.ts (`src/stores/gameStore.ts` - novas actions)
+
+```typescript
+// Actions da Pill Store
+
+/**
+ * Toggle: jogador quer/nao quer visitar a loja ao fim da rodada
+ * Chamado quando jogador clica no icone de Pill Coins
+ */
+toggleWantsStore: (playerId: PlayerId) => {
+  const player = get().players[playerId]
+  
+  // Validacao: precisa ter coins para ativar
+  if (player.pillCoins === 0) {
+    toastStore.show({
+      message: 'Sem Pill Coins! Complete quests para obter.',
+      type: 'warning',
+    })
+    return
+  }
+  
+  // Toggle wantsStore
+  set({
+    players: {
+      ...get().players,
+      [playerId]: {
+        ...player,
+        wantsStore: !player.wantsStore,
+      },
+    },
+  })
+},
+
+/**
+ * Verifica se deve abrir loja ao fim da rodada
+ * Chamado quando pool esvazia (apos verificar Game Over)
+ */
+checkAndStartShopping: () => {
+  const { players } = get()
+  
+  // Verifica se alguem quer ir a loja E tem coins
+  const p1Wants = players.player1.wantsStore && players.player1.pillCoins > 0
+  const p2Wants = players.player2.wantsStore && players.player2.pillCoins > 0
+  
+  if (p1Wants || p2Wants) {
+    // Inicia fase de shopping
+    set({
+      phase: 'shopping',
+      storeState: {
+        confirmed: { player1: false, player2: false },
+        timerStartedAt: Date.now(),
+        timerDuration: DEFAULT_STORE_CONFIG.shoppingTime,
+        pendingBoosts: { player1: [], player2: [] },
+      },
+    })
+  } else {
+    // Ninguem quer, proxima rodada direto
+    get().resetRound()
+  }
+},
+
+/**
+ * Compra item da loja
+ */
+purchaseStoreItem: (playerId: PlayerId, itemId: string) => {
+  const state = get()
+  const player = state.players[playerId]
+  const item = STORE_ITEMS.find(i => i.id === itemId)
+  
+  if (!item || player.pillCoins < item.cost) return
+  if (item.isAvailable && !item.isAvailable(player)) return
+  
+  // Deduz coins
+  const newPlayers = {
+    ...state.players,
+    [playerId]: {
+      ...player,
+      pillCoins: player.pillCoins - item.cost,
+      // Se power_up, adiciona ao inventario
+      items: item.type === 'power_up' && item.itemType
+        ? [...player.items, { type: item.itemType, usesRemaining: 1 }]
+        : player.items,
+    },
+  }
+  
+  // Se boost, adiciona a pendingBoosts
+  let newStoreState = state.storeState
+  if (item.type === 'boost' && item.boostType && newStoreState) {
+    newStoreState = {
+      ...newStoreState,
+      pendingBoosts: {
+        ...newStoreState.pendingBoosts,
+        [playerId]: [...newStoreState.pendingBoosts[playerId], item.boostType],
+      },
+    }
+  }
+  
+  set({ players: newPlayers, storeState: newStoreState })
+},
+
+/**
+ * Jogador confirma compras
+ */
+confirmStorePurchases: (playerId: PlayerId) => {
+  const state = get()
+  if (!state.storeState) return
+  
+  const otherPlayer = playerId === 'player1' ? 'player2' : 'player1'
+  const newConfirmed = { ...state.storeState.confirmed, [playerId]: true }
+  
+  // Reduz timer se outro ainda comprando
+  let newTimerDuration = state.storeState.timerDuration
+  const otherIsShopping = state.players[otherPlayer].wantsStore && 
+                          state.players[otherPlayer].pillCoins > 0
+  
+  if (!newConfirmed[otherPlayer] && otherIsShopping) {
+    const elapsed = Date.now() - (state.storeState.timerStartedAt ?? 0)
+    const remaining = state.storeState.timerDuration - elapsed
+    newTimerDuration = elapsed + (remaining * DEFAULT_STORE_CONFIG.reduceMultiplier)
+    
+    toastStore.show({
+      message: 'Oponente finalizou! Tempo reduzido.',
+      type: 'warning',
+    })
+  }
+  
+  set({
+    storeState: {
+      ...state.storeState,
+      confirmed: newConfirmed,
+      timerDuration: newTimerDuration,
+    },
+  })
+  
+  get().checkShoppingComplete()
+},
+
+/**
+ * Verifica se shopping terminou
+ */
+checkShoppingComplete: () => {
+  const { storeState, players } = get()
+  if (!storeState) return
+  
+  // Quem precisa confirmar: quem queria ir E tem coins
+  const p1NeedsConfirm = players.player1.wantsStore && players.player1.pillCoins > 0
+  const p2NeedsConfirm = players.player2.wantsStore && players.player2.pillCoins > 0
+  
+  const p1Done = !p1NeedsConfirm || storeState.confirmed.player1
+  const p2Done = !p2NeedsConfirm || storeState.confirmed.player2
+  
+  if (p1Done && p2Done) {
+    get().applyPendingBoosts()
+    get().resetRound()
+  }
+},
+
+/**
+ * Aplica boosts pendentes e inicia nova rodada
+ */
+applyPendingBoosts: () => {
+  const { storeState, players } = get()
+  if (!storeState) return
+  
+  const newPlayers = { ...players }
+  
+  for (const playerId of ['player1', 'player2'] as PlayerId[]) {
+    const boosts = storeState.pendingBoosts[playerId]
+    for (const boost of boosts) {
+      switch (boost) {
+        case 'life_up':
+          newPlayers[playerId] = {
+            ...newPlayers[playerId],
+            lives: Math.min(newPlayers[playerId].lives + 1, MAX_LIVES),
+          }
+          break
+        case 'full_resistance':
+          newPlayers[playerId] = {
+            ...newPlayers[playerId],
+            resistance: newPlayers[playerId].maxResistance,
+          }
+          break
+        case 'reveal_start':
+          // Marcar para revelar 2 pills no inicio da rodada
+          // (implementar flag no state)
+          break
+      }
+    }
+    
+    // Reseta wantsStore para proxima rodada
+    newPlayers[playerId] = {
+      ...newPlayers[playerId],
+      wantsStore: false,
+    }
+  }
+  
+  set({ players: newPlayers, storeState: null })
+},
 ```
 
 ---
@@ -819,7 +1108,7 @@ const initialState: GameState = {
     player2: null,
   },
   
-  skipNextTurnSwitch: false,
+  storeState: null,
 }
 ```
 
@@ -887,7 +1176,7 @@ consumePill: (pillId: string) => {
     
     // Verifica progresso do quest
     let newShapeQuests = { ...state.shapeQuests }
-    let questReward: QuestReward | null = null
+    let earnedPillCoin = false
     
     if (currentQuest && !currentQuest.completed) {
       const { updatedQuest, justCompleted } = checkQuestProgress(
@@ -896,7 +1185,7 @@ consumePill: (pillId: string) => {
       )
       
       if (justCompleted) {
-        questReward = updatedQuest.reward
+        earnedPillCoin = true
         // NAO gera novo quest - jogador aguarda proxima rodada
         // Quest fica marcado como completed
       }
@@ -907,13 +1196,22 @@ consumePill: (pillId: string) => {
     // Remove pilula do pool
     const newPillPool = state.pillPool.filter(p => p.id !== pillId)
     
+    // Atualiza Pill Coins se completou quest
+    const newPlayers = earnedPillCoin ? {
+      ...state.players,
+      [currentPlayerId]: {
+        ...state.players[currentPlayerId],
+        pillCoins: state.players[currentPlayerId].pillCoins + 1,
+      },
+    } : state.players
+    
     return {
       ...state,
       pillPool: newPillPool,
       typeCounts: newTypeCounts,
       shapeCounts: newShapeCounts,
       shapeQuests: newShapeQuests,
-      // questReward sera processado separadamente para aplicar bonus
+      players: newPlayers,
     }
   })
 },
@@ -1112,7 +1410,7 @@ export function ShapeSelector({
 |       |       |                                                         |
 |       |       +-> Match: progresso++                                    |
 |       |       +-> Mismatch: progresso = 0                               |
-|       |       +-> Complete: aplica recompensa (NAO gera novo quest)     |
+|       |       +-> Complete: +1 Pill Coin (NAO gera novo quest)          |
 |       |                                                                 |
 |       v                                                                 |
 |  [UI atualiza: ShapeQuestDisplay mostra progresso]                      |
@@ -1121,9 +1419,9 @@ export function ShapeSelector({
 |       +-> Se completou: UI mostra "Aguardando proxima rodada"           |
 |       |                                                                 |
 |       v                                                                 |
-|  [Alterna turno] (ou turno extra se reward = extra_turn)                |
+|  [Alterna turno]                                                        |
 |       |                                                                 |
-|  [Pool esvazia? -> resetRound() -> NOVOS QUESTS gerados]                |
+|  [Pool esvazia? -> checkAndStartShopping() ou resetRound()]             |
 |                                                                         |
 +-------------------------------------------------------------------------+
 ```
@@ -1226,11 +1524,6 @@ describe('questGenerator', () => {
       expect(quest.sequence.length).toBeLessThanOrEqual(2)
     })
     
-    it('gera reward valido', () => {
-      const quest = generateShapeQuest(1, mockShapeCounts)
-      expect(['heal', 'resistance_max', 'reveal_random', 'extra_turn'])
-        .toContain(quest.reward.type)
-    })
   })
   
   describe('checkQuestProgress', () => {
@@ -1240,7 +1533,6 @@ describe('questGenerator', () => {
         sequence: ['round', 'triangle'],
         progress: 0,
         completed: false,
-        reward: { type: 'heal', value: 2, description: '+2' },
       }
       
       const { updatedQuest } = checkQuestProgress(quest, 'round')
@@ -1253,20 +1545,18 @@ describe('questGenerator', () => {
         sequence: ['round', 'triangle'],
         progress: 1,
         completed: false,
-        reward: { type: 'heal', value: 2, description: '+2' },
       }
       
       const { updatedQuest } = checkQuestProgress(quest, 'capsule')
       expect(updatedQuest.progress).toBe(0)
     })
     
-    it('completa quest ao terminar sequencia', () => {
+    it('completa quest ao terminar sequencia (justCompleted = true para dar Pill Coin)', () => {
       const quest: ShapeQuest = {
         id: '1',
         sequence: ['round'],
         progress: 0,
         completed: false,
-        reward: { type: 'heal', value: 2, description: '+2' },
       }
       
       const { updatedQuest, justCompleted } = checkQuestProgress(quest, 'round')
@@ -1333,12 +1623,13 @@ describe('shapeProgression', () => {
 4. Adicionar label em `SHAPE_LABELS`
 5. Adicionar count inicial em `initialState.shapeCounts`
 
-### Recompensas Adicionais
+### Novos Itens da Pill Store
 
-Para adicionar novas recompensas (ex: `life`, `item_refill`):
-1. Adicionar ao tipo `QuestRewardType`
-2. Adicionar entrada em `DEFAULT_QUEST_CONFIG.rewards`
-3. Implementar aplicacao no `consumePill` ou separadamente
+Para adicionar novos itens na loja:
+1. Adicionar ao tipo `BoostType` em `store.ts` (se for boost)
+2. Adicionar entrada em `STORE_ITEMS` em `storeConfig.ts`
+3. Implementar logica em `applyPendingBoosts()` (se for boost)
+4. Adicionar ao `ITEM_CATALOG` (se for power-up)
 
 ### IA Considerando Shapes
 

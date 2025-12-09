@@ -178,7 +178,7 @@ shapeCounts: Record<PillShape, number>
 
 ### RF-004: Sistema de Objetivos (Shape Quests)
 
-**EARS:** O sistema DEVE atribuir objetivos de sequencia de shapes a cada jogador, concedendo bonus aleatorios ao completar.
+**EARS:** O sistema DEVE atribuir objetivos de sequencia de shapes a cada jogador, concedendo **Pill Coins** ao completar.
 
 #### 4.1 Estrutura do Objetivo
 
@@ -192,27 +192,19 @@ interface ShapeQuest {
   progress: number
   /** Se o objetivo foi completado */
   completed: boolean
-  /** Recompensa ao completar */
-  reward: QuestReward
-}
-
-interface QuestReward {
-  type: 'heal' | 'resistance_max' | 'reveal_random' | 'extra_turn'
-  value?: number
-  description: string
 }
 ```
 
-#### 4.2 Pool de Recompensas
+> **Nota:** Ao completar quest, jogador recebe +1 Pill Coin (moeda acumulavel para usar na Pill Store).
 
-| Tipo | Descricao | Peso |
-| :--- | :--- | :--- |
-| `heal` | +2 Resistencia | 35% |
-| `resistance_max` | Resistencia vai para MAX | 25% |
-| `reveal_random` | Revela 1 pilula aleatoria do pool | 25% |
-| `extra_turn` | Jogador joga novamente (nao passa turno) | 15% |
+#### 4.2 Pill Coins
 
-> **Nota:** Pool simplificado para MVP. Recompensas como `life` (+1 vida) e `item_refill` podem ser adicionadas futuramente via sistema de progressao.
+| Propriedade | Valor |
+| :--- | :--- |
+| **Obtencao** | +1 ao completar Shape Quest |
+| **Acumulo** | Jogador pode acumular multiplas coins |
+| **Uso** | Gastar na Pill Store entre rodadas |
+| **Visual** | Icone `dosed_pill.svg` com contador |
 
 #### 4.3 Geracao de Objetivos
 
@@ -240,10 +232,11 @@ interface QuestReward {
 - [ ] Progresso rastreado a cada pilula consumida
 - [ ] Consumir shape CORRETA: avanca progresso
 - [ ] Consumir shape ERRADA: reseta progresso para 0
-- [ ] Ao completar: bonus aplicado, quest marcado como completed (nao gera novo)
+- [ ] Ao completar: +1 Pill Coin, quest marcado como completed (nao gera novo)
 - [ ] Novo quest so e gerado na proxima rodada
 - [ ] UI exibe objetivo atual e progresso (abaixo do inventario ou proximo)
 - [ ] UI indica quando quest foi completado (aguardando proxima rodada)
+- [ ] UI exibe Pill Coins do jogador no AnimatedPlayerArea
 
 #### 4.4 Logica de Progresso
 
@@ -259,33 +252,127 @@ function onPillConsumed(player: Player, pill: Pill) {
     quest.progress++
     if (quest.progress >= quest.sequence.length) {
       quest.completed = true
-      applyQuestReward(player, quest.reward)
+      player.pillCoins++ // +1 Pill Coin
       // NAO gera novo quest - jogador aguarda proxima rodada
     }
   } else {
     quest.progress = 0 // Reset
   }
 }
-
-// Geracao de quest baseada no pool
-function generateShapeQuest(round: number, shapeCounts: Record<PillShape, number>) {
-  const availableShapes = Object.entries(shapeCounts)
-    .filter(([_, count]) => count > 0)
-    .map(([shape, _]) => shape as PillShape)
-  
-  // Sequencia usa apenas shapes disponiveis
-  const sequence = generateSequenceFromAvailable(availableShapes, shapeCounts, length)
-  // ...
-}
 ```
 
 ---
 
-### RF-005: Itens Baseados em Shape
+### RF-005: Pill Store (Loja de Recompensas)
+
+**EARS:** O sistema DEVE permitir que jogadores gastem Pill Coins em uma loja entre rodadas para adquirir Power-Ups e Boosts.
+
+#### 5.1 Fluxo da Pill Store
+
+```
+[Durante rodada: toggle wantsStore] -> [Pool esvazia] -> [Shopping?] -> [Nova Rodada]
+```
+
+**Fluxo Simplificado:**
+1. Durante a rodada, jogador pode clicar no icone de Pill Coins para sinalizar que quer visitar a loja
+2. Ao pool esvaziar, se pelo menos 1 jogador sinalizou (e tem coins), inicia fase shopping
+3. Se ninguem sinalizou, proxima rodada inicia direto
+
+#### 5.2 Toggle "Quero Visitar Loja"
+
+**Regras:**
+- Icone de Pill Coins e clicavel APENAS se `pillCoins > 0`
+- Click funciona como toggle (ativa/desativa `wantsStore`)
+- Jogador pode mudar de ideia a qualquer momento durante a rodada
+- Estado `wantsStore` e resetado para `false` ao iniciar nova rodada
+
+**Comportamento do Click:**
+
+| Condicao | Acao |
+| :--- | :--- |
+| `pillCoins === 0` | Toast: "Sem Pill Coins! Complete quests para obter." |
+| `pillCoins > 0` e `wantsStore === false` | Ativa toggle, feedback visual (highlight) |
+| `pillCoins > 0` e `wantsStore === true` | Desativa toggle |
+
+**Estados Visuais do Icone:**
+
+| Estado | Visual |
+| :--- | :--- |
+| `pillCoins === 0` | Icone opaco/cinza, cursor not-allowed |
+| `pillCoins > 0`, `wantsStore === false` | Icone normal, cursor pointer |
+| `pillCoins > 0`, `wantsStore === true` | Icone com highlight/glow/badge |
+
+#### 5.3 Fase Shopping (Compras)
+
+**Condicao de Entrada:**
+- Pool esvaziou E nao e Game Over
+- Pelo menos 1 jogador tem `wantsStore === true` E `pillCoins > 0`
+
+**Regras:**
+- Timer: 30 segundos (configuravel)
+- Jogador que sinalizou: ve a Pill Store
+- Jogador que nao sinalizou: ve "Aguardando oponente..."
+- Se um confirmar: avisa outro + timer reduz 50%
+- Se timer expirar: confirma automatico (compras feitas ate entao)
+- Ambos confirmam: aplica boosts + inicia nova rodada
+
+#### 5.4 Itens da Loja
+
+**Tipos de Itens:**
+
+| Tipo | Descricao |
+| :--- | :--- |
+| `power_up` | Adiciona item ao inventario |
+| `boost` | Efeito de ativacao imediata |
+
+**Boosts Disponiveis:**
+
+| ID | Nome | Descricao | Custo | Condicao |
+| :--- | :--- | :--- | :--- | :--- |
+| `life_up` | 1-Up | +1 vida | 3 | Vida < MAX |
+| `full_resistance` | Reboot | Resistencia = MAX | 2 | Resistencia < MAX |
+| `reveal_start` | Scanner-2X | Proxima rodada inicia com 2 pills reveladas | 2 | - |
+
+**Power-Ups Disponiveis:**
+- Todos os itens do `ITEM_CATALOG` podem ser comprados
+- Custo base: 2 Pill Coins
+- Condicao: Inventario nao cheio
+
+#### 5.5 Configuracao da Loja
+
+```typescript
+interface StoreConfig {
+  items: StoreItem[]
+  powerUpBaseCost: number
+  shoppingTime: number  // 30000ms
+  reduceMultiplier: number  // 0.5
+}
+```
+
+**Criterios de Aceitacao:**
+- [ ] Icone de Pill Coins clicavel apenas se `pillCoins > 0`
+- [ ] Toast de aviso ao clicar sem coins
+- [ ] Toggle `wantsStore` funciona durante toda a rodada
+- [ ] Feedback visual quando `wantsStore === true` (highlight no icone)
+- [ ] `wantsStore` resetado ao iniciar nova rodada
+- [ ] Pill Store nao exibida se Game Over
+- [ ] Pill Store abre se pelo menos 1 jogador sinalizou com coins
+- [ ] Loja exibida apenas para quem sinalizou
+- [ ] Tela "Aguardando" para quem nao sinalizou
+- [ ] Timer de 30s na fase shopping
+- [ ] Timer reduz 50% quando um jogador confirma
+- [ ] Compras deduzem Pill Coins
+- [ ] Power-Ups adicionados ao inventario
+- [ ] Boosts aplicados ao iniciar proxima rodada
+- [ ] Itens indisponiveis (inventario cheio, vida MAX) desabilitados
+
+---
+
+### RF-006: Itens Baseados em Shape
 
 **EARS:** O sistema DEVE suportar novos itens que interagem com shapes.
 
-#### 5.1 Shape Bomb
+#### 6.1 Shape Bomb
 
 | Propriedade | Valor |
 | :--- | :--- |
@@ -308,7 +395,7 @@ function generateShapeQuest(round: number, shapeCounts: Record<PillShape, number
 - [ ] Contagens (typeCounts e shapeCounts) atualizadas
 - [ ] Se pool esvaziar, nova rodada inicia
 
-#### 5.2 Shape Scanner
+#### 6.2 Shape Scanner
 
 | Propriedade | Valor |
 | :--- | :--- |
@@ -324,7 +411,7 @@ function generateShapeQuest(round: number, shapeCounts: Record<PillShape, number
 - [ ] Pilulas reveladas adicionadas ao `revealedPills`
 - [ ] UI indica quais pilulas foram reveladas (visual de scanned)
 
-#### 5.3 Shape Shift (Futuro/Opcional)
+#### 6.3 Shape Shift (Futuro/Opcional)
 
 | Propriedade | Valor |
 | :--- | :--- |
@@ -391,20 +478,31 @@ interface GameState {
 
 ```typescript
 // src/types/quest.ts (novo arquivo)
-export type QuestRewardType = 'heal' | 'resistance_max' | 'reveal_random' | 'extra_turn'
-
-export interface QuestReward {
-  type: QuestRewardType
-  value?: number
-  description: string
-}
-
 export interface ShapeQuest {
   id: string
   sequence: PillShape[]
   progress: number
   completed: boolean
-  reward: QuestReward
+}
+// Nota: Ao completar quest, jogador recebe +1 Pill Coin
+
+// src/types/store.ts (novo arquivo)
+export type BoostType = 'life_up' | 'full_resistance' | 'reveal_start'
+export type StoreItemType = 'power_up' | 'boost'
+
+export interface StoreItem {
+  id: string
+  type: StoreItemType
+  name: string
+  cost: number
+  // ...
+}
+
+export interface StoreState {
+  confirmed: Record<PlayerId, boolean>
+  timerStartedAt: number | null
+  timerDuration: number
+  pendingBoosts: Record<PlayerId, BoostType[]>
 }
 ```
 
@@ -445,12 +543,17 @@ export interface ShapeQuest {
 
 ### Arquivos a Criar
 - `src/utils/shapeProgression.ts` - Progressao de shapes (similar a pillProgression)
-- `src/types/quest.ts` - Tipos de ShapeQuest e QuestReward
+- `src/types/quest.ts` - Tipos de ShapeQuest e QuestConfig
+- `src/types/store.ts` - Tipos da Pill Store (StoreState, StoreItem, etc)
 - `src/utils/questGenerator.ts` - Geracao e logica de quests
+- `src/utils/storeConfig.ts` - Configuracao da Pill Store
+- `src/hooks/useStoreTimer.ts` - Hook para timer da loja
 - `src/components/game/ShapeIcon.tsx` - Icone de shape isolado
 - `src/components/game/ShapeQuestDisplay.tsx` - UI do objetivo
 - `src/components/game/ShapeSelector.tsx` - Selecao de shape para itens
-- `src/components/game/ShapeCounter.tsx` - Contagem de shapes (opcional)
+- `src/components/game/PillStore.tsx` - UI da loja
+- `src/components/game/StoreItemCard.tsx` - Card de item na loja
+- `src/components/game/WaitingForOpponent.tsx` - Tela de espera
 
 ### Arquivos a Modificar
 - `src/types/pill.ts` - Manter PillShape (ja existe)

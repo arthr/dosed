@@ -4,7 +4,6 @@
 - `[ ]` Pendente
 - `[x]` Concluido
 - `[~]` Em andamento
-- `[-]` Cancelado
 
 ---
 
@@ -118,21 +117,35 @@
 
 ### 3.1 Definicao de Tipos
 
-- [ ] TASK-SS-020: Criar arquivo `src/types/quest.ts`
-  - QuestRewardType
-  - QuestReward interface
+- [x] TASK-SS-020: Criar arquivo `src/types/quest.ts`
   - ShapeQuest interface
   - QuestConfig interface
 
-- [ ] TASK-SS-021: Exportar novos tipos em `src/types/index.ts`
+- [x] TASK-SS-021: Exportar novos tipos em `src/types/index.ts`
 
 ### 3.2 Alteracoes no GameState
 
 - [ ] TASK-SS-022: Adicionar `shapeQuests: Record<PlayerId, ShapeQuest | null>` ao `GameState`
 
-- [ ] TASK-SS-023: Adicionar `skipNextTurnSwitch: boolean` ao `GameState` (para reward extra_turn)
+- [ ] TASK-SS-024: Atualizar `initialState` com `shapeQuests`
 
-- [ ] TASK-SS-024: Atualizar `initialState` com `shapeQuests` e `skipNextTurnSwitch`
+### 3.3 Pill Store - Novos Tipos
+
+- [ ] TASK-SS-024B: Criar arquivo `src/types/store.ts`
+  - BoostType tipo
+  - StoreItemType tipo
+  - StoreItem interface
+  - StoreState interface (apenas fase shopping)
+  - StoreTimerConfig interface
+  - StoreConfig interface
+
+- [ ] TASK-SS-024C: Exportar novos tipos de store em `src/types/index.ts`
+
+- [ ] TASK-SS-024D: Adicionar `pillCoins: number` e `wantsStore: boolean` ao `Player` em `src/types/player.ts`
+
+- [ ] TASK-SS-024E: Adicionar `storeState: StoreState | null` ao `GameState`
+
+- [ ] TASK-SS-024F: Adicionar phase `'shopping'` ao tipo `GamePhase`
 
 ---
 
@@ -146,27 +159,27 @@
   - minLength: 2
   - maxLength: 3
   - increaseLengthAfterRound: 5
-  - rewards: pool com pesos
 
 - [ ] TASK-SS-027: Implementar funcao `generateSequenceFromPool(length, shapeCounts)` 
   - Gera sequencia APENAS com shapes disponiveis no pool
   - Respeita quantidade de cada shape (nao pede mais do que existe)
 
-- [ ] TASK-SS-028: Implementar funcao `selectReward(config)` - selecao por peso
-
 - [ ] TASK-SS-029: Implementar funcao `generateShapeQuest(round, shapeCounts, config?)`
   - Recebe shapeCounts para gerar quest realizavel
   - Limita tamanho da sequencia ao total de pilulas no pool
+  - NAO gera reward - ao completar, jogador recebe +1 Pill Coin
 
 - [ ] TASK-SS-030: Implementar funcao `checkQuestProgress(quest, consumedShape)` 
   - Retorna { updatedQuest, justCompleted }
   - Ao completar: marca completed = true (NAO gera novo quest)
+  - Se justCompleted = true, caller deve dar +1 Pill Coin
 
 ### 4.2 Integracao com GameStore
 
 - [ ] TASK-SS-031: Atualizar `initGame()` para gerar quests iniciais
   - Passar shapeCounts para generateShapeQuest()
   - Gerar quest para ambos jogadores
+  - Inicializar pillCoins = 0 para ambos
 
 - [ ] TASK-SS-032: Atualizar `confirmItemSelection()` para gerar quests iniciais
   - Passar shapeCounts para generateShapeQuest()
@@ -179,23 +192,15 @@
 - [ ] TASK-SS-034: Atualizar `consumePill()` para:
   - Chamar `checkQuestProgress()` com shape da pilula consumida
   - Atualizar `shapeQuests[playerId]` com quest atualizado
-  - Se completou: marcar como completed, NAO gerar novo quest
-  - Retornar/armazenar recompensa para aplicacao
-
-- [ ] TASK-SS-035: Implementar aplicacao de recompensas no `consumePill()` ou action separada
-  - heal: aumentar resistencia
-  - resistance_max: setar resistencia = maxResistance
-  - reveal_random: revelar pilula aleatoria (adicionar em revealedPills)
-  - extra_turn: setar skipNextTurnSwitch = true
-
-- [ ] TASK-SS-036: Atualizar logica de alternancia de turno para verificar `skipNextTurnSwitch`
+  - Se completou: +1 Pill Coin ao jogador
+  - Marcar como completed, NAO gerar novo quest
 
 ### 4.3 UI de Quest
 
 - [ ] TASK-SS-037: Criar componente `ShapeQuestDisplay.tsx` em `src/components/game/`
   - Mostra sequencia de shapes
   - Indica progresso atual
-  - Mostra recompensa
+  - Mostra "+1 Pill Coin" como recompensa
   - Mostra estado "Completado - aguardando proxima rodada" quando quest.completed = true
 
 - [ ] TASK-SS-038: Integrar `ShapeQuestDisplay` no `AnimatedPlayerArea.tsx`
@@ -212,8 +217,114 @@
 
 - [ ] TASK-SS-041: Adicionar feedback de completar
   - Animacao de celebracao
-  - Toast com recompensa recebida
+  - Toast "+1 Pill Coin!"
   - UI mostra "Aguardando proxima rodada" (nao gera novo quest)
+
+### 4.4 UI de Pill Coins
+
+- [ ] TASK-SS-041B: Criar exibicao de Pill Coins no `AnimatedPlayerArea.tsx`
+  - Icone `dosed_pill.svg` com contador discreto
+  - Clicavel APENAS se `pillCoins > 0`
+  - Click funciona como toggle para `wantsStore`
+  - Estados visuais:
+    - `pillCoins === 0`: icone opaco/cinza, cursor not-allowed
+    - `pillCoins > 0`, `wantsStore === false`: icone normal, cursor pointer
+    - `pillCoins > 0`, `wantsStore === true`: icone com highlight/glow
+  - Tooltip contextual
+
+- [ ] TASK-SS-041C: Implementar `toggleWantsStore(playerId)` no gameStore
+  - Valida `pillCoins > 0` antes de ativar
+  - Se `pillCoins === 0`: mostra toast de aviso
+  - Toggle `player.wantsStore`
+
+---
+
+## Fase 4B: Pill Store (Loja de Recompensas)
+
+### 4B.1 Configuracao da Loja
+
+- [ ] TASK-SS-080: Criar arquivo `src/utils/storeConfig.ts`
+  - DEFAULT_STORE_CONFIG com shoppingTime, reduceMultiplier
+  - STORE_ITEMS array com todos itens da loja
+
+- [ ] TASK-SS-081: Definir itens do tipo Boost em STORE_ITEMS:
+  - life_up (1-Up): +1 vida, custo 3, condicao vida < MAX
+  - full_resistance (Reboot): resistencia MAX, custo 2, condicao resistencia < MAX
+  - reveal_start (Scanner-2X): 2 pills reveladas na proxima rodada, custo 2
+
+- [ ] TASK-SS-082: Definir itens do tipo Power-Up em STORE_ITEMS:
+  - power_antidote, power_reveal, power_bomb
+  - Custo base 2, condicao inventario nao cheio
+
+### 4B.2 Estado e Actions da Store
+
+- [ ] TASK-SS-083: Implementar `checkAndStartShopping()` no gameStore
+  - Verifica se alguem tem `wantsStore === true` E `pillCoins > 0`
+  - Se sim: inicia phase = 'shopping'
+  - Se nao: resetRound() direto
+
+- [ ] TASK-SS-084: Implementar `purchaseStoreItem(playerId, itemId)` no gameStore
+  - Valida coins e disponibilidade
+  - Deduz pillCoins
+  - Se power_up: adiciona ao inventario
+  - Se boost: adiciona a pendingBoosts
+
+- [ ] TASK-SS-085: Implementar `confirmStorePurchases(playerId)` no gameStore
+  - Marca confirmed[playerId] = true
+  - Se outro comprando e nao confirmou: reduz timer, avisa
+  - Chama checkShoppingComplete()
+
+- [ ] TASK-SS-086: Implementar `checkShoppingComplete()` no gameStore
+  - Verifica se todos que precisam confirmar ja confirmaram
+  - Chama applyPendingBoosts() e resetRound()
+
+- [ ] TASK-SS-087: Implementar `applyPendingBoosts()` no gameStore
+  - Aplica life_up, full_resistance
+  - Marca flag para reveal_start na proxima rodada
+  - Reseta `wantsStore = false` para ambos jogadores
+
+- [ ] TASK-SS-088: Adicionar flag `revealAtStart: number` ao GameState
+  - Indica quantas pills revelar automaticamente ao iniciar rodada
+  - Consumida em resetRound() apos revelar
+
+### 4B.3 Hook de Timer
+
+- [ ] TASK-SS-089: Criar `src/hooks/useStoreTimer.ts`
+  - Monitora storeState.timerStartedAt e timerDuration
+  - Retorna remainingTime e formattedTime
+  - Chama handleShoppingTimeout ao expirar (apenas shopping)
+
+### 4B.4 UI da Pill Store
+
+- [ ] TASK-SS-090: Criar componente `PillStore.tsx`
+  - Header com timer e Pill Coins do jogador
+  - Aviso se oponente confirmou (tempo reduzido)
+  - Grid de StoreItemCard
+  - Botao [CONFIRMAR]
+
+- [ ] TASK-SS-091: Criar componente `StoreItemCard.tsx`
+  - Icone, nome, descricao, custo
+  - Estado: disponivel, indisponivel (cinza), nao pode comprar (coins insuficientes)
+  - onClick para comprar
+
+- [ ] TASK-SS-092: Criar componente `WaitingForOpponent.tsx`
+  - Exibido para quem NAO sinalizou `wantsStore` na fase shopping
+  - "Aguardando oponente fazer compras..."
+  - Timer visual
+
+- [ ] TASK-SS-093: Integrar overlays no `Game.tsx` ou `GameBoard.tsx`
+  - Renderizar PillStore ou WaitingForOpponent em phase 'shopping'
+  - PillStore para quem tem `wantsStore === true`
+  - WaitingForOpponent para quem tem `wantsStore === false`
+
+### 4B.5 Fluxo de Fim de Rodada
+
+- [ ] TASK-SS-094: Modificar `endRound()` ou logica equivalente
+  - Ao pool esvaziar: verificar se Game Over
+  - Se nao Game Over: chamar `checkAndStartShopping()`
+  - checkAndStartShopping verifica wantsStore e decide:
+    - Alguem quer ir E tem coins -> phase = 'shopping'
+    - Ninguem quer -> resetRound() direto
 
 ---
 
@@ -347,9 +458,9 @@
 
 ### 7.2 Balanceamento
 
-- [ ] TASK-SS-075: Testar balanceamento de recompensas de quest
-  - Ajustar pesos se necessario
-  - Ajustar valores (heal amount, etc)
+- [ ] TASK-SS-075: Testar balanceamento da Pill Store
+  - Ajustar custos de itens se necessario
+  - Verificar frequencia de obtencao de Pill Coins
 
 - [ ] TASK-SS-076: Testar balanceamento de itens de shape
   - Shape Bomb muito forte? Limitar quantidade no inventario
@@ -369,12 +480,18 @@
 | Arquivo | Descricao |
 |---------|-----------|
 | `src/utils/shapeProgression.ts` | Progressao de shapes (similar a pillProgression) |
-| `src/types/quest.ts` | Tipos de ShapeQuest e QuestReward |
+| `src/types/quest.ts` | Tipos de ShapeQuest |
+| `src/types/store.ts` | Tipos de Pill Store (StoreState, StoreItem, etc) |
 | `src/utils/questGenerator.ts` | Geracao e logica de quests |
+| `src/utils/storeConfig.ts` | Configuracao da Pill Store |
+| `src/hooks/useStoreTimer.ts` | Hook para timer da loja |
 | `src/components/game/ShapeIcon.tsx` | Icone de shape isolado |
 | `src/components/game/ShapeQuestDisplay.tsx` | UI do objetivo atual |
 | `src/components/game/ShapeSelector.tsx` | Selecao de shape para itens |
 | `src/components/game/ShapeCounter.tsx` | Contagem de shapes (opcional) |
+| `src/components/game/PillStore.tsx` | UI da loja de compras |
+| `src/components/game/StoreItemCard.tsx` | Card de item na loja |
+| `src/components/game/WaitingForOpponent.tsx` | Tela de espera |
 | `src/utils/__tests__/shapeProgression.test.ts` | Testes de progressao de shapes |
 | `src/utils/__tests__/questGenerator.test.ts` | Testes de quests |
 
@@ -382,7 +499,8 @@
 | Arquivo | Mudancas |
 |---------|----------|
 | `src/types/pill.ts` | (ja tem PillShape, sem mudancas) |
-| `src/types/game.ts` | shapeCounts, shapeQuests, skipNextTurnSwitch |
+| `src/types/game.ts` | shapeCounts, shapeQuests, storeState, novas phases |
+| `src/types/player.ts` | pillCoins, wantsStore |
 | `src/types/item.ts` | SHAPE_BOMB, SHAPE_SCANNER |
 | `src/types/index.ts` | Exportar novos tipos |
 | `src/utils/constants.ts` | SHAPE_CLASSES, SHAPE_CLIP_PATHS, SHAPE_LABELS |
@@ -390,9 +508,10 @@
 | `src/utils/itemCatalog.ts` | Novos itens |
 | `src/utils/itemLogic.ts` | Logica dos novos itens (se necessario) |
 | `src/utils/aiLogic.ts` | selectAIItemTarget para shape items |
-| `src/stores/gameStore.ts` | Estado, geracao de quests, progresso, recompensas |
+| `src/stores/gameStore.ts` | Estado, quests, pillCoins, store actions |
 | `src/components/game/Pill.tsx` | Renderizacao de shapes |
-| `src/components/game/AnimatedPlayerArea.tsx` | Integrar ShapeQuestDisplay |
+| `src/components/game/AnimatedPlayerArea.tsx` | ShapeQuestDisplay, Pill Coins |
+| `src/components/game/Game.tsx` | Renderizar overlays da loja |
 | `src/hooks/useItemUsage.ts` | Suporte a targetType: shape |
 
 ---
@@ -412,6 +531,9 @@ Fase 3 (Tipos de Quest) - Estrutura
 Fase 4 (Sistema de Quests) - Core da feature
      |
      v
+Fase 4B (Pill Store) - Loja de recompensas
+     |
+     v
 Fase 5 (Itens de Shape) - Expansao
      |
      v
@@ -424,7 +546,8 @@ Fase 7 (Polish) - Refinamento
 **Dependencias:**
 - Fase 2 depende de Fase 1 (shapes devem existir para renderizar)
 - Fase 4 depende de Fase 3 (tipos devem existir)
-- Fase 5 depende de Fase 2 e 4 (ShapeSelector usa ShapeIcon, itens usam shapeCounts)
+- Fase 4B depende de Fase 4 (Pill Coins vem de quests)
+- Fase 5 depende de Fase 2 e 4B (ShapeSelector usa ShapeIcon, itens na loja)
 - Fase 6 e 7 podem ser paralelas apos Fase 5
 
 ---
@@ -436,11 +559,12 @@ Fase 7 (Polish) - Refinamento
 | Fase 1 | Baixa | 1h |
 | Fase 2 | Media | 2h |
 | Fase 3 | Baixa | 30min |
-| Fase 4 | Alta | 3h |
+| Fase 4 | Alta | 2h 30min |
+| Fase 4B | Alta | 3h 30min |
 | Fase 5 | Media | 2h |
 | Fase 6 | Media | 1h 30min |
 | Fase 7 | Baixa | 1h |
-| **Total** | - | **~11h** |
+| **Total** | - | **~14h** |
 
 ---
 
@@ -517,7 +641,7 @@ A quest DEVE ser realizavel:
 
 ### Nova Quest Apenas em Nova Rodada
 
-- Ao completar quest: aplica recompensa, marca `completed = true`
+- Ao completar quest: +1 Pill Coin, marca `completed = true`
 - NAO gera novo quest imediatamente
 - Jogador aguarda proxima rodada para receber novo quest
 - UI deve indicar "Completado - aguardando proxima rodada"
@@ -525,14 +649,41 @@ A quest DEVE ser realizavel:
 
 ### Shape Bomb e Pool Vazio
 
-Se Shape Bomb remover todas as pilulas restantes, nova rodada deve iniciar. Reutilizar logica existente de Discard.
+Se Shape Bomb remover todas as pilulas restantes, iniciar fluxo de fim de rodada (Pill Store). Reutilizar logica existente de Discard.
 
-### Extra Turn Reward
+### Pill Store - Toggle Durante Rodada
 
-A recompensa `extra_turn`:
-- Seta `skipNextTurnSwitch = true`
-- Na logica de fim de turno: se flag true, nao alterna turno e reseta flag
-- Funciona para humano e IA
+**Regras do Toggle `wantsStore`:**
+- Icone de Pill Coins clicavel APENAS se `pillCoins > 0`
+- Click com `pillCoins === 0`: mostra toast de aviso
+- Click funciona como toggle: ativa/desativa `wantsStore`
+- Jogador pode mudar de ideia a qualquer momento durante a rodada
+- `wantsStore` e resetado para `false` ao iniciar nova rodada
+
+**Fim da Rodada:**
+- Se alguem tem `wantsStore === true` E `pillCoins > 0`: phase = 'shopping'
+- Se ninguem quer: resetRound() direto
+
+**Fase Shopping (30s):**
+- Apenas quem tem `wantsStore === true` ve a loja
+- Quem tem `wantsStore === false` ve tela de espera
+- Se um confirmar: avisa outro + timer reduz 50%
+- Se timer expirar: confirma automatico
+- Ambos confirmados -> aplica boosts + resetRound()
+
+### Pill Store - Boosts
+
+Boosts sao efeitos aplicados ao iniciar proxima rodada:
+- `life_up`: +1 vida (max 3)
+- `full_resistance`: resistencia = maxResistance
+- `reveal_start`: revela N pills automaticamente no inicio
+
+### IA e Pill Store
+
+Para MVP, a IA:
+- Pode setar `wantsStore = true` se tem coins e precisa de itens/boosts
+- Compras simples: prioriza life_up se vida baixa, full_resistance se resistencia baixa
+- NAO otimiza estrategicamente
 
 ### IA Ignora Quests
 
@@ -541,5 +692,5 @@ Para MVP, a IA:
 - NAO tenta completar seus quests
 - PODE usar Shape Bomb/Scanner com heuristicas simples (shape com mais pilulas)
 
-Futuro: IA avancada pode considerar quests.
+Futuro: IA avancada pode considerar quests e otimizar compras na loja.
 

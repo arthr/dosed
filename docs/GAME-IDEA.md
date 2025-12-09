@@ -109,25 +109,57 @@ Cada pilula possui uma **forma visual** (shape) independente do seu tipo de efei
 
 **C. Sistema de Objetivos (Shape Combos):**
 * Jogadores recebem objetivos de sequencia de shapes a consumir.
-* Completar um objetivo concede bonus aleatorio.
+* Completar um objetivo concede +1 Pill Coin (para usar na Pill Store).
 * Novo objetivo e atribuido apenas no inicio de cada rodada.
 
 ### 5.4 Objetivos de Shape (Shape Quests)
 
-| Exemplo de Objetivo | Recompensa Possivel |
+| Exemplo de Objetivo | Recompensa |
 | :--- | :--- |
-| Consumir: Triangle -> Round -> Capsule | +1 Vida |
-| Consumir: Flower -> Star | Reabastecer 1 Item usado |
-| Consumir: Oval -> Heart | +2 Resistencia |
+| Consumir: Triangle -> Round -> Capsule | +1 Pill Coin |
+| Consumir: Flower -> Star | +1 Pill Coin |
+| Consumir: Oval -> Heart | +1 Pill Coin |
 
 **Regras:**
 * Apenas UM objetivo ativo por vez.
-* Objetivo concluido = bonus aplicado, aguarda proxima rodada para novo objetivo.
+* Objetivo concluido = +1 Pill Coin, aguarda proxima rodada para novo objetivo.
 * Objetivos sao pessoais (cada jogador tem o seu).
-* Bonus sao aleatorios dentro de um pool definido.
 * Sequencia gerada apenas com shapes disponiveis no pool atual.
+* Pill Coins sao acumulaveis e podem ser gastas na Pill Store.
 
-> **Nota:** Sistema de objetivos sera detalhado em `.specs/shape-system/`.
+### 5.5 Pill Store (Loja de Recompensas)
+
+Sistema de loja que aparece ao final de cada rodada (opcional).
+
+**Toggle Durante a Rodada:**
+* O icone de Pill Coins no painel do jogador e clicavel (se `pillCoins > 0`).
+* Click funciona como toggle para sinalizar "quero visitar a loja".
+* Jogador pode mudar de ideia a qualquer momento durante a rodada.
+* Se `pillCoins === 0`, click mostra aviso: "Complete quests para obter!"
+
+**Fluxo ao Fim da Rodada:**
+1. Ao pool esvaziar, verifica se alguem sinalizou E tem coins.
+2. Se sim: fase de compras inicia (timer 30s).
+3. Se nao: proxima rodada inicia direto.
+4. Quem sinalizou ve a loja; quem nao sinalizou ve "Aguardando oponente...".
+5. Ao confirmar compras, boosts sao aplicados na proxima rodada.
+
+**Regras de Timer (Shopping):**
+* Se um jogador confirmar, timer do outro reduz pela metade.
+* Timer expirado = confirma compras feitas ate entao.
+
+**Itens da Loja:**
+
+| Tipo | Item | Efeito | Custo |
+| :--- | :--- | :--- | :--- |
+| **Boost** | 1-Up | +1 Vida (se nao estiver no maximo) | 3 |
+| **Boost** | Reboot | Resistencia = MAX | 2 |
+| **Boost** | Scanner-2X | Proxima rodada inicia com 2 pills reveladas | 2 |
+| **Power-Up** | Antidote | Adiciona Antidote ao inventario | 2 |
+| **Power-Up** | Reveal | Adiciona Reveal ao inventario | 2 |
+| **Power-Up** | Bomb | Adiciona Bomb ao inventario | 2 |
+
+> **Nota:** Pill Store nao aparece em Game Over. Detalhes em `.specs/shape-system/`.
 
 ---
 
@@ -161,9 +193,12 @@ Um turno e composto por **Acoes Livres** seguidas de uma **Acao Obrigatoria**.
 5. **Fim do Turno:** Passa a vez para o oponente.
 
 ### Fase 4: Fim de Rodada
-1. Quando pool esvazia, nova rodada inicia.
-2. Shields sao removidos.
-3. Novos objetivos de shape podem ser atribuidos.
+1. Quando pool esvazia, verifica se Game Over.
+2. Se nao Game Over, verifica se alguem sinalizou `wantsStore` E tem coins.
+3. Se sim: fase de compras (timer 30s).
+4. Se nao: proxima rodada direto.
+5. Boosts comprados sao aplicados, `wantsStore` resetado.
+6. Nova rodada inicia com novos objetivos de shape.
 
 ---
 

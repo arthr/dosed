@@ -36,9 +36,11 @@ src/
 ├── types/                      # Definicoes TypeScript
 │   ├── index.ts               # Barrel export
 │   ├── pill.ts                # Pill, PillType, PillConfig
-│   ├── player.ts              # Player, PlayerId, PlayerEffect, PlayerInventory
+│   ├── player.ts              # Player, PlayerId, PlayerEffect, PlayerInventory (+ pillCoins)
 │   ├── game.ts                # GameState, GamePhase, GameConfig, TargetSelectionState
-│   └── item.ts                # ItemType, ItemCategory, ItemDefinition, InventoryItem
+│   ├── item.ts                # ItemType, ItemCategory, ItemDefinition, InventoryItem
+│   ├── quest.ts               # ShapeQuest, QuestConfig
+│   └── store.ts               # StoreState, StoreItem, StoreConfig (Pill Store)
 │
 ├── utils/                      # Funcoes puras (logica de negocio)
 │   ├── constants.ts           # Configuracoes e valores default
@@ -46,7 +48,10 @@ src/
 │   ├── gameLogic.ts           # Efeitos, colapso, criacao de player
 │   ├── aiLogic.ts             # Logica da IA (selecao, itens, heuristicas)
 │   ├── itemCatalog.ts         # Catalogo de itens (9 itens, cores, icones)
-│   └── itemLogic.ts           # Logica de efeitos de cada item
+│   ├── itemLogic.ts           # Logica de efeitos de cada item
+│   ├── shapeProgression.ts    # Progressao de shapes por rodada
+│   ├── questGenerator.ts      # Geracao de Shape Quests
+│   └── storeConfig.ts         # Configuracao da Pill Store (itens, timers)
 │
 ├── stores/                     # Estado global (Zustand)
 │   ├── gameStore.ts           # Estado + Actions + Selectors
@@ -63,7 +68,8 @@ src/
 │   ├── useItemUsage.ts        # Uso de itens durante partida
 │   ├── useAIItemSelection.ts  # Selecao automatica de itens pela IA
 │   ├── useOverlay.ts          # Acesso ao overlayStore
-│   └── useToast.ts            # Acesso ao toastStore
+│   ├── useToast.ts            # Acesso ao toastStore
+│   └── useStoreTimer.ts       # Timer da Pill Store (countdown)
 │
 ├── components/
 │   ├── ui/                    # Componentes shadcn/ui
@@ -95,7 +101,17 @@ src/
 │   │   ├── ItemCard.tsx             # Card visual do item
 │   │   ├── InventoryBar.tsx         # Barra de inventario (5 slots)
 │   │   ├── InventorySlot.tsx        # Slot individual de item
-│   │   └── ItemTargetSelector.tsx   # Overlay de selecao de alvo
+│   │   ├── ItemTargetSelector.tsx   # Overlay de selecao de alvo
+│   │   │
+│   │   │  # Sistema de Shapes
+│   │   ├── ShapeIcon.tsx            # Icone de shape isolado
+│   │   ├── ShapeQuestDisplay.tsx    # UI do objetivo atual
+│   │   ├── ShapeSelector.tsx        # Selecao de shape para itens
+│   │   │
+│   │   │  # Pill Store
+│   │   ├── PillStore.tsx            # UI principal da loja
+│   │   ├── StoreItemCard.tsx        # Card de item na loja
+│   │   └── WaitingForOpponent.tsx   # Tela de espera
 │   │
 │   ├── overlays/              # Overlays bloqueantes
 │   │   ├── OverlayManager.tsx     # Gerencia qual overlay esta ativo
@@ -123,16 +139,28 @@ src/
      ↑                                                            │                        │
      │                                                            │ pool vazio             │
      │                                                            ↓                        │
-     │                                                     ┌─────────────┐                 │
-     │                                                     │ roundEnding │                 │
-     │                                                     └─────────────┘                 │
-     │                                                            │                        │
-     │                                                            │ resetRound()           │
-     │                                                            ↓                        │
-     │                                                     [playing - nova rodada]         │
+     │                                               [Alguem sinalizou loja?]              │
+     │                                                   │              │                  │
+     │                                                  NAO            SIM                 │
+     │                                                   │              ↓                  │
+     │                                                   │      ┌───────────┐              │
+     │                                                   │      │ shopping  │ (timer 30s)  │
+     │                                                   │      └───────────┘              │
+     │                                                   │              │                  │
+     │                                                   ↓              ↓                  │
+     │                                                ┌─────────────────┐                  │
+     │                                                │ resetRound()    │                  │
+     │                                                │ (aplica boosts) │                  │
+     │                                                └─────────────────┘                  │
+     │                                                         │                           │
+     │                                                         ↓                           │
+     │                                                [playing - nova rodada]              │
      │                                                                                     │
      └──────────────────────────── resetGame() ────────────────────────────────────────────┘
 ```
+
+> **Nota:** Toggle `wantsStore` e feito durante a rodada clicando no icone de Pill Coins (se `pillCoins > 0`).
+> A fase `shopping` so ocorre se pelo menos 1 jogador sinalizou. Pill Store nao aparece em Game Over.
 
 ### Fluxo de Selecao de Itens
 
@@ -508,8 +536,29 @@ src/
 │     │ │  Repete ate pool esvaziar                 │                 │
 │     │ └───────────────────────────────────────────┘                 │
 │     │                                                               │
-│     │ Pool vazio? → phase = 'roundEnding'                           │
-│     │ → resetRound() → Nova rodada                                  │
+│     │ Pool vazio? → Verifica wantsStore                             │
+│     │                                                               │
+│     │ ┌───────────────────────────────────────────┐                 │
+│     │ │         PILL STORE (OPCIONAL)             │                 │
+│     │ │                                           │                 │
+│     │ │  Durante a rodada:                        │                 │
+│     │ │  - Jogador clica icone Pill Coins         │                 │
+│     │ │  - Se pillCoins > 0: toggle wantsStore    │                 │
+│     │ │  - Se pillCoins = 0: toast de aviso       │                 │
+│     │ │                                           │                 │
+│     │ │  Ao pool esvaziar:                        │                 │
+│     │ │  - Ninguem wantsStore? → resetRound()     │                 │
+│     │ │                                           │                 │
+│     │ │  [shopping] Timer 30s (se alguem)         │                 │
+│     │ │  - Quem sinalizou: ve loja                │                 │
+│     │ │  - Quem nao: "Aguardando..."              │                 │
+│     │ │  - Um confirma → timer outro reduz 50%    │                 │
+│     │ │  - Timeout → confirma automatico          │                 │
+│     │ │  - Compras: Power-Ups, Boosts             │                 │
+│     │ │                                           │                 │
+│     │ │  Todos confirmados → applyBoosts()        │                 │
+│     │ │  → resetRound() → Nova rodada             │                 │
+│     │ └───────────────────────────────────────────┘                 │
 │     │                                                               │
 │     │ Jogador eliminado?                                            │
 │     ↓                                                               │

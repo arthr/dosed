@@ -146,8 +146,8 @@
 
 - [x] TASK-PP-050: Alterar `PROGRESSION.rules.LIFE` para { unlockRound: 5, startPct: 6, endPct: 17 }
 - [x] TASK-PP-051: Verificar CSS para cor `bg-pill-life` (ja estava configurado)
-- [ ] TASK-PP-052: Testar balanceamento com LIFE ativo (MANUAL)
-- [ ] TASK-PP-053: Ajustar porcentagens se necessario (CONDICIONAL)
+- [X] TASK-PP-052: Testar balanceamento com LIFE ativo (MANUAL)
+- [X] TASK-PP-053: Ajustar porcentagens se necessario (CONDICIONAL)
 
 ---
 

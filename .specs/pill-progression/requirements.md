@@ -29,9 +29,7 @@ O sistema possui dois eixos de progressao:
 | DMG_HIGH     | Toxina       | Rodada 1    |
 | HEAL         | Antidoto     | Rodada 2    |
 | FATAL        | Cianeto      | Rodada 4    |
-| LIFE         | Vida         | Rodada 10*  |
-
-> *LIFE e uma feature futura, implementada mas desativada por padrao.
+| LIFE         | Vida         | Rodada 5    |
 
 ---
 
@@ -84,17 +82,16 @@ interface ProgressionConfig {
 
 ---
 
-### RF-005: Novo Tipo de Pilula - LIFE (Feature Flag)
+### RF-005: Novo Tipo de Pilula - LIFE
 **EARS:** O sistema DEVE suportar um novo tipo de pilula LIFE que recupera vidas perdidas.
 
 **Efeito:**
 - Recupera +1 vida (ate o maximo de vidas)
 - NAO afeta resistencia
 
-**Feature Flag:**
-- Implementado no codigo
-- Desativado por padrao (`endPct: 0` ou `unlockRound > maxRound`)
-- Pode ser ativado alterando configuracao
+**Configuracao Atual:**
+- Desbloqueia na rodada 5
+- `{ unlockRound: 5, startPct: 6, endPct: 17 }`
 
 ---
 
@@ -185,23 +182,23 @@ Rodada 19+: 12 pilulas (cap)
 ## Criterios de Aceitacao
 
 ### Progressao de Tipos
-- [ ] Probabilidades mudam conforme rodada avanca
-- [ ] Tipos sao desbloqueados na rodada correta
-- [ ] Soma de probabilidades sempre igual a 100%
-- [ ] Tipo LIFE implementado mas desativado
-- [ ] Configuracao centralizada em PROGRESSION
+- [x] Probabilidades mudam conforme rodada avanca
+- [x] Tipos sao desbloqueados na rodada correta
+- [x] Soma de probabilidades sempre igual a 100%
+- [x] Tipo LIFE implementado e ativado (rodada 5)
+- [x] Configuracao centralizada em PROGRESSION
 
 ### Pool Scaling
-- [ ] Quantidade de pilulas aumenta em degraus
-- [ ] Frequencia de aumento configuravel
-- [ ] Limite maximo (cap) respeitado
-- [ ] Configuracao centralizada em POOL_SCALING
+- [x] Quantidade de pilulas aumenta em degraus
+- [x] Frequencia de aumento configuravel
+- [x] Limite maximo (cap) respeitado
+- [x] Configuracao centralizada em POOL_SCALING
 
 ### Geral
-- [ ] Geracao de pilulas usa rodada atual para tipo E quantidade
-- [ ] Testes unitarios para funcoes de calculo
-- [ ] Comportamento de IA nao afetado
-- [ ] UI de PillPool adapta-se a quantidades variaveis
+- [x] Geracao de pilulas usa rodada atual para tipo E quantidade
+- [x] Testes unitarios para funcoes de calculo
+- [x] Comportamento de IA nao afetado
+- [x] UI de PillPool adapta-se a quantidades variaveis
 
 ---
 

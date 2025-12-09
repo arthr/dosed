@@ -177,5 +177,6 @@ Selecao automatica de itens pela IA:
 - `PROGRESSION` - Configuracao de desbloqueio e distribuicao de tipos por rodada
 - `POOL_SCALING` - Configuracao de quantidade de pilulas por rodada (step function)
 - `getPillChances(round, config?)` - Calcula probabilidades normalizadas por rodada
-- `rollPillType(round, config?)` - Sorteia tipo de pilula baseado na rodada
+- `rollPillType(round, config?)` - Sorteia tipo de pilula baseado na rodada (uso: pilulas bonus)
 - `getPillCount(round, config?)` - Calcula quantidade de pilulas por rodada
+- `distributePillTypes(count, round, config?)` - Distribui pilulas proporcionalmente (usado pelo pool principal)

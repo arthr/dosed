@@ -244,6 +244,16 @@ export type ItemType =
   // Novos
   | 'SHAPE_BOMB'
   | 'SHAPE_SCANNER'
+
+/** Fonte de obtencao de item */
+export type ItemSource = 'initial' | 'store'
+
+/** ItemDefinition com novo atributo availableIn */
+export interface ItemDefinition {
+  // ... campos existentes ...
+  /** Onde o item pode ser obtido. Se omitido, disponivel em TODOS os lugares */
+  availableIn?: ItemSource[]
+}
 ```
 
 ---
@@ -1255,6 +1265,7 @@ export const ITEM_CATALOG: Record<ItemType, ItemDefinition> = {
     category: 'chaos',
     targetType: 'pill',  // Reutiliza selecao de pill existente
     color: 'text-purple-400',
+    availableIn: ['store'],  // Apenas na Pill Store
   },
   
   shape_scanner: {
@@ -1265,6 +1276,7 @@ export const ITEM_CATALOG: Record<ItemType, ItemDefinition> = {
     category: 'intel',
     targetType: 'pill',  // Reutiliza selecao de pill existente
     color: 'text-blue-400',
+    availableIn: ['store'],  // Apenas na Pill Store
   },
 }
 ```

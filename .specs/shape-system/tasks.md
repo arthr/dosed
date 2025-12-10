@@ -456,12 +456,14 @@
 
 ### 7.2 Balanceamento
 
-- [ ] TASK-SS-075: Testar balanceamento da Pill Store
-  - Ajustar custos de itens se necessario
-  - Verificar frequencia de obtencao de Pill Coins
+- [x] TASK-SS-075: Bloquear itens de shape na selecao inicial
+  - Adicionado atributo `availableIn?: ItemSource[]` em `ItemDefinition`
+  - Shape Bomb e Shape Scanner configurados com `availableIn: ['store']`
+  - Criados helpers: `getItemsForInitialSelection()`, `getAllItemsForInitialSelection()`, `getItemsForStore()`
+  - ItemSelectionScreen e useAIItemSelection atualizados para usar filtro
 
 - [ ] TASK-SS-076: Testar balanceamento de itens de shape
-  - Shape Bomb muito forte? Limitar quantidade no inventario
+  - Shape Bomb muito forte? Considerar adicionar na Pill Store com custo alto
   - Shape Scanner muito fraco? Aumentar utilidade
 
 ### 7.3 Documentacao

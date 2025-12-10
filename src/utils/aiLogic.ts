@@ -169,6 +169,36 @@ export function deduceNonRevealedTypes(ctx: AIDecisionContext): Map<string, Pill
   return deductions
 }
 
+/**
+ * Calcula nivel de risco do pool de forma simplificada
+ * Versao rapida para uso em decisoes simples
+ */
+export function calculatePoolRisk(
+  typeCounts: Record<PillType, number>,
+  poolSize: number
+): PoolRiskLevel {
+  const total = Object.values(typeCounts).reduce((sum, n) => sum + n, 0)
+  if (total === 0) return 'low'
+
+  const damageCount = typeCounts.DMG_LOW + typeCounts.DMG_HIGH + typeCounts.FATAL
+  const safeCount = typeCounts.SAFE + typeCounts.HEAL + typeCounts.LIFE
+
+  // CRITICO: FATAL presente em pool pequeno
+  if (typeCounts.FATAL > 0 && poolSize <= 3) {
+    return 'critical'
+  }
+  // ALTO: Maioria e dano
+  if (damageCount / total > 0.5) {
+    return 'high'
+  }
+  // BAIXO: Maioria e seguro
+  if (safeCount / total > 0.5) {
+    return 'low'
+  }
+  // MEDIO: Equilibrado
+  return 'medium'
+}
+
 // ============================================
 // Selecao de Pilulas
 // ============================================

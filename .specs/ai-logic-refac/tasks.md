@@ -6,7 +6,7 @@
 | :--- | :---: | :---: | :---: |
 | Types | 5 | 5 | 0 |
 | Config | 3 | 3 | 0 |
-| AI Logic - Analise | 4 | 3 | 1 |
+| AI Logic - Analise | 4 | 4 | 0 |
 | AI Logic - Selecao | 4 | 0 | 4 |
 | AI Logic - Itens | 4 | 0 | 4 |
 | AI Logic - Pre-jogo/Loja | 4 | 0 | 4 |
@@ -14,7 +14,7 @@
 | Hooks | 4 | 0 | 4 |
 | Components | 3 | 0 | 3 |
 | Integration | 3 | 0 | 3 |
-| **TOTAL** | **37** | **11** | **26** |
+| **TOTAL** | **37** | **12** | **25** |
 
 ---
 
@@ -80,7 +80,7 @@
   - Retorna `Map<pillId, PillType[]>` com tipos possiveis por pilula
   - Usado apenas por nivel Insane (`config.usesDeduction`)
 
-- [ ] TASK-011: Implementar `calculatePoolRisk(typeCounts, poolSize)` (helper)
+- [x] TASK-011: Implementar `calculatePoolRisk(typeCounts, poolSize)` (helper)
   - Versao simplificada para uso rapido
   - Retorna apenas `PoolRiskLevel`
 

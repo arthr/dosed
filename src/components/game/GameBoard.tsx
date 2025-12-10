@@ -3,6 +3,7 @@ import { useGameStore } from '@/stores/gameStore'
 import { useOverlayStore } from '@/stores/overlayStore'
 import { usePillConsumption } from '@/hooks/usePillConsumption'
 import { useAIPlayer } from '@/hooks/useAIPlayer'
+import { useAIStore } from '@/hooks/useAIStore'
 import { useItemUsage, useToast } from '@/hooks'
 import { AnimatedPlayerArea } from './AnimatedPlayerArea'
 import { PillPool } from './PillPool'
@@ -53,6 +54,9 @@ export function GameBoard() {
   const currentPlayer = players[currentTurn]
   const isHumanTurn = !currentPlayer.isAI
   const isRoundEnding = gamePhase === 'roundEnding'
+
+  // Hook de comportamento da IA na loja
+  useAIStore()
 
   // Hook de uso de itens
   const {

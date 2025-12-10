@@ -11,10 +11,10 @@
 | AI Logic - Itens | 4 | 4 | 0 |
 | AI Logic - Pre-jogo/Loja | 4 | 4 | 0 |
 | Store | 3 | 3 | 0 |
-| Hooks | 4 | 3 | 1 |
+| Hooks | 4 | 4 | 0 |
 | Components | 3 | 0 | 3 |
 | Integration | 3 | 0 | 3 |
-| **TOTAL** | **37** | **30** | **7** |
+| **TOTAL** | **37** | **31** | **6** |
 
 ---
 
@@ -202,7 +202,7 @@
   - `shouldAIWantStore()` chamado durante rodada
   - `selectAIStoreItems()` chamado na fase shopping
 
-- [ ] TASK-030: Integrar `useAIStore` no fluxo de shopping
+- [x] TASK-030: Integrar `useAIStore` no fluxo de shopping
   - Conectar com gameStore
   - Auto-toggle `wantsStore` para IA
   - Auto-compra na fase shopping

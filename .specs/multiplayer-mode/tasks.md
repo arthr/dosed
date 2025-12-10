@@ -295,12 +295,12 @@
 ---
 
 ### TASK-MP-024: Atualizar App.tsx
-- [ ] Importar componentes multiplayer
-- [ ] Adicionar logica de roteamento para lobby/waiting
-- [ ] Integrar `DisconnectedOverlay` globalmente
+- [x] Importar componentes multiplayer
+- [x] Adicionar logica de roteamento para lobby/waiting
+- [x] Integrar `DisconnectedOverlay` globalmente
 
 **Arquivos:**
-- `src/App.tsx`
+- `src/App.tsx` (atualizado)
 
 ---
 

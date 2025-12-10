@@ -8,7 +8,7 @@ import { InfoPanel } from '@/components/game/InfoPanel'
 import { GameBoard } from '@/components/game/GameBoard'
 import { ItemSelectionScreen } from '@/components/game/ItemSelectionScreen'
 import { DifficultySelect } from '@/components/game/DifficultySelect'
-import { LobbyScreen, WaitingRoom } from '@/components/multiplayer'
+import { LobbyScreen, WaitingRoom, DisconnectedOverlay } from '@/components/multiplayer'
 import { OverlayManager } from '@/components/overlays'
 import { ToastManager } from '@/components/toasts'
 import { useOverlayStore } from '@/stores/overlayStore'
@@ -124,6 +124,7 @@ function GamePage() {
       {/* Sistemas globais de UI */}
       <OverlayManager />
       <ToastManager />
+      <DisconnectedOverlay />
     </>
   )
 }

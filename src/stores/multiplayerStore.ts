@@ -363,6 +363,36 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
       case 'player_joined': {
         // Guest entrou - atualiza sala e inicia jogo (apenas host processa)
         if (state.localRole === 'host' && state.room) {
+          const gameStore = useGameStore.getState()
+          const gamePhase = gameStore.phase
+
+          // Guard: Se jogo ja esta em andamento, nao reinicia
+          // Isso evita que reconexoes acidentais resetem o estado do jogo
+          if (state.room.status === 'playing' || (gamePhase !== 'setup' && gamePhase !== 'itemSelection')) {
+            console.log('[MultiplayerStore] Ignorando player_joined - jogo ja em andamento', {
+              roomStatus: state.room.status,
+              gamePhase,
+            })
+
+            // Envia state_sync para sincronizar guest que pode ter perdido estado
+            get().sendEvent({
+              type: 'state_sync',
+              payload: {
+                currentTurn: gameStore.currentTurn,
+                phase: gameStore.phase,
+                pillPool: gameStore.pillPool,
+                players: gameStore.players,
+                round: gameStore.round,
+                revealedPills: gameStore.revealedPills,
+                shapeQuests: gameStore.shapeQuests,
+                typeCounts: gameStore.typeCounts,
+                shapeCounts: gameStore.shapeCounts,
+                storeState: gameStore.storeState,
+              },
+            })
+            break
+          }
+
           const guestNamePayload = (payload.payload as { guestName?: string }) ?? {}
           const guestName = guestNamePayload.guestName ?? 'Guest'
 
@@ -377,7 +407,6 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
           set({ room: updatedRoom })
 
           // Inicia o jogo automaticamente (host gera os dados)
-          const gameStore = useGameStore.getState()
           gameStore.initGame({
             mode: 'multiplayer',
             roomId: state.room.id,
@@ -496,26 +525,49 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
             storeState?: import('@/types').StoreState | null
           }
 
-          if (syncPayload) {
-            // Aplica estado sincronizado diretamente no gameStore
-            useGameStore.setState({
-              currentTurn: syncPayload.currentTurn,
-              phase: syncPayload.phase,
-              pillPool: syncPayload.pillPool,
-              players: syncPayload.players,
-              round: syncPayload.round,
-              revealedPills: syncPayload.revealedPills,
-              shapeQuests: syncPayload.shapeQuests,
-              typeCounts: syncPayload.typeCounts,
-              shapeCounts: syncPayload.shapeCounts,
-              storeState: syncPayload.storeState,
+          // Validacao robusta do payload
+          if (!syncPayload || typeof syncPayload !== 'object') {
+            console.error('[MultiplayerStore] state_sync recebido com payload invalido:', {
+              payloadType: typeof payload.payload,
+              fullPayload: payload,
             })
-            console.log('[MultiplayerStore] Guest aplicou state_sync do host', {
-              currentTurn: syncPayload.currentTurn,
-              phase: syncPayload.phase,
-              round: syncPayload.round,
-            })
+            break
           }
+
+          // Verificar campos obrigatorios para sincronizacao
+          if (!syncPayload.phase || !syncPayload.currentTurn) {
+            console.error('[MultiplayerStore] state_sync faltando campos obrigatorios:', {
+              hasPhase: !!syncPayload.phase,
+              hasCurrentTurn: !!syncPayload.currentTurn,
+              receivedKeys: Object.keys(syncPayload),
+            })
+            break
+          }
+
+          // Log antes de aplicar para debug
+          const gameStoreBefore = useGameStore.getState()
+          console.log('[MultiplayerStore] Guest aplicando state_sync', {
+            antes: { phase: gameStoreBefore.phase, currentTurn: gameStoreBefore.currentTurn, round: gameStoreBefore.round },
+            depois: { phase: syncPayload.phase, currentTurn: syncPayload.currentTurn, round: syncPayload.round },
+          })
+
+          // Aplica estado sincronizado diretamente no gameStore
+          // Usa spread condicional para evitar sobrescrever com undefined
+          useGameStore.setState({
+            ...(syncPayload.currentTurn && { currentTurn: syncPayload.currentTurn }),
+            ...(syncPayload.phase && { phase: syncPayload.phase }),
+            ...(syncPayload.pillPool && { pillPool: syncPayload.pillPool }),
+            ...(syncPayload.players && { players: syncPayload.players }),
+            ...(syncPayload.round !== undefined && { round: syncPayload.round }),
+            ...(syncPayload.revealedPills && { revealedPills: syncPayload.revealedPills }),
+            ...(syncPayload.shapeQuests && { shapeQuests: syncPayload.shapeQuests }),
+            ...(syncPayload.typeCounts && { typeCounts: syncPayload.typeCounts }),
+            ...(syncPayload.shapeCounts && { shapeCounts: syncPayload.shapeCounts }),
+            // storeState pode ser null legitimamente
+            ...(syncPayload.storeState !== undefined && { storeState: syncPayload.storeState }),
+          })
+
+          console.log('[MultiplayerStore] Guest state_sync aplicado com sucesso')
         }
         break
       }

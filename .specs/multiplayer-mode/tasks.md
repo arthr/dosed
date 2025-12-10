@@ -754,6 +754,38 @@ heartbeat do oponente por 15 segundos, considera desconectado e exibe overlay.
 
 ---
 
+### HOTFIX-MP-012: Corrigir reinicio indevido do jogo apos reconexao do guest
+- [x] Adicionar guard no handler `player_joined` para verificar se jogo esta em andamento
+- [x] Enviar `state_sync` automaticamente quando guest tenta entrar em jogo ja iniciado
+- [x] Melhorar validacao do payload no handler `state_sync` com logs detalhados
+- [x] Aplicar estado sincronizado de forma condicional (evitar sobrescrever com undefined)
+
+**Problema resolvido:**
+Apos reconexao do guest, o host recebia evento `player_joined` e chamava `initGame()` sem
+verificar se ja havia um jogo em andamento. Isso resetava o estado do jogo e enviava ambos
+os jogadores de volta para a tela de selecao de itens.
+
+**Causa raiz:**
+O handler de `player_joined` nao tinha guard para verificar `room.status` ou `gamePhase`
+antes de reiniciar o jogo. Reconexoes do WebSocket podiam disparar eventos que eram
+tratados como novas entradas na sala.
+
+**Solucao:**
+1. Guard no handler `player_joined`:
+   - Verifica se `room.status === 'playing'` ou `gamePhase` indica jogo em andamento
+   - Se jogo em andamento, ignora reinicio e envia `state_sync` para sincronizar guest
+
+2. Validacao robusta no handler `state_sync`:
+   - Verifica se payload existe e e objeto valido
+   - Verifica campos obrigatorios (`phase`, `currentTurn`)
+   - Logs detalhados antes e depois da aplicacao
+   - Spread condicional para evitar sobrescrever com undefined
+
+**Arquivos:**
+- `src/stores/multiplayerStore.ts` (handlers player_joined, state_sync)
+
+---
+
 ## Ordem de Execucao Recomendada
 
 1. **Infraestrutura:** TASK-MP-001, TASK-MP-002

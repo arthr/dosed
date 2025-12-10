@@ -232,7 +232,7 @@
     - `pillCoins > 0`, `wantsStore === true`: icone com highlight/glow
   - Tooltip contextual
 
-- [ ] TASK-SS-041C: Implementar `toggleWantsStore(playerId)` no gameStore
+- [x] TASK-SS-041C: Implementar `toggleWantsStore(playerId)` no gameStore
   - Valida `pillCoins > 0` antes de ativar
   - Se `pillCoins === 0`: mostra toast de aviso
   - Toggle `player.wantsStore`
@@ -243,17 +243,17 @@
 
 ### 4B.1 Configuracao da Loja
 
-- [ ] TASK-SS-080: Criar arquivo `src/utils/storeConfig.ts`
+- [x] TASK-SS-080: Criar arquivo `src/utils/storeConfig.ts`
   - DEFAULT_STORE_CONFIG com shoppingTime, reduceMultiplier
   - STORE_ITEMS array com todos itens da loja
 
-- [ ] TASK-SS-081: Definir itens do tipo Boost em STORE_ITEMS:
+- [x] TASK-SS-081: Definir itens do tipo Boost em STORE_ITEMS:
   - life_up (1-Up): +1 vida, custo 3, condicao vida < MAX
   - full_resistance (Reboot): resistencia MAX, custo 2, condicao resistencia < MAX
   - reveal_start (Scanner-2X): 2 pills reveladas na proxima rodada, custo 2
 
-- [ ] TASK-SS-082: Definir itens do tipo Power-Up em STORE_ITEMS:
-  - power_antidote, power_reveal, power_bomb
+- [x] TASK-SS-082: Definir itens do tipo Power-Up em STORE_ITEMS:
+  - power_scanner, power_shield, power_pocket_pill, power_discard
   - Custo base 2, condicao inventario nao cheio
 
 ### 4B.2 Estado e Actions da Store

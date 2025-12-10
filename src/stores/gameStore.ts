@@ -67,6 +67,9 @@ interface GameStore extends GameState {
   doublePill: (pillId: string) => void
   clearPillModifiers: (pillId: string) => void
 
+  // Actions - Pill Store
+  toggleWantsStore: (playerId: PlayerId) => void
+
   // Selectors (computed)
   getCurrentPlayer: () => Player
   getOpponent: () => Player
@@ -1135,6 +1138,48 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     set({ pillPool: newPillPool })
+  },
+
+  // ============ PILL STORE ============
+
+  /**
+   * Toggle: jogador quer/nao quer visitar a loja ao fim da rodada
+   * Chamado quando jogador clica no icone de Pill Coins
+   */
+  toggleWantsStore: (playerId: PlayerId) => {
+    const state = get()
+    const player = state.players[playerId]
+
+    // Validacao: precisa ter coins para ativar
+    if (player.pillCoins === 0) {
+      useToastStore.getState().show({
+        type: 'quest',
+        message: 'Sem Pill Coins! Complete quests para obter.',
+        playerId,
+        duration: 2000,
+      })
+      return
+    }
+
+    // Toggle wantsStore
+    set({
+      players: {
+        ...state.players,
+        [playerId]: {
+          ...player,
+          wantsStore: !player.wantsStore,
+        },
+      },
+    })
+
+    // Toast de feedback
+    const newWantsStore = !player.wantsStore
+    useToastStore.getState().show({
+      type: 'quest',
+      message: newWantsStore ? 'Visita a loja agendada!' : 'Visita a loja cancelada',
+      playerId,
+      duration: 1200,
+    })
   },
 
   // ============ SELECTORS ============

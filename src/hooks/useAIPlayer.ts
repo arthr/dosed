@@ -94,6 +94,20 @@ export function useAIPlayer({
       const delay = getAIThinkingDelay()
 
       timeoutRef.current = setTimeout(() => {
+        // Verificacao de seguranca: confirma que condicoes ainda sao validas
+        // Isso previne execucao se estado mudou durante o delay (ex: fase mudou)
+        const currentState = useGameStore.getState()
+        const stillValidTurn = 
+          currentState.phase === 'playing' &&
+          currentState.players[currentState.currentTurn].isAI &&
+          currentState.pillPool.length > 0
+
+        if (!stillValidTurn) {
+          // Condicoes mudaram, reseta flag e aborta
+          hasScheduledRef.current = false
+          return
+        }
+
         // Tenta usar item primeiro (se ainda nao usou neste turno)
         if (!hasUsedItemRef.current && executeItem && opponentId) {
           const shouldUseItem = shouldAIUseItem(currentPlayer)
@@ -145,6 +159,9 @@ export function useAIPlayer({
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
         timeoutRef.current = null
+        // Reset flag para permitir novo agendamento se effect re-executar
+        // Isso corrige bug onde toggle de wantsStore cancelava timeout da IA
+        hasScheduledRef.current = false
       }
     }
   }, [

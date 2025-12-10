@@ -5,7 +5,7 @@
 | Area | Total | Concluidas | Pendentes |
 | :--- | :---: | :---: | :---: |
 | Types | 5 | 5 | 0 |
-| Config | 3 | 1 | 2 |
+| Config | 3 | 3 | 0 |
 | AI Logic - Analise | 4 | 0 | 4 |
 | AI Logic - Selecao | 4 | 0 | 4 |
 | AI Logic - Itens | 4 | 0 | 4 |
@@ -14,7 +14,7 @@
 | Hooks | 4 | 0 | 4 |
 | Components | 3 | 0 | 3 |
 | Integration | 3 | 0 | 3 |
-| **TOTAL** | **37** | **6** | **31** |
+| **TOTAL** | **37** | **8** | **29** |
 
 ---
 
@@ -53,10 +53,10 @@
   - Incluir novos campos: `usesTypeCounts`, `usesDeduction`
   - Valores conforme tabela de requisitos atualizada
 
-- [ ] TASK-006: Implementar `getAIConfig(difficulty)` em `aiConfig.ts`
+- [x] TASK-006: Implementar `getAIConfig(difficulty)` em `aiConfig.ts`
   - Retorna configuracao para nivel especificado
 
-- [ ] TASK-007: Implementar `getAIThinkingDelay(difficulty)` em `aiConfig.ts`
+- [x] TASK-007: Implementar `getAIThinkingDelay(difficulty)` em `aiConfig.ts`
   - Calcula delay aleatorio baseado nos limites do nivel
 
 ---

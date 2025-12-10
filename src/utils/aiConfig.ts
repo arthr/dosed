@@ -58,3 +58,19 @@ export const AI_CONFIGS: Record<DifficultyLevel, AIConfig> = {
   },
 }
 
+/**
+ * Retorna configuracao da IA para dificuldade especificada
+ */
+export function getAIConfig(difficulty: DifficultyLevel): AIConfig {
+  return AI_CONFIGS[difficulty]
+}
+
+/**
+ * Retorna delay de pensamento aleatorio para dificuldade
+ */
+export function getAIThinkingDelay(difficulty: DifficultyLevel): number {
+  const config = AI_CONFIGS[difficulty]
+  const range = config.thinkingDelayMax - config.thinkingDelayMin
+  return Math.floor(Math.random() * range) + config.thinkingDelayMin
+}
+

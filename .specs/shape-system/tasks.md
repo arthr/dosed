@@ -409,46 +409,50 @@
 
 ### 6.3 Testes de Integracao
 
-- [ ] TASK-SS-063: Verificar geracao de pilulas com shapes aleatorias
+- [x] TASK-SS-063: Verificar geracao de pilulas com shapes aleatorias
 
-- [ ] TASK-SS-064: Verificar shapeCounts atualizado corretamente
+- [x] TASK-SS-064: Verificar shapeCounts atualizado corretamente
 
-- [ ] TASK-SS-065: Verificar quest progress ao consumir pilulas
+- [x] TASK-SS-065: Verificar quest progress ao consumir pilulas
 
-- [ ] TASK-SS-066: Verificar aplicacao de recompensas
+- [x] TASK-SS-066: Verificar aplicacao de recompensas
 
-- [ ] TASK-SS-067: Verificar Shape Bomb remove pilulas corretamente
+- [x] TASK-SS-067: Verificar Shape Bomb remove pilulas corretamente
 
-- [ ] TASK-SS-068: Verificar Shape Scanner revela pilulas corretamente
+- [x] TASK-SS-068: Verificar Shape Scanner revela pilulas corretamente
 
 ### 6.4 Validacao Manual
 
-- [ ] TASK-SS-069: Jogar partida completa testando:
-  - Shapes visiveis em pilulas ocultas
-  - Quest progress visual
-  - Reset de quest ao errar
-  - Recompensas aplicadas corretamente
-  - Shape Bomb e Shape Scanner funcionais
+- [x] TASK-SS-069: Jogar partida completa testando:
+  - Shapes visiveis em pilulas ocultas - OK
+  - Quest progress visual - OK (check verde ao acertar shape)
+  - Reset de quest ao errar - OK (nao avanca com shape errada)
+  - Recompensas aplicadas corretamente - OK (+1 Pill Coin ao completar)
+  - Shape Bomb e Shape Scanner funcionais - OK (testados na rodada 1)
 
-- [ ] TASK-SS-070: Testar em diferentes tamanhos de tela (mobile, desktop)
+- [~] TASK-SS-070: CANCELADA - Testar em diferentes tamanhos de tela (mobile, desktop)
 
-- [ ] TASK-SS-071: Verificar IA funciona normalmente (ignora shapes)
+- [x] TASK-SS-071: Verificar IA funciona normalmente (ignora shapes)
+  - IA joga turnos normalmente
+  - IA usa itens (Shield, Pocket Pill, etc)
+  - IA completa quests e recebe Pill Coins
+  - IA nao prioriza shapes para completar quests (comportamento esperado)
 
 ---
 
 ## Fase 7: Polish e Ajustes
 
-### 7.1 UI/UX
+### 7.1 UI/UX (ADIADAS - BACKLOG)
 
-- [ ] TASK-SS-072: Ajustar visual de shapes para melhor distincao
+- [~] TASK-SS-072: ADIADA - Ajustar visual de shapes para melhor distincao
   - Bordas, sombras se necessario
   - Cores de contraste
 
-- [ ] TASK-SS-073: Criar ShapeCounter.tsx (opcional)
+- [~] TASK-SS-073: ADIADA - Criar ShapeCounter.tsx (opcional)
   - Similar a TypeCounter
   - Toggle para mostrar/ocultar
 
-- [ ] TASK-SS-074: Ajustar posicionamento de ShapeQuestDisplay se necessario
+- [~] TASK-SS-074: ADIADA - Ajustar posicionamento de ShapeQuestDisplay se necessario
 
 ### 7.2 Balanceamento
 

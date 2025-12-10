@@ -5,6 +5,9 @@
 /** Categorias de itens */
 export type ItemCategory = 'intel' | 'sustain' | 'control' | 'chaos'
 
+/** Fonte de obtencao de item */
+export type ItemSource = 'initial' | 'store'
+
 /** Tipos de item disponiveis */
 export type ItemType =
   | 'scanner'
@@ -47,6 +50,8 @@ export interface ItemDefinition {
   icon: string
   /** Classe de cor Tailwind */
   color: string
+  /** Onde o item pode ser obtido. Se omitido, disponivel em TODOS os lugares */
+  availableIn?: ItemSource[]
 }
 
 /** Item no inventario do jogador */

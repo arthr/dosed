@@ -85,6 +85,7 @@ export const ITEM_CATALOG: Record<ItemType, ItemDefinition> = {
     targetType: 'pill',
     icon: 'ScanSearch',
     color: 'text-blue-400',
+    availableIn: ['store'], // Apenas na Pill Store
   },
 
   // === SUSTAIN (Sobrevivencia) ===
@@ -154,6 +155,7 @@ export const ITEM_CATALOG: Record<ItemType, ItemDefinition> = {
     targetType: 'pill',
     icon: 'Bomb',
     color: 'text-purple-400',
+    availableIn: ['store'], // Apenas na Pill Store
   },
 }
 
@@ -190,5 +192,36 @@ export function getAllCategories(): ItemCategory[] {
 /** Retorna todos os tipos de item */
 export function getAllItemTypes(): ItemType[] {
   return Object.keys(ITEM_CATALOG) as ItemType[]
+}
+
+/**
+ * Filtra itens disponiveis para selecao inicial (pre-jogo)
+ * Exclui itens que tem availableIn definido sem 'initial'
+ */
+export function getItemsForInitialSelection(category: ItemCategory): ItemType[] {
+  return ITEMS_BY_CATEGORY[category].filter((itemType) => {
+    const def = ITEM_CATALOG[itemType]
+    // Se nao definido, disponivel em todos os lugares (default)
+    if (!def.availableIn) return true
+    return def.availableIn.includes('initial')
+  })
+}
+
+/**
+ * Retorna todos os tipos de item disponiveis para selecao inicial
+ */
+export function getAllItemsForInitialSelection(): ItemType[] {
+  return getAllCategories().flatMap(getItemsForInitialSelection)
+}
+
+/**
+ * Filtra itens disponiveis na Pill Store
+ */
+export function getItemsForStore(): ItemType[] {
+  return getAllItemTypes().filter((itemType) => {
+    const def = ITEM_CATALOG[itemType]
+    if (!def.availableIn) return true
+    return def.availableIn.includes('store')
+  })
 }
 

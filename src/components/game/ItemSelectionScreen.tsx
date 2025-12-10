@@ -6,10 +6,10 @@ import { useAIItemSelection } from '@/hooks/useAIItemSelection'
 import { useGameStore } from '@/stores/gameStore'
 import { ItemCard } from './ItemCard'
 import {
-  ITEMS_BY_CATEGORY,
   CATEGORY_LABELS,
   CATEGORY_TEXT_COLORS,
   getAllCategories,
+  getItemsForInitialSelection,
 } from '@/utils/itemCatalog'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/8bit/button'
@@ -195,7 +195,7 @@ function CategorySection({
   onItemClick,
   canSelectMore,
 }: CategorySectionProps) {
-  const items = ITEMS_BY_CATEGORY[category]
+  const items = getItemsForInitialSelection(category)
   const label = CATEGORY_LABELS[category]
   const textColor = CATEGORY_TEXT_COLORS[category]
 

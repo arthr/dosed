@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useGameStore } from '@/stores/gameStore'
-import { getAllItemTypes } from '@/utils/itemCatalog'
+import { getAllItemsForInitialSelection } from '@/utils/itemCatalog'
 import type { ItemType } from '@/types'
 
 /** Delay antes de comecar a selecionar itens (ms) */
@@ -59,9 +59,9 @@ export function useAIItemSelection() {
     // Obtem actions via getState (referencias estaveis)
     const { selectItem, confirmItemSelection } = useGameStore.getState()
 
-    // Seleciona 5 itens aleatorios
-    const allItems = getAllItemTypes()
-    const shuffledItems = shuffleArray(allItems)
+    // Seleciona 5 itens aleatorios (apenas itens disponiveis na selecao inicial)
+    const availableItems = getAllItemsForInitialSelection()
+    const shuffledItems = shuffleArray(availableItems)
     const selectedItems = shuffledItems.slice(0, 5) as ItemType[]
 
     // Agenda selecao com delays

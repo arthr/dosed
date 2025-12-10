@@ -362,7 +362,7 @@
 
 ### 5.3 IA e Itens de Shape
 
-- [ ] TASK-SS-052: Atualizar `selectAIItemTarget()` em `aiLogic.ts` para itens de shape
+- [x] TASK-SS-052: Atualizar `selectAIItemTarget()` em `aiLogic.ts` para itens de shape
   - Shape Bomb: selecionar pill da shape com mais pilulas no pool
   - Shape Scanner: selecionar pill da shape com mais pilulas nao reveladas
 

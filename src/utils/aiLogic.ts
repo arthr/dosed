@@ -1,4 +1,4 @@
-import type { InventoryItem, ItemType, Pill, Player } from '@/types'
+import type { InventoryItem, ItemType, Pill, PillShape, Player } from '@/types'
 import { ITEM_CATALOG } from './itemCatalog'
 
 /**
@@ -17,10 +17,12 @@ const ITEM_PRIORITY: Record<ItemType, number> = {
   shield: 10,
   pocket_pill: 9,
   scanner: 7,
+  shape_scanner: 7,
   handcuffs: 6,
   force_feed: 5,
   inverter: 4,
   double: 3,
+  shape_bomb: 3,
   discard: 2,
   shuffle: 1,
 }
@@ -151,6 +153,16 @@ function calculateItemScore(
       contextBonus = 3
       break
 
+    case 'shape_bomb':
+      // Shape Bomb e mais util com muitas pilulas da mesma shape
+      if (hasManyPills) contextBonus = 8
+      break
+
+    case 'shape_scanner':
+      // Shape Scanner e mais util com muitas pilulas
+      if (hasManyPills) contextBonus = 10
+      break
+
     default:
       contextBonus = 0
   }
@@ -159,19 +171,82 @@ function calculateItemScore(
 }
 
 /**
+ * Conta pills por shape no pool
+ */
+function countPillsByShape(pillPool: Pill[]): Record<PillShape, number> {
+  const counts: Partial<Record<PillShape, number>> = {}
+  for (const pill of pillPool) {
+    const shape = pill.visuals.shape
+    counts[shape] = (counts[shape] || 0) + 1
+  }
+  return counts as Record<PillShape, number>
+}
+
+/**
+ * Encontra uma pill da shape com mais ocorrencias no pool
+ * @param pillPool Pool de pilulas
+ * @param excludeRevealed Se true, nao conta pills ja reveladas (para shape_scanner)
+ * @param revealedPills Lista de IDs de pills reveladas
+ */
+function findPillOfMostCommonShape(
+  pillPool: Pill[],
+  excludeRevealed: boolean = false,
+  revealedPills: string[] = []
+): string | undefined {
+  const relevantPills = excludeRevealed
+    ? pillPool.filter((p) => !revealedPills.includes(p.id))
+    : pillPool
+
+  if (relevantPills.length === 0) return undefined
+
+  // Conta pills por shape
+  const shapeCounts = countPillsByShape(relevantPills)
+
+  // Encontra shape com mais pills
+  let maxCount = 0
+  let bestShape: PillShape | null = null
+  for (const [shape, count] of Object.entries(shapeCounts)) {
+    if (count > maxCount) {
+      maxCount = count
+      bestShape = shape as PillShape
+    }
+  }
+
+  if (!bestShape) return undefined
+
+  // Retorna primeira pill dessa shape
+  const targetPill = pillPool.find((p) => p.visuals.shape === bestShape)
+  return targetPill?.id
+}
+
+/**
  * Seleciona alvo automatico para o item da IA
  * @param itemType Tipo do item
  * @param pillPool Pool de pilulas
  * @param opponentId ID do oponente
+ * @param revealedPills Lista de IDs de pills reveladas (para shape_scanner)
  * @returns ID do alvo ou undefined se nao precisa de alvo
  */
 export function selectAIItemTarget(
   itemType: ItemType,
   pillPool: Pill[],
-  opponentId: string
+  opponentId: string,
+  revealedPills: string[] = []
 ): string | undefined {
   const itemDef = ITEM_CATALOG[itemType]
 
+  // Casos especiais para itens de shape
+  switch (itemType) {
+    case 'shape_bomb':
+      // Seleciona pill da shape com mais pilulas (maximiza impacto)
+      return findPillOfMostCommonShape(pillPool) ?? selectRandomPill(pillPool) ?? undefined
+
+    case 'shape_scanner':
+      // Seleciona pill da shape com mais pilulas NAO reveladas (maximiza info)
+      return findPillOfMostCommonShape(pillPool, true, revealedPills) ?? selectRandomPill(pillPool) ?? undefined
+  }
+
+  // Logica padrao por targetType
   switch (itemDef.targetType) {
     case 'self':
     case 'table':

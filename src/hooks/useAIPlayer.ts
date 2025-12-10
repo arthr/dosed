@@ -103,8 +103,9 @@ export function useAIPlayer({
 
             if (selectedItem) {
               // Seleciona alvo se necessario
+              const revealedPills = useGameStore.getState().revealedPills
               const targetId = itemRequiresTarget(selectedItem.type)
-                ? selectAIItemTarget(selectedItem.type, pillPool, opponentId)
+                ? selectAIItemTarget(selectedItem.type, pillPool, opponentId, revealedPills)
                 : undefined
 
               // Usa o item

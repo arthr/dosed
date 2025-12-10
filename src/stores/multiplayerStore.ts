@@ -375,9 +375,12 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
             })
 
             // Envia state_sync para sincronizar guest que pode ter perdido estado
+            // Inclui mode e roomId para garantir que eventos multiplayer funcionem
             get().sendEvent({
               type: 'state_sync',
               payload: {
+                mode: gameStore.mode,
+                roomId: gameStore.roomId,
                 currentTurn: gameStore.currentTurn,
                 phase: gameStore.phase,
                 pillPool: gameStore.pillPool,
@@ -430,6 +433,9 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
               },
             },
           })
+
+          // Host inicia heartbeat aqui (nao no handler game_started, que ele ignora)
+          get().startHeartbeat()
         }
         break
       }
@@ -487,11 +493,14 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
         set({ opponentDisconnected: false })
 
         // Se somos o host, enviamos estado atual para o guest que reconectou
+        // Inclui mode e roomId para garantir que eventos multiplayer funcionem
         if (state.localRole === 'host') {
           const gameStore = useGameStore.getState()
           get().sendEvent({
             type: 'state_sync',
             payload: {
+              mode: gameStore.mode,
+              roomId: gameStore.roomId,
               currentTurn: gameStore.currentTurn,
               phase: gameStore.phase,
               pillPool: gameStore.pillPool,
@@ -513,6 +522,8 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
         // Recebemos estado sincronizado do host - aplicar localmente
         if (state.localRole === 'guest') {
           const syncPayload = payload.payload as {
+            mode?: import('@/types').GameMode
+            roomId?: string | null
             currentTurn?: import('@/types').PlayerId
             phase?: import('@/types').GamePhase
             pillPool?: import('@/types').Pill[]
@@ -547,13 +558,16 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
           // Log antes de aplicar para debug
           const gameStoreBefore = useGameStore.getState()
           console.log('[MultiplayerStore] Guest aplicando state_sync', {
-            antes: { phase: gameStoreBefore.phase, currentTurn: gameStoreBefore.currentTurn, round: gameStoreBefore.round },
-            depois: { phase: syncPayload.phase, currentTurn: syncPayload.currentTurn, round: syncPayload.round },
+            antes: { mode: gameStoreBefore.mode, phase: gameStoreBefore.phase, currentTurn: gameStoreBefore.currentTurn, round: gameStoreBefore.round },
+            depois: { mode: syncPayload.mode, phase: syncPayload.phase, currentTurn: syncPayload.currentTurn, round: syncPayload.round },
           })
 
           // Aplica estado sincronizado diretamente no gameStore
           // Usa spread condicional para evitar sobrescrever com undefined
+          // IMPORTANTE: mode e roomId sao criticos para emissao de eventos multiplayer
           useGameStore.setState({
+            ...(syncPayload.mode && { mode: syncPayload.mode }),
+            ...(syncPayload.roomId !== undefined && { roomId: syncPayload.roomId }),
             ...(syncPayload.currentTurn && { currentTurn: syncPayload.currentTurn }),
             ...(syncPayload.phase && { phase: syncPayload.phase }),
             ...(syncPayload.pillPool && { pillPool: syncPayload.pillPool }),

@@ -264,6 +264,10 @@ export interface PlayerReconnectedEvent extends GameEventBase {
 export interface StateSyncEvent extends GameEventBase {
   type: 'state_sync'
   payload: {
+    /** Modo de jogo - critico para emissao de eventos */
+    mode: import('./multiplayer').GameMode
+    /** ID da sala - critico para emissao de eventos */
+    roomId: string | null
     currentTurn: import('./player').PlayerId
     phase: import('./game').GamePhase
     pillPool: import('./pill').Pill[]

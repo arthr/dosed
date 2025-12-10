@@ -759,6 +759,8 @@ heartbeat do oponente por 15 segundos, considera desconectado e exibe overlay.
 - [x] Enviar `state_sync` automaticamente quando guest tenta entrar em jogo ja iniciado
 - [x] Melhorar validacao do payload no handler `state_sync` com logs detalhados
 - [x] Aplicar estado sincronizado de forma condicional (evitar sobrescrever com undefined)
+- [x] **FIX:** Host iniciar heartbeat apos enviar `game_started` (nao no handler que ele ignora)
+- [x] **FIX:** Incluir `mode` e `roomId` no payload de `state_sync` para restaurar emissao de eventos
 
 **Problema resolvido:**
 Apos reconexao do guest, o host recebia evento `player_joined` e chamava `initGame()` sem
@@ -769,6 +771,21 @@ os jogadores de volta para a tela de selecao de itens.
 O handler de `player_joined` nao tinha guard para verificar `room.status` ou `gamePhase`
 antes de reiniciar o jogo. Reconexoes do WebSocket podiam disparar eventos que eram
 tratados como novas entradas na sala.
+
+**Bug adicional encontrado (heartbeat):**
+O Host nunca iniciava o sistema de heartbeat porque:
+- Host envia `game_started` no handler de `player_joined`
+- O evento `game_started` e ignorado pelo Host (filtro de eventos proprios)
+- O `startHeartbeat()` so era chamado no handler de `game_started`
+- Resultado: Guest enviava heartbeats, Host nao enviava, Guest considerava Host desconectado
+
+**Bug adicional encontrado (state_sync incompleto):**
+Apos Guest reconectar (ex: recarregar pagina), eventos de gameplay nao eram sincronizados:
+- Guest recarrega pagina -> `gameStore.mode` reseta para `'single_player'`
+- Host envia `state_sync` mas sem `mode` e `roomId`
+- Guest aplica `state_sync` mas `mode` continua `'single_player'`
+- `emitMultiplayerEvent` verifica `if (mode !== 'multiplayer')` e nao emite eventos
+- Resultado: jogadas do Guest nao eram enviadas ao Host
 
 **Solucao:**
 1. Guard no handler `player_joined`:
@@ -781,8 +798,18 @@ tratados como novas entradas na sala.
    - Logs detalhados antes e depois da aplicacao
    - Spread condicional para evitar sobrescrever com undefined
 
+3. Host inicia heartbeat no local correto:
+   - `startHeartbeat()` chamado apos Host enviar `game_started`
+   - Nao depende mais do handler `game_started` que o Host ignora
+
+4. `state_sync` inclui `mode` e `roomId`:
+   - Campos adicionados ao payload de `state_sync`
+   - Guest restaura `mode: 'multiplayer'` apos reconexao
+   - Eventos de gameplay voltam a ser emitidos corretamente
+
 **Arquivos:**
-- `src/stores/multiplayerStore.ts` (handlers player_joined, state_sync)
+- `src/stores/multiplayerStore.ts` (handlers player_joined, state_sync, heartbeat)
+- `src/types/events.ts` (StateSyncEvent payload atualizado)
 
 ---
 

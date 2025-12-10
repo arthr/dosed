@@ -207,7 +207,7 @@
   - Posicionar abaixo do inventario ou em local adequado
   - Mostrar apenas quest do jogador correspondente
 
-- [ ] TASK-SS-039: Adicionar feedback visual de progresso
+- [x] TASK-SS-039: Adicionar feedback visual de progresso
   - Shape completada: marca verde
   - Shape atual: highlight/ring
 

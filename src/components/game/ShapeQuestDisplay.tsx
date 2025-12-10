@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Coins } from 'lucide-react'
+import { Check, Coins, Sparkles } from 'lucide-react'
 import type { ShapeQuest } from '@/types'
 import { ShapeIcon } from './ShapeIcon'
 
@@ -21,37 +21,61 @@ export function ShapeQuestDisplay({ quest, className = '' }: ShapeQuestDisplayPr
   if (quest.completed) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: -5 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
         className={`
-          flex items-center gap-2 px-2 py-1.5
-          bg-emerald-500/10 border border-emerald-500/30 rounded
+          relative overflow-hidden
+          flex items-center gap-2 px-3 py-2
+          bg-linear-to-r from-emerald-500/15 to-emerald-400/10
+          border border-emerald-500/40 rounded-lg
           ${className}
         `}
       >
-        <Check size={14} className="text-emerald-500 shrink-0" />
-        <span className="text-[10px] text-emerald-400 font-medium">
+        {/* Efeito de brilho animado */}
+        <motion.div
+          className="absolute inset-0 bg-linear-to-r from-transparent via-emerald-400/20 to-transparent"
+          animate={{ x: ['-100%', '100%'] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+        />
+        
+        <motion.div
+          initial={{ rotate: 0 }}
+          animate={{ rotate: [0, 10, -10, 0] }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Sparkles size={14} className="text-emerald-400 shrink-0" />
+        </motion.div>
+        <span className="text-[10px] text-emerald-300 font-medium relative z-10">
           Quest completo! Aguarde proxima rodada
         </span>
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', delay: 0.3 }}
+          className="flex items-center gap-0.5 text-amber-400 ml-auto"
+        >
+          <Coins size={12} />
+          <span className="text-[10px] font-bold">+1</span>
+        </motion.div>
       </motion.div>
     )
   }
 
   return (
-    <div className={`flex flex-col gap-1 ${className}`}>
+    <div className={`flex flex-col gap-1.5 ${className}`}>
       {/* Header com label e recompensa */}
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+      <div className="flex items-center justify-between px-0.5">
+        <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
           Objetivo
         </span>
-        <div className="flex items-center gap-1 text-[10px] text-amber-400">
+        <div className="flex items-center gap-1 text-[10px] text-amber-400/80">
           <Coins size={10} />
           <span>+1</span>
         </div>
       </div>
 
       {/* Sequencia de shapes */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         <AnimatePresence mode="popLayout">
           {quest.sequence.map((shape, index) => {
             const isCompleted = index < quest.progress
@@ -63,41 +87,80 @@ export function ShapeQuestDisplay({ quest, className = '' }: ShapeQuestDisplayPr
                 key={`${quest.id}-shape-${index}`}
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: index * 0.05 }}
-                className="relative"
+                transition={{ 
+                  delay: index * 0.08,
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 20
+                }}
+                className="relative flex items-center"
               >
-                {/* Container da shape */}
-                <div
+                {/* Container da shape com efeitos */}
+                <motion.div
                   className={`
-                    relative p-1 rounded transition-all duration-200
-                    ${isCurrent ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''}
-                    ${isCompleted ? 'opacity-60' : ''}
-                    ${isPending ? 'opacity-40' : ''}
+                    relative p-1.5 rounded-lg transition-all duration-300
+                    ${isCurrent ? 'bg-primary/10' : ''}
+                    ${isCompleted ? 'bg-emerald-500/10' : ''}
                   `}
+                  animate={isCurrent ? {
+                    boxShadow: [
+                      '0 0 0 2px var(--primary)',
+                      '0 0 8px 2px var(--primary)',
+                      '0 0 0 2px var(--primary)',
+                    ],
+                  } : {}}
+                  transition={isCurrent ? {
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  } : {}}
                 >
+                  {/* Glow effect para shape atual */}
+                  {isCurrent && (
+                    <motion.div
+                      className="absolute inset-0 rounded-lg bg-primary/20"
+                      animate={{ opacity: [0.3, 0.6, 0.3] }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+                  )}
+
                   <ShapeIcon
                     shape={shape}
                     size="sm"
-                    className={isCompleted ? 'grayscale' : ''}
+                    className={`
+                      relative z-10 transition-all duration-300
+                      ${isCompleted ? 'grayscale opacity-70' : ''}
+                      ${isPending ? 'opacity-40' : ''}
+                      ${isCurrent ? 'scale-110' : ''}
+                    `}
                   />
 
-                  {/* Checkmark para shape completada */}
+                  {/* Checkmark animado para shape completada */}
                   {isCompleted && (
                     <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="absolute -top-1 -right-1 bg-emerald-500 rounded-full p-0.5"
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                      className="absolute -top-1.5 -right-1.5 bg-emerald-500 rounded-full p-0.5 shadow-lg shadow-emerald-500/30"
                     >
-                      <Check size={8} className="text-white" />
+                      <Check size={8} className="text-white" strokeWidth={3} />
                     </motion.div>
                   )}
-                </div>
+                </motion.div>
 
                 {/* Seta entre shapes (exceto ultima) */}
                 {index < quest.sequence.length - 1 && (
-                  <span className="absolute -right-1 top-1/2 -translate-y-1/2 text-[8px] text-muted-foreground">
+                  <motion.span
+                    initial={{ opacity: 0, x: -5 }}
+                    animate={{ opacity: isCompleted ? 0.4 : 0.6, x: 0 }}
+                    transition={{ delay: index * 0.08 + 0.1 }}
+                    className={`
+                      ml-1 text-xs font-bold
+                      ${isCompleted ? 'text-emerald-500/60' : 'text-muted-foreground/60'}
+                    `}
+                  >
                     {'>'}
-                  </span>
+                  </motion.span>
                 )}
               </motion.div>
             )
@@ -107,4 +170,3 @@ export function ShapeQuestDisplay({ quest, className = '' }: ShapeQuestDisplayPr
     </div>
   )
 }
-

@@ -33,14 +33,14 @@ export interface ProgressionConfig {
  * - maxRound 15 para evitar estagnacao em partidas longas
  */
 export const PROGRESSION: ProgressionConfig = {
-  maxRound: 15,
+  maxRound: 20,
   rules: {
-    SAFE: { unlockRound: 1, startPct: 45, endPct: 10 },
-    DMG_LOW: { unlockRound: 1, startPct: 30, endPct: 15 },
-    DMG_HIGH: { unlockRound: 1, startPct: 15, endPct: 25 },
+    SAFE: { unlockRound: 1, startPct: 45, endPct: 15 },
+    DMG_LOW: { unlockRound: 1, startPct: 40, endPct: 20 },
+    DMG_HIGH: { unlockRound: 3, startPct: 15, endPct: 25 },
     HEAL: { unlockRound: 2, startPct: 10, endPct: 15 },
-    FATAL: { unlockRound: 4, startPct: 5, endPct: 18 },
-    LIFE: { unlockRound: 5, startPct: 6, endPct: 17 },
+    FATAL: { unlockRound: 6, startPct: 5, endPct: 18 },
+    LIFE: { unlockRound: 5, startPct: 6, endPct: 13 },
   },
 }
 
@@ -236,8 +236,7 @@ export const POOL_SCALING: PoolScalingConfig = {
   baseCount: 6,
   increaseBy: 1,
   frequency: 3,
-  maxCap: 12,
-}
+  maxCap: 15}
 
 /**
  * Calcula a quantidade de pilulas para uma rodada usando Step Function

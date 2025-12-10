@@ -104,6 +104,12 @@ Comportamento da IA na loja:
 - Auto-toggle `wantsStore` baseado em coins e `storeInterestThreshold`
 - Auto-compra durante fase shopping usando `selectAIStoreItems()`
 
+### useStoreTimer
+Timer da Pill Store:
+- Monitora `storeState.timerStartedAt` e `timerDuration`
+- Retorna `remainingTime` e `formattedTime`
+- Chama `handleShoppingTimeout` ao expirar
+
 ## Sistema de Dificuldade
 
 ### Niveis
@@ -291,3 +297,19 @@ Loja:
 - `rollPillType(round, config?)` - Sorteia tipo de pilula baseado na rodada (uso: pilulas bonus)
 - `getPillCount(round, config?)` - Calcula quantidade de pilulas por rodada
 - `distributePillTypes(count, round, config?)` - Distribui pilulas proporcionalmente (usado pelo pool principal)
+
+### shapeProgression.ts
+- `SHAPE_PROGRESSION` - Configuracao de shapes ATIVAS/SAZONAIS por rodada
+- `getShapeChances(round, config?)` - Calcula probabilidades de shapes
+- `rollShape(round, config?)` - Sorteia shape baseada na rodada
+- `distributeShapes(count, round, config?)` - Distribui shapes proporcionalmente
+- `countPillShapes(pills)` - Conta quantidade de cada shape no pool
+
+### questGenerator.ts
+- `DEFAULT_QUEST_CONFIG` - Configuracao padrao de quests (minLength, maxLength)
+- `generateShapeQuest(round, shapeCounts, config?)` - Gera quest realizavel baseado no pool
+- `checkQuestProgress(quest, consumedShape)` - Verifica progresso e retorna se completou
+
+### storeConfig.ts
+- `STORE_ITEMS` - Array de itens disponiveis na Pill Store
+- `DEFAULT_STORE_CONFIG` - Configuracao da loja (shoppingTime, reduceMultiplier)

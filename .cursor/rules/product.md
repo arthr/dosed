@@ -150,4 +150,13 @@ Cada jogador seleciona 5 itens antes da partida (inventario fixo de 5 slots). It
 ### Prioridade Baixa
 - [ ] Modo PvP (multiplayer)
 - [ ] Leaderboard/ranking
-- [ ] Modos de dificuldade (Easy/Normal/Hard)
+
+---
+
+## Funcionalidades Implementadas (Recentes)
+
+### Sistema de Dificuldade da IA
+- 4 niveis: `easy` (Paciente), `normal` (Cobaia), `hard` (Sobrevivente), `insane` (Hofmann)
+- Selecionavel na tela de setup antes de iniciar partida
+- Cada nivel altera: uso de typeCounts, deducao logica, chance de usar itens, delay de pensamento
+- Ver `utils/aiConfig.ts` para configuracao detalhada

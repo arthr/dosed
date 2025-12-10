@@ -23,6 +23,8 @@ export type ConnectionStatus =
   | 'connecting'
   | 'connected'
   | 'reconnecting'
+  | 'error'
+  | 'not_configured'
 
 /**
  * Estado de uma sala multiplayer

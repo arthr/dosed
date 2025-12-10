@@ -1,7 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase'
 import type { RealtimeChannel } from '@supabase/supabase-js'
-
-export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error' | 'not_configured'
+import type { ConnectionStatus } from '@/types'
 type EventHandler = (event: string, payload: Record<string, unknown>) => void
 type StatusHandler = (status: ConnectionStatus) => void
 

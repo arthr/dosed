@@ -1,8 +1,9 @@
-import { useState } from 'react'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { ArrowLeft, Loader2, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/8bit/button'
 import { Input } from '@/components/ui/8bit/input'
 import { useMultiplayer } from '@/hooks'
+import { realtimeService } from '@/services'
 
 interface CreateRoomFormProps {
   /** Callback quando usuario clica em voltar */
@@ -16,8 +17,13 @@ export function CreateRoomForm({ onBack }: CreateRoomFormProps) {
   const [hostName, setHostName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isConfigured, setIsConfigured] = useState(true)
 
   const { createRoom } = useMultiplayer()
+
+  useEffect(() => {
+    setIsConfigured(realtimeService.isConfigured())
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,6 +55,24 @@ export function CreateRoomForm({ onBack }: CreateRoomFormProps) {
       setErrorMessage(message)
       setIsLoading(false)
     }
+  }
+
+  if (!isConfigured) {
+    return (
+      <div className="flex flex-col gap-4 items-center text-center">
+        <AlertTriangle className="size-12 text-amber-500" />
+        <div className="space-y-2">
+          <p className="font-medium">Multiplayer nao configurado</p>
+          <p className="text-sm text-muted-foreground">
+            Configure as variaveis de ambiente do Supabase para habilitar o modo multiplayer.
+          </p>
+        </div>
+        <Button variant="ghost" onClick={onBack}>
+          <ArrowLeft className="size-4 mr-2" />
+          Voltar
+        </Button>
+      </div>
+    )
   }
 
   return (

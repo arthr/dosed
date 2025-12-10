@@ -230,24 +230,7 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
 
     // Registra handler de status
     const unsubscribeStatus = realtimeService.onStatusChange((status) => {
-      // Converte status do realtimeService para ConnectionStatus
-      let connectionStatus: ConnectionStatus = 'disconnected'
-      switch (status) {
-        case 'connected':
-          connectionStatus = 'connected'
-          break
-        case 'connecting':
-          connectionStatus = 'connecting'
-          break
-        case 'error':
-        case 'not_configured':
-          connectionStatus = 'disconnected'
-          break
-        case 'disconnected':
-          connectionStatus = 'disconnected'
-          break
-      }
-      set({ connectionStatus })
+      set({ connectionStatus: status })
     })
 
     set({

@@ -164,6 +164,16 @@ export interface StoreItem {
 }
 
 /**
+ * Item no carrinho de compras
+ */
+export interface CartItem {
+  /** ID do item da loja */
+  storeItemId: string
+  /** Custo do item */
+  cost: number
+}
+
+/**
  * Estado da Pill Store (apenas fase shopping)
  * Nota: wantsStore fica no Player, nao aqui
  */
@@ -176,6 +186,8 @@ export interface StoreState {
   timerDuration: number
   /** Boosts comprados para aplicar na proxima rodada */
   pendingBoosts: Record<PlayerId, BoostType[]>
+  /** Carrinho de compras de cada jogador */
+  cart: Record<PlayerId, CartItem[]>
 }
 
 /**
@@ -724,6 +736,10 @@ export const DEFAULT_STORE_CONFIG: StoreConfig = {
 
 ### Modulo: storeActions.ts (`src/stores/gameStore.ts` - novas actions)
 
+> **ATUALIZADO:** Sistema de carrinho de compras implementado.
+> Jogadores adicionam itens ao carrinho sem debitar coins imediatamente.
+> Coins sao debitados apenas ao confirmar compras.
+
 ```typescript
 // Actions da Pill Store
 
@@ -767,7 +783,7 @@ checkAndStartShopping: () => {
   const p2Wants = players.player2.wantsStore && players.player2.pillCoins > 0
   
   if (p1Wants || p2Wants) {
-    // Inicia fase de shopping
+    // Inicia fase de shopping com carrinhos vazios
     set({
       phase: 'shopping',
       storeState: {
@@ -775,6 +791,7 @@ checkAndStartShopping: () => {
         timerStartedAt: Date.now(),
         timerDuration: DEFAULT_STORE_CONFIG.shoppingTime,
         pendingBoosts: { player1: [], player2: [] },
+        cart: { player1: [], player2: [] },
       },
     })
   } else {
@@ -784,40 +801,102 @@ checkAndStartShopping: () => {
 },
 
 /**
- * Compra item da loja
+ * Adiciona item ao carrinho de compras (NAO debita coins)
  */
-purchaseStoreItem: (playerId: PlayerId, itemId: string) => {
+addToCart: (playerId: PlayerId, itemId: string) => {
   const state = get()
   const player = state.players[playerId]
+  const storeState = state.storeState
   const item = STORE_ITEMS.find(i => i.id === itemId)
   
-  if (!item || player.pillCoins < item.cost) return
+  if (!item || !storeState) return
+  
+  // Calcula total do carrinho + novo item
+  const cartTotal = storeState.cart[playerId].reduce((sum, ci) => sum + ci.cost, 0)
+  if (player.pillCoins < cartTotal + item.cost) return
   if (item.isAvailable && !item.isAvailable(player)) return
   
-  // Deduz coins
-  const newPlayers = {
-    ...state.players,
-    [playerId]: {
-      ...player,
-      pillCoins: player.pillCoins - item.cost,
-      // Se power_up, adiciona ao inventario
-      items: item.type === 'power_up' && item.itemType
-        ? [...player.items, { type: item.itemType, usesRemaining: 1 }]
-        : player.items,
-    },
-  }
-  
-  // Se boost, adiciona a pendingBoosts
-  let newStoreState = state.storeState
-  if (item.type === 'boost' && item.boostType && newStoreState) {
-    newStoreState = {
-      ...newStoreState,
-      pendingBoosts: {
-        ...newStoreState.pendingBoosts,
-        [playerId]: [...newStoreState.pendingBoosts[playerId], item.boostType],
+  // Adiciona ao carrinho
+  set({
+    storeState: {
+      ...storeState,
+      cart: {
+        ...storeState.cart,
+        [playerId]: [...storeState.cart[playerId], { storeItemId: itemId, cost: item.cost }],
       },
+    },
+  })
+},
+
+/**
+ * Remove item do carrinho de compras
+ */
+removeFromCart: (playerId: PlayerId, itemId: string) => {
+  const storeState = get().storeState
+  if (!storeState) return
+  
+  const cart = storeState.cart[playerId]
+  const index = cart.findIndex(ci => ci.storeItemId === itemId)
+  if (index === -1) return
+  
+  const newCart = [...cart]
+  newCart.splice(index, 1)
+  
+  set({
+    storeState: {
+      ...storeState,
+      cart: { ...storeState.cart, [playerId]: newCart },
+    },
+  })
+},
+
+/**
+ * Processa carrinho - debita coins e aplica itens
+ * Chamado internamente ao confirmar compras
+ */
+processCart: (playerId: PlayerId) => {
+  const state = get()
+  const player = state.players[playerId]
+  const storeState = state.storeState
+  if (!storeState) return
+  
+  const cart = storeState.cart[playerId]
+  let totalCost = 0
+  let updatedPlayer = { ...player }
+  let newStoreState = { ...storeState }
+  
+  for (const cartItem of cart) {
+    const item = STORE_ITEMS.find(i => i.id === cartItem.storeItemId)
+    if (!item) continue
+    
+    totalCost += item.cost
+    
+    if (item.type === 'power_up' && item.itemType) {
+      // Adiciona item ao inventario
+      updatedPlayer.inventory.items.push({ id: uuidv4(), type: item.itemType })
+    } else if (item.type === 'boost' && item.boostType) {
+      // Adiciona boost aos pendentes
+      newStoreState.pendingBoosts[playerId].push(item.boostType)
     }
   }
+  
+  // Deduz coins e limpa carrinho
+  updatedPlayer.pillCoins -= totalCost
+  newStoreState.cart[playerId] = []
+  
+  set({
+    players: { ...state.players, [playerId]: updatedPlayer },
+    storeState: newStoreState,
+  })
+},
+
+/**
+ * @deprecated Use addToCart/removeFromCart
+ * Mantido para compatibilidade - apenas adiciona ao carrinho
+ */
+purchaseStoreItem: (playerId: PlayerId, itemId: string) => {
+  get().addToCart(playerId, itemId)
+},
   
   set({ players: newPlayers, storeState: newStoreState })
 },

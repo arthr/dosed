@@ -260,16 +260,20 @@
 
 - [x] TASK-SS-083: Implementar `checkAndStartShopping()` no gameStore
   - Verifica se alguem tem `wantsStore === true` E `pillCoins > 0`
-  - Se sim: inicia phase = 'shopping'
+  - Se sim: inicia phase = 'shopping' com carrinhos vazios
   - Se nao: resetRound() direto
 
-- [x] TASK-SS-084: Implementar `purchaseStoreItem(playerId, itemId)` no gameStore
-  - Valida coins e disponibilidade
-  - Deduz pillCoins
-  - Se power_up: adiciona ao inventario
-  - Se boost: adiciona a pendingBoosts
+- [x] TASK-SS-084: ~~Implementar `purchaseStoreItem(playerId, itemId)`~~ **DEPRECATED**
+  - Substituido pelo sistema de carrinho (addToCart/removeFromCart)
+  - Mantido para compatibilidade - apenas adiciona ao carrinho
+
+- [x] TASK-SS-084B: Implementar sistema de carrinho de compras
+  - `addToCart(playerId, itemId)`: adiciona ao carrinho sem debitar coins
+  - `removeFromCart(playerId, itemId)`: remove do carrinho
+  - `processCart(playerId)`: processa carrinho ao confirmar (debita coins, aplica itens)
 
 - [x] TASK-SS-085: Implementar `confirmStorePurchases(playerId)` no gameStore
+  - **ATUALIZADO**: Chama processCart() antes de confirmar
   - Marca confirmed[playerId] = true
   - Se outro comprando e nao confirmou: reduz timer, avisa
   - Chama checkShoppingComplete()
@@ -287,6 +291,10 @@
   - Indica quantas pills revelar automaticamente ao iniciar rodada
   - Consumida em resetRound() apos revelar
 
+- [x] TASK-SS-088B: Adicionar `cart: Record<PlayerId, CartItem[]>` ao StoreState
+  - Armazena itens no carrinho de cada jogador
+  - CartItem: { storeItemId, cost }
+
 ### 4B.3 Hook de Timer
 
 - [x] TASK-SS-089: Criar `src/hooks/useStoreTimer.ts`
@@ -297,15 +305,20 @@
 ### 4B.4 UI da Pill Store
 
 - [x] TASK-SS-090: Criar componente `PillStore.tsx`
-  - Header com timer e Pill Coins do jogador
+  - Header com timer e Pill Coins do jogador (mostra coins disponiveis apos carrinho)
   - Aviso se oponente confirmou (tempo reduzido)
   - Grid de StoreItemCard
-  - Botao [CONFIRMAR]
+  - **ATUALIZADO**: Resumo do carrinho com total e itens
+  - Botao [CONFIRMAR COMPRAS (-X)] ou [CONFIRMAR (SEM COMPRAS)]
 
 - [x] TASK-SS-091: Criar componente `StoreItemCard.tsx`
   - Icone, nome, descricao, custo
   - Estado: disponivel, indisponivel (cinza), nao pode comprar (coins insuficientes)
-  - onClick para comprar
+  - **ATUALIZADO**: Sistema de carrinho:
+    - Click no card adiciona ao carrinho
+    - Botao "-" remove do carrinho
+    - Badge mostra quantidade no carrinho (Nx)
+    - Botao "+" adiciona mais (se disponivel)
 
 - [x] TASK-SS-092: Criar componente `WaitingForOpponent.tsx`
   - Exibido para quem NAO sinalizou `wantsStore` na fase shopping

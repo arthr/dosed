@@ -40,6 +40,7 @@ export type { QuestConfig, ShapeQuest } from './quest'
 // Store types
 export type {
   BoostType,
+  CartItem,
   StoreConfig,
   StoreItem,
   StoreItemType,

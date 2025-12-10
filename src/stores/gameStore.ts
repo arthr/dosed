@@ -71,6 +71,10 @@ interface GameStore extends GameState {
   // Actions - Pill Store
   toggleWantsStore: (playerId: PlayerId) => void
   checkAndStartShopping: () => void
+  addToCart: (playerId: PlayerId, itemId: string) => void
+  removeFromCart: (playerId: PlayerId, itemId: string) => void
+  processCart: (playerId: PlayerId) => void
+  /** @deprecated Use addToCart/removeFromCart */
   purchaseStoreItem: (playerId: PlayerId, itemId: string) => void
   confirmStorePurchases: (playerId: PlayerId) => void
   checkShoppingComplete: () => void
@@ -1291,7 +1295,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const p2Wants = players.player2.wantsStore && players.player2.pillCoins > 0
 
     if (p1Wants || p2Wants) {
-      // Inicia fase de shopping
+      // Inicia fase de shopping com carrinhos vazios
       set({
         phase: 'shopping',
         storeState: {
@@ -1299,6 +1303,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           timerStartedAt: Date.now(),
           timerDuration: DEFAULT_STORE_CONFIG.shoppingTime,
           pendingBoosts: { player1: [], player2: [] },
+          cart: { player1: [], player2: [] },
         },
       })
     } else {
@@ -1308,11 +1313,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   /**
-   * Compra um item da Pill Store
-   * @param playerId - ID do jogador comprando
+   * Adiciona item ao carrinho de compras
+   * NAO debita Pill Coins - apenas reserva para compra futura
+   * @param playerId - ID do jogador
    * @param itemId - ID do item na loja
    */
-  purchaseStoreItem: (playerId: PlayerId, itemId: string) => {
+  addToCart: (playerId: PlayerId, itemId: string) => {
     const state = get()
     const player = state.players[playerId]
     const storeState = state.storeState
@@ -1325,17 +1331,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Busca item no catalogo
     const item = getStoreItemById(itemId)
     if (!item) {
-      useToastStore.getState().show({
-        type: 'quest',
-        message: 'Item nao encontrado!',
-        playerId,
-        duration: 1500,
-      })
       return
     }
 
-    // Validacao: coins suficientes
-    if (player.pillCoins < item.cost) {
+    // Calcula total do carrinho atual
+    const currentCart = storeState.cart[playerId]
+    const cartTotal = currentCart.reduce((sum, ci) => sum + ci.cost, 0)
+
+    // Validacao: coins suficientes para carrinho + novo item
+    if (player.pillCoins < cartTotal + item.cost) {
       useToastStore.getState().show({
         type: 'quest',
         message: 'Pill Coins insuficientes!',
@@ -1345,8 +1349,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return
     }
 
-    // Validacao: item disponivel para o jogador
-    if (item.isAvailable && !item.isAvailable(player)) {
+    // Validacao: item disponivel para o jogador (considerando carrinho)
+    // Cria player simulado com itens do carrinho para validacao
+    const cartPowerUps = currentCart.filter(ci => {
+      const si = getStoreItemById(ci.storeItemId)
+      return si?.type === 'power_up'
+    })
+    const simulatedPlayer = {
+      ...player,
+      inventory: {
+        ...player.inventory,
+        items: [
+          ...player.inventory.items,
+          ...cartPowerUps.map(() => ({ id: 'temp', type: 'scanner' as const })),
+        ],
+      },
+    }
+
+    if (item.isAvailable && !item.isAvailable(simulatedPlayer)) {
       useToastStore.getState().show({
         type: 'quest',
         message: 'Item indisponivel!',
@@ -1356,40 +1376,132 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return
     }
 
-    // Deduz coins
-    let updatedPlayer = {
-      ...player,
-      pillCoins: player.pillCoins - item.cost,
+    // Adiciona ao carrinho
+    const newCart = [...currentCart, { storeItemId: itemId, cost: item.cost }]
+
+    set({
+      storeState: {
+        ...storeState,
+        cart: {
+          ...storeState.cart,
+          [playerId]: newCart,
+        },
+      },
+    })
+
+    // Toast de feedback
+    useToastStore.getState().show({
+      type: 'quest',
+      message: `${item.name} adicionado ao carrinho`,
+      playerId,
+      duration: 1000,
+    })
+  },
+
+  /**
+   * Remove item do carrinho de compras
+   * @param playerId - ID do jogador
+   * @param itemId - ID do item na loja a remover
+   */
+  removeFromCart: (playerId: PlayerId, itemId: string) => {
+    const state = get()
+    const storeState = state.storeState
+
+    if (state.phase !== 'shopping' || !storeState) {
+      return
     }
 
-    // Aplica efeito conforme tipo
+    const currentCart = storeState.cart[playerId]
+    // Remove primeira ocorrencia do item
+    const index = currentCart.findIndex(ci => ci.storeItemId === itemId)
+    if (index === -1) return
+
+    const newCart = [...currentCart]
+    newCart.splice(index, 1)
+
+    set({
+      storeState: {
+        ...storeState,
+        cart: {
+          ...storeState.cart,
+          [playerId]: newCart,
+        },
+      },
+    })
+
+    const item = getStoreItemById(itemId)
+    useToastStore.getState().show({
+      type: 'quest',
+      message: `${item?.name ?? 'Item'} removido do carrinho`,
+      playerId,
+      duration: 1000,
+    })
+  },
+
+  /**
+   * Processa o carrinho de compras - debita coins e aplica itens
+   * Chamado internamente quando jogador confirma compras
+   */
+  processCart: (playerId: PlayerId) => {
+    const state = get()
+    const player = state.players[playerId]
+    const storeState = state.storeState
+
+    if (!storeState) return
+
+    const cart = storeState.cart[playerId]
+    if (cart.length === 0) return
+
+    let updatedPlayer = { ...player }
     let newStoreState = { ...storeState }
+    let totalCost = 0
 
-    if (item.type === 'power_up' && item.itemType) {
-      // Adiciona item ao inventario
-      const newItem: InventoryItem = {
-        id: uuidv4(),
-        type: item.itemType,
-      }
-      updatedPlayer = {
-        ...updatedPlayer,
-        inventory: {
-          ...updatedPlayer.inventory,
-          items: [...updatedPlayer.inventory.items, newItem],
-        },
-      }
-    } else if (item.type === 'boost' && item.boostType) {
-      // Adiciona boost aos pendentes
-      newStoreState = {
-        ...newStoreState,
-        pendingBoosts: {
-          ...newStoreState.pendingBoosts,
-          [playerId]: [...newStoreState.pendingBoosts[playerId], item.boostType],
-        },
+    for (const cartItem of cart) {
+      const item = getStoreItemById(cartItem.storeItemId)
+      if (!item) continue
+
+      totalCost += item.cost
+
+      if (item.type === 'power_up' && item.itemType) {
+        // Adiciona item ao inventario
+        const newItem: InventoryItem = {
+          id: uuidv4(),
+          type: item.itemType,
+        }
+        updatedPlayer = {
+          ...updatedPlayer,
+          inventory: {
+            ...updatedPlayer.inventory,
+            items: [...updatedPlayer.inventory.items, newItem],
+          },
+        }
+      } else if (item.type === 'boost' && item.boostType) {
+        // Adiciona boost aos pendentes
+        newStoreState = {
+          ...newStoreState,
+          pendingBoosts: {
+            ...newStoreState.pendingBoosts,
+            [playerId]: [...newStoreState.pendingBoosts[playerId], item.boostType],
+          },
+        }
       }
     }
 
-    // Atualiza estado
+    // Deduz total de coins
+    updatedPlayer = {
+      ...updatedPlayer,
+      pillCoins: updatedPlayer.pillCoins - totalCost,
+    }
+
+    // Limpa carrinho
+    newStoreState = {
+      ...newStoreState,
+      cart: {
+        ...newStoreState.cart,
+        [playerId]: [],
+      },
+    }
+
     set({
       players: {
         ...state.players,
@@ -1399,16 +1511,27 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })
 
     // Toast de confirmacao
-    useToastStore.getState().show({
-      type: 'quest',
-      message: `${item.name} comprado!`,
-      playerId,
-      duration: 1500,
-    })
+    if (totalCost > 0) {
+      useToastStore.getState().show({
+        type: 'quest',
+        message: `Compra finalizada! -${totalCost} Pill Coins`,
+        playerId,
+        duration: 2000,
+      })
+    }
+  },
+
+  /**
+   * @deprecated Use addToCart/removeFromCart + confirmStorePurchases
+   * Mantido para compatibilidade - agora apenas adiciona ao carrinho
+   */
+  purchaseStoreItem: (playerId: PlayerId, itemId: string) => {
+    get().addToCart(playerId, itemId)
   },
 
   /**
    * Jogador confirma que terminou de fazer compras
+   * Processa o carrinho (debita coins e aplica itens) antes de confirmar
    * @param playerId - ID do jogador confirmando
    */
   confirmStorePurchases: (playerId: PlayerId) => {
@@ -1425,18 +1548,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return
     }
 
+    // Processa o carrinho antes de confirmar (debita coins e aplica itens)
+    get().processCart(playerId)
+
+    // Re-obtem estado atualizado apos processCart
+    const updatedState = get()
+    const updatedStoreState = updatedState.storeState
+    if (!updatedStoreState) return
+
     const otherPlayerId: PlayerId = playerId === 'player1' ? 'player2' : 'player1'
-    const otherPlayer = state.players[otherPlayerId]
+    const otherPlayer = updatedState.players[otherPlayerId]
 
     // Verifica se outro jogador esta comprando (wantsStore && tem coins)
     const otherIsShopping = otherPlayer.wantsStore && otherPlayer.pillCoins > 0
 
-    let newTimerDuration = storeState.timerDuration
+    let newTimerDuration = updatedStoreState.timerDuration
 
     // Se outro ainda comprando e nao confirmou, reduz timer
-    if (otherIsShopping && !storeState.confirmed[otherPlayerId]) {
-      const elapsed = Date.now() - (storeState.timerStartedAt ?? 0)
-      const remaining = storeState.timerDuration - elapsed
+    if (otherIsShopping && !updatedStoreState.confirmed[otherPlayerId]) {
+      const elapsed = Date.now() - (updatedStoreState.timerStartedAt ?? 0)
+      const remaining = updatedStoreState.timerDuration - elapsed
       newTimerDuration = elapsed + (remaining * DEFAULT_STORE_CONFIG.reduceMultiplier)
 
       // Avisa o outro jogador
@@ -1451,9 +1582,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Atualiza estado
     set({
       storeState: {
-        ...storeState,
+        ...updatedStoreState,
         confirmed: {
-          ...storeState.confirmed,
+          ...updatedStoreState.confirmed,
           [playerId]: true,
         },
         timerDuration: newTimerDuration,

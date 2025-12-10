@@ -325,6 +325,30 @@ function onPillConsumed(player: Player, pill: Pill) {
 - Se timer expirar: confirma automatico (compras feitas ate entao)
 - Ambos confirmam: aplica boosts + inicia nova rodada
 
+#### 5.3.1 Sistema de Carrinho de Compras
+
+> **ATUALIZADO:** Implementado sistema de carrinho para evitar compras acidentais.
+
+**Fluxo de Compras:**
+1. Jogador clica em itens para adicionar ao carrinho (NAO debita coins)
+2. Carrinho exibe resumo com total a ser gasto
+3. Jogador pode remover itens do carrinho a qualquer momento
+4. Ao clicar "Confirmar Compras", carrinho e processado:
+   - Coins sao debitados
+   - Itens sao adicionados ao inventario ou pendingBoosts
+5. Jogador pode confirmar sem itens no carrinho (sem compras)
+
+**UI do Carrinho:**
+- Header mostra coins disponiveis (total - carrinho)
+- Badge nos itens mostra quantidade no carrinho (Nx)
+- Resumo do carrinho com lista de itens e total
+- Botao "Confirmar Compras (-X)" ou "Confirmar (Sem Compras)"
+
+**Validacoes:**
+- Nao permite adicionar se coins disponiveis (apos carrinho) < custo
+- Nao permite adicionar se item indisponivel (inventario cheio, etc)
+- Considera itens do carrinho ao validar disponibilidade
+
 #### 5.4 Itens da Loja
 
 **Tipos de Itens:**
@@ -372,21 +396,24 @@ interface StoreConfig {
 ```
 
 **Criterios de Aceitacao:**
-- [ ] Icone de Pill Coins clicavel apenas se `pillCoins > 0`
-- [ ] Toast de aviso ao clicar sem coins
-- [ ] Toggle `wantsStore` funciona durante toda a rodada
-- [ ] Feedback visual quando `wantsStore === true` (highlight no icone)
-- [ ] `wantsStore` resetado ao iniciar nova rodada
-- [ ] Pill Store nao exibida se Game Over
-- [ ] Pill Store abre se pelo menos 1 jogador sinalizou com coins
-- [ ] Loja exibida apenas para quem sinalizou
-- [ ] Tela "Aguardando" para quem nao sinalizou
-- [ ] Timer de 30s na fase shopping
-- [ ] Timer reduz 50% quando um jogador confirma
-- [ ] Compras deduzem Pill Coins
-- [ ] Power-Ups adicionados ao inventario
-- [ ] Boosts aplicados ao iniciar proxima rodada
-- [ ] Itens indisponiveis (inventario cheio, vida MAX) desabilitados
+- [x] Icone de Pill Coins clicavel apenas se `pillCoins > 0`
+- [x] Toast de aviso ao clicar sem coins
+- [x] Toggle `wantsStore` funciona durante toda a rodada
+- [x] Feedback visual quando `wantsStore === true` (highlight no icone)
+- [x] `wantsStore` resetado ao iniciar nova rodada
+- [x] Pill Store nao exibida se Game Over
+- [x] Pill Store abre se pelo menos 1 jogador sinalizou com coins
+- [x] Loja exibida apenas para quem sinalizou
+- [x] Tela "Aguardando" para quem nao sinalizou
+- [x] Timer de 30s na fase shopping
+- [x] Timer reduz 50% quando um jogador confirma
+- [x] Compras deduzem Pill Coins (via sistema de carrinho)
+- [x] Power-Ups adicionados ao inventario
+- [x] Boosts aplicados ao iniciar proxima rodada
+- [x] Itens indisponiveis (inventario cheio, vida MAX) desabilitados
+- [x] Sistema de carrinho: adicionar/remover itens sem debitar coins
+- [x] Carrinho: resumo com total antes de confirmar
+- [x] Carrinho: coins debitados apenas ao confirmar
 
 ---
 

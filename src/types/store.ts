@@ -40,6 +40,16 @@ export interface StoreItem {
 }
 
 /**
+ * Item no carrinho de compras
+ */
+export interface CartItem {
+  /** ID do item da loja */
+  storeItemId: string
+  /** Custo do item */
+  cost: number
+}
+
+/**
  * Estado da Pill Store (apenas durante fase shopping)
  * Nota: wantsStore fica no Player, nao aqui
  */
@@ -52,6 +62,8 @@ export interface StoreState {
   timerDuration: number
   /** Boosts comprados para aplicar na proxima rodada */
   pendingBoosts: Record<PlayerId, BoostType[]>
+  /** Carrinho de compras de cada jogador (itens adicionados mas nao confirmados) */
+  cart: Record<PlayerId, CartItem[]>
 }
 
 /**

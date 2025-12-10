@@ -1,5 +1,6 @@
 import type {
   AIDecisionContext,
+  DifficultyLevel,
   InventoryItem,
   ItemEvaluation,
   ItemType,
@@ -726,5 +727,140 @@ export function selectAIItemTarget(
 export function itemRequiresTarget(itemType: ItemType): boolean {
   const itemDef = ITEM_CATALOG[itemType]
   return itemDef.targetType !== 'self' && itemDef.targetType !== 'table'
+}
+
+// ============================================
+// Selecao de Itens Pre-Jogo
+// ============================================
+
+/**
+ * Embaralha array (Fisher-Yates)
+ */
+function shuffleArray<T>(array: T[]): T[] {
+  const result = [...array]
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[result[i], result[j]] = [result[j], result[i]]
+  }
+  return result
+}
+
+/**
+ * Seleciona itens variados (1 por categoria se possivel)
+ * Usado por Normal
+ */
+function selectVariedItems(availableItems: ItemType[]): ItemType[] {
+  const selected: ItemType[] = []
+  const categories = ['intel', 'sustain', 'control', 'chaos'] as const
+
+  // Tenta pegar 1 de cada categoria
+  for (const category of categories) {
+    const categoryItems = availableItems.filter((item) => {
+      const def = ITEM_CATALOG[item]
+      return def.category === category && !selected.includes(item)
+    })
+    if (categoryItems.length > 0) {
+      selected.push(categoryItems[Math.floor(Math.random() * categoryItems.length)])
+    }
+  }
+
+  // Completa com aleatorios ate 5
+  const remaining = availableItems.filter((item) => !selected.includes(item))
+  const shuffled = shuffleArray(remaining)
+  while (selected.length < 5 && shuffled.length > 0) {
+    selected.push(shuffled.pop()!)
+  }
+
+  return selected
+}
+
+/**
+ * Seleciona itens ofensivos (prioriza control/chaos)
+ * Usado por Hard
+ */
+function selectOffensiveItems(availableItems: ItemType[]): ItemType[] {
+  const offensivePriority: ItemType[] = [
+    'force_feed',
+    'handcuffs',
+    'double',
+    'inverter',
+    'shape_bomb',
+    'discard',
+  ]
+
+  const selected: ItemType[] = []
+
+  // Prioriza ofensivos
+  for (const item of offensivePriority) {
+    if (availableItems.includes(item) && !selected.includes(item)) {
+      selected.push(item)
+      if (selected.length >= 5) break
+    }
+  }
+
+  // Completa com outros
+  const remaining = availableItems.filter((item) => !selected.includes(item))
+  const shuffled = shuffleArray(remaining)
+  while (selected.length < 5 && shuffled.length > 0) {
+    selected.push(shuffled.pop()!)
+  }
+
+  return selected
+}
+
+/**
+ * Seleciona composicao otimizada (2 Intel, 2 Sustain, 1 Control)
+ * Usado por Insane
+ */
+function selectOptimalItems(availableItems: ItemType[]): ItemType[] {
+  const selected: ItemType[] = []
+
+  // Composicao ideal: 2 Intel, 2 Sustain, 1 Control
+  const composition = [
+    { category: 'intel' as const, count: 2 },
+    { category: 'sustain' as const, count: 2 },
+    { category: 'control' as const, count: 1 },
+  ]
+
+  for (const { category, count } of composition) {
+    const categoryItems = availableItems.filter((item) => {
+      const def = ITEM_CATALOG[item]
+      return def.category === category && !selected.includes(item)
+    })
+    const shuffled = shuffleArray(categoryItems)
+    for (let i = 0; i < count && shuffled.length > 0; i++) {
+      selected.push(shuffled.pop()!)
+    }
+  }
+
+  // Completa ate 5 se necessario
+  const remaining = availableItems.filter((item) => !selected.includes(item))
+  const shuffled = shuffleArray(remaining)
+  while (selected.length < 5 && shuffled.length > 0) {
+    selected.push(shuffled.pop()!)
+  }
+
+  return selected
+}
+
+/**
+ * Seleciona itens iniciais baseado na dificuldade
+ */
+export function selectAIInitialItems(
+  difficulty: DifficultyLevel,
+  availableItems: ItemType[]
+): ItemType[] {
+  switch (difficulty) {
+    case 'easy':
+      return shuffleArray(availableItems).slice(0, 5)
+    case 'normal':
+      return selectVariedItems(availableItems)
+    case 'hard':
+      return selectOffensiveItems(availableItems)
+    case 'insane':
+      return selectOptimalItems(availableItems)
+    default:
+      return shuffleArray(availableItems).slice(0, 5)
+  }
 }
 

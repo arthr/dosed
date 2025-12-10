@@ -9,12 +9,12 @@
 | AI Logic - Analise | 4 | 4 | 0 |
 | AI Logic - Selecao | 4 | 4 | 0 |
 | AI Logic - Itens | 4 | 4 | 0 |
-| AI Logic - Pre-jogo/Loja | 4 | 0 | 4 |
+| AI Logic - Pre-jogo/Loja | 4 | 2 | 2 |
 | Store | 3 | 0 | 3 |
 | Hooks | 4 | 0 | 4 |
 | Components | 3 | 0 | 3 |
 | Integration | 3 | 0 | 3 |
-| **TOTAL** | **37** | **20** | **17** |
+| **TOTAL** | **37** | **22** | **15** |
 
 ---
 
@@ -147,13 +147,13 @@
 
 ### Selecao de Itens Iniciais
 
-- [ ] TASK-020: Implementar `selectAIInitialItems(difficulty, available)`
+- [x] TASK-020: Implementar `selectAIInitialItems(difficulty, available)`
   - Easy: aleatorio
   - Normal: variedade (1 por categoria se possivel)
   - Hard: ofensivos (Force Feed, Handcuffs, etc)
   - Insane: otimizado (2 Intel, 2 Sustain, 1 Control)
 
-- [ ] TASK-021: Implementar funcoes auxiliares de selecao
+- [x] TASK-021: Implementar funcoes auxiliares de selecao
   - `selectVariedItems()` - 1 por categoria
   - `selectOffensiveItems()` - prioriza controle/chaos
   - `selectOptimalItems()` - composicao balanceada

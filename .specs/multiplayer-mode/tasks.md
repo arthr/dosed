@@ -37,15 +37,15 @@
 ## Fase 1: Types e Stores
 
 ### TASK-MP-003: Criar types de multiplayer
-- [ ] Criar `src/types/multiplayer.ts`
-- [ ] Definir `GameMode`, `RoomStatus`, `LocalRole`
-- [ ] Definir `Room`, `MultiplayerContext`
-- [ ] Definir `ConnectionStatus`
-- [ ] Atualizar `src/types/index.ts` com exports
+- [x] Criar `src/types/multiplayer.ts`
+- [x] Definir `GameMode`, `RoomStatus`, `LocalRole`
+- [x] Definir `Room`, `MultiplayerContext`
+- [x] Definir `ConnectionStatus`
+- [x] Atualizar `src/types/index.ts` com exports
 
 **Arquivos:**
-- `src/types/multiplayer.ts` (novo)
-- `src/types/index.ts`
+- `src/types/multiplayer.ts` (criado)
+- `src/types/index.ts` (atualizado)
 
 ---
 

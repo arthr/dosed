@@ -59,3 +59,13 @@ export type {
   StoreState,
 } from './store'
 
+// Multiplayer types
+export type {
+  ConnectionStatus,
+  GameMode,
+  LocalRole,
+  MultiplayerContext,
+  Room,
+  RoomStatus,
+} from './multiplayer'
+

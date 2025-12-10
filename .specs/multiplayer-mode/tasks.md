@@ -11,26 +11,26 @@
 ## Fase 0: Setup e Infraestrutura
 
 ### TASK-MP-001: Configurar Supabase Realtime
-- [ ] Criar projeto Supabase (se nao existir)
-- [ ] Configurar Realtime Broadcast
-- [ ] Adicionar variaveis de ambiente
-- [ ] Instalar dependencias: `@supabase/supabase-js`
+- [x] Criar projeto Supabase (se nao existir)
+- [x] Configurar Realtime Broadcast
+- [x] Adicionar variaveis de ambiente
+- [x] Instalar dependencias: `@supabase/supabase-js`
 
 **Arquivos:**
-- `.env` / `.env.example`
-- `package.json`
+- `.env.example` (criado)
+- `package.json` (ja tinha dependencia)
 
 ---
 
 ### TASK-MP-002: Criar servico de realtime
-- [ ] Criar `src/services/realtimeService.ts`
-- [ ] Implementar interface `RealtimeService`
-- [ ] Implementar `createSupabaseRealtimeService()`
-- [ ] Exportar instancia singleton
+- [x] Criar `src/services/realtimeService.ts`
+- [x] Implementar interface `RealtimeService`
+- [x] Implementar `createSupabaseRealtimeService()`
+- [x] Exportar instancia singleton
 
 **Arquivos:**
-- `src/services/realtimeService.ts` (novo)
-- `src/services/index.ts` (novo)
+- `src/services/realtimeService.ts` (ja existia)
+- `src/services/index.ts` (criado)
 
 ---
 

@@ -55,3 +55,10 @@ export {
 
 // Store Timer (shopping phase)
 export { useStoreTimer } from './useStoreTimer'
+
+// Multiplayer
+export {
+  useMultiplayer,
+  useIsLocalTurn,
+  useCanInteract,
+} from './useMultiplayer'

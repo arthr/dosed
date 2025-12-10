@@ -163,14 +163,14 @@
 ## Fase 4: Hooks Multiplayer
 
 ### TASK-MP-013: Criar useMultiplayer
-- [ ] Criar `src/hooks/useMultiplayer.ts`
-- [ ] Implementar `isLocalTurn` - verifica se turno do jogador local
-- [ ] Implementar `canInteract` - turno local + fase correta
-- [ ] Re-exportar estado relevante do multiplayerStore
+- [x] Criar `src/hooks/useMultiplayer.ts`
+- [x] Implementar `isLocalTurn` - verifica se turno do jogador local
+- [x] Implementar `canInteract` - turno local + fase correta
+- [x] Re-exportar estado relevante do multiplayerStore
 
 **Arquivos:**
-- `src/hooks/useMultiplayer.ts` (novo)
-- `src/hooks/index.ts`
+- `src/hooks/useMultiplayer.ts` (criado)
+- `src/hooks/index.ts` (atualizado)
 
 ---
 

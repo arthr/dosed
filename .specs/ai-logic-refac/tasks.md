@@ -11,10 +11,10 @@
 | AI Logic - Itens | 4 | 4 | 0 |
 | AI Logic - Pre-jogo/Loja | 4 | 4 | 0 |
 | Store | 3 | 3 | 0 |
-| Hooks | 4 | 2 | 2 |
+| Hooks | 4 | 3 | 1 |
 | Components | 3 | 0 | 3 |
 | Integration | 3 | 0 | 3 |
-| **TOTAL** | **37** | **29** | **8** |
+| **TOTAL** | **37** | **30** | **7** |
 
 ---
 
@@ -197,7 +197,7 @@
   - Usar `selectAIInitialItems(difficulty, available)`
   - Obter dificuldade do store
 
-- [ ] TASK-029: Criar `useAIStore.ts` (NOVO)
+- [x] TASK-029: Criar `useAIStore.ts` (NOVO)
   - Hook para comportamento da IA na loja
   - `shouldAIWantStore()` chamado durante rodada
   - `selectAIStoreItems()` chamado na fase shopping

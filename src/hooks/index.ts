@@ -23,6 +23,7 @@ export { usePillConsumption } from './usePillConsumption'
 
 // AI Player
 export { useAIPlayer } from './useAIPlayer'
+export { useAIStore } from './useAIStore'
 
 // Overlay System
 export {

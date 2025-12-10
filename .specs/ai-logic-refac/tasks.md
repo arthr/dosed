@@ -4,7 +4,7 @@
 
 | Area | Total | Concluidas | Pendentes |
 | :--- | :---: | :---: | :---: |
-| Types | 5 | 0 | 5 |
+| Types | 5 | 1 | 4 |
 | Config | 3 | 0 | 3 |
 | AI Logic - Analise | 4 | 0 | 4 |
 | AI Logic - Selecao | 4 | 0 | 4 |
@@ -14,7 +14,7 @@
 | Hooks | 4 | 0 | 4 |
 | Components | 3 | 0 | 3 |
 | Integration | 3 | 0 | 3 |
-| **TOTAL** | **37** | **0** | **37** |
+| **TOTAL** | **37** | **1** | **36** |
 
 ---
 
@@ -22,7 +22,7 @@
 
 ### Types
 
-- [ ] TASK-001: Criar type `DifficultyLevel` em `types/game.ts`
+- [x] TASK-001: Criar type `DifficultyLevel` em `types/game.ts`
   ```typescript
   export type DifficultyLevel = 'easy' | 'normal' | 'hard' | 'insane'
   ```

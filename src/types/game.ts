@@ -5,6 +5,31 @@ import type { ShapeQuest } from './quest'
 import type { StoreState } from './store'
 
 /**
+ * Niveis de dificuldade da IA
+ */
+export type DifficultyLevel = 'easy' | 'normal' | 'hard' | 'insane'
+
+/**
+ * Labels de exibicao para dificuldade
+ */
+export const DIFFICULTY_LABELS: Record<DifficultyLevel, string> = {
+  easy: 'Paciente',
+  normal: 'Cobaia',
+  hard: 'Sobrevivente',
+  insane: 'Hofmann',
+}
+
+/**
+ * Descricoes para tooltip
+ */
+export const DIFFICULTY_DESCRIPTIONS: Record<DifficultyLevel, string> = {
+  easy: 'IA previsivel, ideal para aprender',
+  normal: 'Experiencia balanceada',
+  hard: 'IA agressiva e estrategica',
+  insane: 'IA calculista, sem piedade',
+}
+
+/**
  * Fases do jogo
  */
 export type GamePhase = 'setup' | 'itemSelection' | 'playing' | 'roundEnding' | 'shopping' | 'ended'

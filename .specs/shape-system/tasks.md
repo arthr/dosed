@@ -482,9 +482,14 @@
 
 ### 7.3 Documentacao
 
-- [ ] TASK-SS-077: Atualizar `docs/GAME-IDEA.md` com mecanicas de shape
+- [x] TASK-SS-077: Atualizar `docs/GAME-IDEA.md` com mecanicas de shape
+  - Secao 5 completa adicionada ao documento
 
-- [ ] TASK-SS-078: Atualizar `product.md` com status da feature
+- [x] TASK-SS-078: Atualizar `.cursor/rules/product.md` com status da feature
+  - Sistema de 16 shapes (ATIVAS vs SAZONAIS)
+  - Shape Quests e Pill Coins
+  - Pill Store e fase shopping
+  - Novos itens (Shape Bomb, Shape Scanner)
 
 ---
 

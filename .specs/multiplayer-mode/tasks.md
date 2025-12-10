@@ -634,6 +634,25 @@
 
 ---
 
+### HOTFIX-MP-007: Sincronizar IDs de itens e relaxar validacao de turno
+- [x] Incluir `itemId` no evento `item_selected` para sincronizar IDs entre clientes
+- [x] Modificar `selectItem` para aceitar `itemId` opcional (usado em eventos remotos)
+- [x] Atualizar interface `GameStore.selectItem` com parametro opcional
+- [x] Atualizar `applyRemoteEvent` para passar `itemId` ao `selectItem`
+- [x] Substituir `validateTurn()` por `warnIfWrongTurn()` (apenas log, nao rejeita)
+- [x] Evitar dessincronizacao por rejeicao de eventos em race conditions
+
+**Problema resolvido:**
+Itens tinham IDs gerados localmente com `uuidv4()`, resultando em IDs diferentes
+entre host e guest. Eventos `item_deselected` e `item_used` falhavam por nao
+encontrar o item com ID correto no cliente remoto.
+
+**Arquivos:**
+- `src/types/events.ts` (ItemSelectedEvent.payload.itemId)
+- `src/stores/gameStore.ts` (selectItem, interface, applyRemoteEvent)
+
+---
+
 ## Ordem de Execucao Recomendada
 
 1. **Infraestrutura:** TASK-MP-001, TASK-MP-002

@@ -110,7 +110,7 @@ interface GameStore extends GameState {
 
   // Actions - Item Selection (pre-game)
   startItemSelectionPhase: () => void
-  selectItem: (playerId: PlayerId, itemType: ItemType) => void
+  selectItem: (playerId: PlayerId, itemType: ItemType, itemId?: string) => void
   deselectItem: (playerId: PlayerId, itemId: string) => void
   confirmItemSelection: (playerId: PlayerId) => void
 
@@ -762,8 +762,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   /**
    * Adiciona um item ao inventario do jogador
+   * @param playerId - ID do jogador
+   * @param itemType - Tipo do item
+   * @param itemId - ID do item (opcional, usado para sincronizacao multiplayer)
    */
-  selectItem: (playerId: PlayerId, itemType: ItemType) => {
+  selectItem: (playerId: PlayerId, itemType: ItemType, itemId?: string) => {
     const state = get()
     const player = state.players[playerId]
 
@@ -772,8 +775,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return
     }
 
+    // Usa itemId fornecido (evento remoto) ou gera novo (local)
+    const newItemId = itemId ?? uuidv4()
+
     const newItem: InventoryItem = {
-      id: uuidv4(),
+      id: newItemId,
       type: itemType,
     }
 
@@ -790,11 +796,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       },
     })
 
-    // Emite evento multiplayer
-    emitMultiplayerEvent(state.mode, {
-      type: 'item_selected',
-      payload: { itemType },
-    })
+    // Emite evento multiplayer (apenas se nao for evento remoto)
+    if (!itemId) {
+      emitMultiplayerEvent(state.mode, {
+        type: 'item_selected',
+        payload: { itemType, itemId: newItemId },
+      })
+    }
   },
 
   /**
@@ -1926,13 +1934,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
       })
     }
 
-    // Helper: valida se e turno do jogador que enviou
-    const validateTurn = (): boolean => {
+    // Helper: verifica turno (apenas warning, nao rejeita)
+    // Eventos remotos ja foram validados pelo remetente - rejeitar causa dessincronizacao
+    const warnIfWrongTurn = (): void => {
       if (state.currentTurn !== event.playerId) {
-        logInvalid(`Evento fora de turno (esperado: ${state.currentTurn}, recebido: ${event.playerId})`)
-        return false
+        console.warn(`[GameStore] Evento de turno diferente (local: ${state.currentTurn}, remoto: ${event.playerId})`, {
+          type: event.type,
+          payload: 'payload' in event ? event.payload : undefined,
+        })
       }
-      return true
     }
 
     // Helper: valida se pillId existe no pool
@@ -1973,8 +1983,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
           console.log('[GameStore] pill_consumed payload:', payload)
 
-          // Valida turno e pilula
-          if (!validateTurn()) break
+          // Verifica turno (apenas warning) e valida pilula
+          warnIfWrongTurn()
           if (!validatePill(payload.pillId)) break
 
           get().consumePill(payload.pillId, {
@@ -1986,8 +1996,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         case 'item_used': {
           const payload = event.payload as { itemId: string; targetId?: string }
 
-          // Valida turno e item
-          if (!validateTurn()) break
+          // Verifica turno (apenas warning) e valida item
+          warnIfWrongTurn()
           if (!validateItem(event.playerId, payload.itemId)) break
 
           // Valida alvo se for pilula
@@ -2005,7 +2015,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
 
         case 'item_selected': {
-          const payload = event.payload as { itemType: ItemType }
+          const payload = event.payload as { itemType: ItemType; itemId: string }
 
           // Valida fase
           if (state.phase !== 'itemSelection') {
@@ -2013,7 +2023,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
             break
           }
 
-          get().selectItem(event.playerId, payload.itemType)
+          // Passa itemId para sincronizar IDs entre clientes
+          get().selectItem(event.playerId, payload.itemType, payload.itemId)
           break
         }
 

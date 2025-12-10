@@ -95,6 +95,8 @@ export interface ItemSelectedEvent extends GameEventBase {
   type: 'item_selected'
   payload: {
     itemType: ItemType
+    /** ID do item gerado (para sincronizacao multiplayer) */
+    itemId: string
   }
 }
 

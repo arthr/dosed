@@ -197,7 +197,7 @@
 
 ### 4.3 UI de Quest
 
-- [ ] TASK-SS-037: Criar componente `ShapeQuestDisplay.tsx` em `src/components/game/`
+- [x] TASK-SS-037: Criar componente `ShapeQuestDisplay.tsx` em `src/components/game/`
   - Mostra sequencia de shapes
   - Indica progresso atual
   - Mostra "+1 Pill Coin" como recompensa

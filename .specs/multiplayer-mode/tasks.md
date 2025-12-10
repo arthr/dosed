@@ -383,25 +383,28 @@
 ---
 
 ### TASK-MP-032: Implementar desconexao durante jogo
-- [ ] Detectar perda de conexao
-- [ ] Exibir overlay de reconexao
-- [ ] Timeout de 60s para W.O.
-- [ ] Cleanup correto de recursos
+- [x] Detectar perda de conexao (local e oponente)
+- [x] Exibir overlay de reconexao (diferencia local vs oponente)
+- [x] Timeout de 60s para W.O. (ja implementado)
+- [x] Cleanup correto de recursos (ja implementado)
+- [x] Emitir eventos player_disconnected/player_reconnected
+- [x] Estado opponentDisconnected no store
 
 **Arquivos:**
-- `src/stores/multiplayerStore.ts`
-- `src/hooks/useRoomConnection.ts`
+- `src/stores/multiplayerStore.ts` (atualizado - opponentDisconnected, emissao de eventos)
+- `src/components/multiplayer/DisconnectedOverlay.tsx` (atualizado - suporte a ambos casos)
+- `src/hooks/useRoomConnection.ts` (sem alteracoes - ja estava completo)
 
 ---
 
 ### TASK-MP-033: Implementar validacao de eventos
-- [ ] Validar turno correto no receptor
-- [ ] Validar dados do evento
-- [ ] Log de eventos invalidos
-- [ ] Recuperacao graceful
+- [x] Validar turno correto no receptor
+- [x] Validar dados do evento (pillId, itemId, fase)
+- [x] Log de eventos invalidos (detalhado com contexto)
+- [x] Recuperacao graceful (try/catch, nao crasha)
 
 **Arquivos:**
-- `src/stores/gameStore.ts` (applyRemoteEvent)
+- `src/stores/gameStore.ts` (applyRemoteEvent - refatorado com validacoes)
 
 ---
 

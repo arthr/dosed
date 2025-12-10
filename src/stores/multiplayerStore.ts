@@ -40,6 +40,10 @@ interface MultiplayerStore extends MultiplayerContext {
   _localPlayerId: string
   _unsubscribeEvent: (() => void) | null
   _unsubscribeStatus: (() => void) | null
+  
+  // Estado de desconexao do oponente
+  opponentDisconnected: boolean
+  setOpponentDisconnected: (value: boolean) => void
 }
 
 /**
@@ -50,6 +54,7 @@ const initialState: MultiplayerContext & {
   _localPlayerId: string
   _unsubscribeEvent: (() => void) | null
   _unsubscribeStatus: (() => void) | null
+  opponentDisconnected: boolean
 } = {
   mode: 'single_player',
   room: null,
@@ -61,6 +66,7 @@ const initialState: MultiplayerContext & {
   _localPlayerId: '',
   _unsubscribeEvent: null,
   _unsubscribeStatus: null,
+  opponentDisconnected: false,
 }
 
 /**
@@ -230,7 +236,22 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
 
     // Registra handler de status
     const unsubscribeStatus = realtimeService.onStatusChange((status) => {
+      const prevStatus = get().connectionStatus
       set({ connectionStatus: status })
+
+      // Emite evento de desconexao/reconexao para notificar oponente
+      if (get().room && get().mode === 'multiplayer') {
+        if (prevStatus === 'connected' && status === 'disconnected') {
+          // Notifica oponente que desconectamos
+          // Nota: pode nao chegar se a conexao ja caiu
+          get().sendEvent({ type: 'player_disconnected' })
+        } else if (prevStatus !== 'connected' && status === 'connected') {
+          // Notifica oponente que reconectamos
+          get().sendEvent({ type: 'player_reconnected' })
+          // Reseta flag de oponente desconectado (ele pode ter reconectado tambem)
+          set({ opponentDisconnected: false })
+        }
+      }
     })
 
     set({
@@ -335,14 +356,14 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
       }
 
       case 'player_disconnected': {
-        // Jogador desconectou temporariamente
-        set({ connectionStatus: 'reconnecting' })
+        // Oponente desconectou temporariamente
+        set({ opponentDisconnected: true })
         break
       }
 
       case 'player_reconnected': {
-        // Jogador reconectou
-        set({ connectionStatus: 'connected' })
+        // Oponente reconectou
+        set({ opponentDisconnected: false })
         break
       }
 
@@ -423,6 +444,13 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
   },
 
   /**
+   * Define se oponente esta desconectado
+   */
+  setOpponentDisconnected: (value: boolean) => {
+    set({ opponentDisconnected: value })
+  },
+
+  /**
    * Reseta para estado inicial
    */
   reset: () => {
@@ -471,4 +499,10 @@ export const useRoom = () =>
  */
 export const useMultiplayerError = () =>
   useMultiplayerStore((state) => state.error)
+
+/**
+ * Hook para verificar se oponente esta desconectado
+ */
+export const useOpponentDisconnected = () =>
+  useMultiplayerStore((state) => state.opponentDisconnected)
 

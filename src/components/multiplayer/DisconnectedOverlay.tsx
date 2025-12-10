@@ -1,16 +1,21 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { WifiOff, Loader2, LogOut } from 'lucide-react'
+import { WifiOff, Loader2, LogOut, UserX } from 'lucide-react'
 import { Button } from '@/components/ui/8bit/button'
 import { Card, CardContent } from '@/components/ui/8bit/card'
 import { useRoomConnection } from '@/hooks'
-import { useMultiplayerStore } from '@/stores/multiplayerStore'
+import { useMultiplayerStore, useOpponentDisconnected } from '@/stores/multiplayerStore'
 
 /**
- * Overlay exibido quando oponente desconecta durante partida
+ * Overlay exibido quando ha problema de conexao durante partida
+ * Casos:
+ * 1. Conexao LOCAL caiu - tentando reconectar
+ * 2. OPONENTE desconectou - aguardando ele reconectar
+ * 
  * Mostra countdown para W.O. e opcao de encerrar voluntariamente
  */
 export function DisconnectedOverlay() {
   const room = useMultiplayerStore((state) => state.room)
+  const opponentDisconnected = useOpponentDisconnected()
 
   const {
     isReconnecting,
@@ -19,8 +24,15 @@ export function DisconnectedOverlay() {
     forfeit,
   } = useRoomConnection()
 
-  // Exibe apenas quando reconectando e tem sala ativa
-  const shouldShow = isReconnecting && room && !hasTimedOut
+  // Exibe quando:
+  // 1. Reconectando localmente (conexao local caiu)
+  // 2. Oponente desconectou
+  const isLocalReconnecting = isReconnecting && room && !hasTimedOut
+  const isOpponentDisconnected = opponentDisconnected && room && !hasTimedOut
+  const shouldShow = isLocalReconnecting || isOpponentDisconnected
+
+  // Determina qual mensagem exibir
+  const isLocalIssue = isLocalReconnecting
 
   return (
     <AnimatePresence>
@@ -42,7 +54,11 @@ export function DisconnectedOverlay() {
               <CardContent className="flex flex-col items-center gap-6 pt-8 pb-6">
                 {/* Icone */}
                 <div className="relative">
-                  <WifiOff className="size-16 text-amber-500" />
+                  {isLocalIssue ? (
+                    <WifiOff className="size-16 text-amber-500" />
+                  ) : (
+                    <UserX className="size-16 text-amber-500" />
+                  )}
                   <motion.div
                     className="absolute -bottom-1 -right-1"
                     animate={{ rotate: 360 }}
@@ -54,9 +70,13 @@ export function DisconnectedOverlay() {
 
                 {/* Mensagem */}
                 <div className="text-center space-y-2">
-                  <h2 className="text-xl font-bold">Oponente Desconectado</h2>
+                  <h2 className="text-xl font-bold">
+                    {isLocalIssue ? 'Conexao Perdida' : 'Oponente Desconectado'}
+                  </h2>
                   <p className="text-sm text-muted-foreground">
-                    Aguardando reconexao...
+                    {isLocalIssue
+                      ? 'Tentando reconectar...'
+                      : 'Aguardando oponente reconectar...'}
                   </p>
                 </div>
 

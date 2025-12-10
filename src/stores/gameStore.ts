@@ -1841,14 +1841,63 @@ export const useGameStore = create<GameStore>((set, get) => ({
   /**
    * Aplica evento recebido de jogador remoto
    * Bypassa emissao de eventos (evita loop)
+   * Inclui validacoes para evitar estados invalidos
    */
   applyRemoteEvent: (event: GameEvent) => {
+    const state = get()
+
+    // Helper: log de evento invalido
+    const logInvalid = (reason: string) => {
+      console.warn(`[GameStore] Evento remoto invalido: ${reason}`, {
+        type: event.type,
+        playerId: event.playerId,
+        payload: 'payload' in event ? event.payload : undefined,
+        currentTurn: state.currentTurn,
+        phase: state.phase,
+      })
+    }
+
+    // Helper: valida se e turno do jogador que enviou
+    const validateTurn = (): boolean => {
+      if (state.currentTurn !== event.playerId) {
+        logInvalid(`Evento fora de turno (esperado: ${state.currentTurn}, recebido: ${event.playerId})`)
+        return false
+      }
+      return true
+    }
+
+    // Helper: valida se pillId existe no pool
+    const validatePill = (pillId: string): boolean => {
+      const pill = state.pillPool.find((p) => p.id === pillId)
+      if (!pill) {
+        logInvalid(`Pilula nao encontrada: ${pillId}`)
+        return false
+      }
+      return true
+    }
+
+    // Helper: valida se itemId existe no inventario do jogador
+    const validateItem = (playerId: PlayerId, itemId: string): boolean => {
+      const player = state.players[playerId]
+      const item = player?.inventory.items.find((i) => i.id === itemId)
+      if (!item) {
+        logInvalid(`Item nao encontrado no inventario: ${itemId}`)
+        return false
+      }
+      return true
+    }
+
     setSyncingFromRemote(true)
 
     try {
       switch (event.type) {
         case 'pill_consumed': {
           const payload = event.payload as { pillId: string; forcedTarget?: PlayerId }
+
+          // Valida turno e pilula
+          if (!validateTurn()) break
+          if (!validatePill(payload.pillId)) break
+
           get().consumePill(payload.pillId, {
             forcedTarget: payload.forcedTarget,
           })
@@ -1857,30 +1906,71 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         case 'item_used': {
           const payload = event.payload as { itemId: string; targetId?: string }
+
+          // Valida turno e item
+          if (!validateTurn()) break
+          if (!validateItem(event.playerId, payload.itemId)) break
+
+          // Valida alvo se for pilula
+          if (payload.targetId && state.pillPool.length > 0) {
+            // Tenta validar como pill (pode ser outro tipo de alvo)
+            const isPillTarget = state.pillPool.some((p) => p.id === payload.targetId)
+            if (!isPillTarget) {
+              // Nao e pill - pode ser outro tipo de alvo valido (ex: oponente)
+              // Permite continuar
+            }
+          }
+
           get().executeItem(payload.itemId, payload.targetId)
           break
         }
 
         case 'item_selected': {
           const payload = event.payload as { itemType: ItemType }
+
+          // Valida fase
+          if (state.phase !== 'itemSelection') {
+            logInvalid(`Fase incorreta para selecao de item: ${state.phase}`)
+            break
+          }
+
           get().selectItem(event.playerId, payload.itemType)
           break
         }
 
         case 'item_deselected': {
           const payload = event.payload as { itemId: string }
+
+          // Valida fase
+          if (state.phase !== 'itemSelection') {
+            logInvalid(`Fase incorreta para desselecao de item: ${state.phase}`)
+            break
+          }
+
           get().deselectItem(event.playerId, payload.itemId)
           break
         }
 
         case 'selection_confirmed': {
+          // Valida fase
+          if (state.phase !== 'itemSelection') {
+            logInvalid(`Fase incorreta para confirmacao: ${state.phase}`)
+            break
+          }
+
           get().confirmItemSelection(event.playerId)
           break
         }
 
         case 'wants_store_toggled': {
           const payload = event.payload as { wantsStore: boolean }
-          const player = get().players[event.playerId]
+          const player = state.players[event.playerId]
+
+          if (!player) {
+            logInvalid(`Jogador nao encontrado: ${event.playerId}`)
+            break
+          }
+
           // Toggle apenas se estado diferente
           if (player.wantsStore !== payload.wantsStore) {
             get().toggleWantsStore(event.playerId)
@@ -1890,6 +1980,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         case 'cart_updated': {
           const payload = event.payload as { action: 'add' | 'remove'; itemId: string }
+
+          // Valida fase
+          if (state.phase !== 'shopping') {
+            logInvalid(`Fase incorreta para atualizar carrinho: ${state.phase}`)
+            break
+          }
+
           if (payload.action === 'add') {
             get().addToCart(event.playerId, payload.itemId)
           } else {
@@ -1899,6 +1996,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
 
         case 'store_confirmed': {
+          // Valida fase
+          if (state.phase !== 'shopping') {
+            logInvalid(`Fase incorreta para confirmar compras: ${state.phase}`)
+            break
+          }
+
           get().confirmStorePurchases(event.playerId)
           break
         }
@@ -1906,6 +2009,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
         default:
           console.warn('[GameStore] Evento remoto nao tratado:', event.type)
       }
+    } catch (error) {
+      // Recuperacao graceful - log erro mas nao crasha
+      console.error('[GameStore] Erro ao aplicar evento remoto:', error, {
+        type: event.type,
+        playerId: event.playerId,
+        payload: 'payload' in event ? event.payload : undefined,
+      })
     } finally {
       setSyncingFromRemote(false)
     }

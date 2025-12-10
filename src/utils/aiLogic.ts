@@ -19,9 +19,6 @@ import { ITEM_CATALOG } from './itemCatalog'
 // Constantes
 // ============================================
 
-/** Chance base da IA usar um item (35%) */
-const AI_ITEM_USE_CHANCE = 0.35
-
 /** Prioridade de itens por tipo (maior = mais prioritario) */
 const ITEM_PRIORITY: Record<ItemType, number> = {
   shield: 10,
@@ -378,17 +375,27 @@ export function getAIThinkingDelay(): number {
 
 /**
  * Decide se a IA deve usar um item neste turno
- * @param player Jogador IA
- * @returns true se deve usar item
+ * Usa config.itemUseChance com bonus se risco alto e tem item defensivo
  */
-export function shouldAIUseItem(player: Player): boolean {
-  // Sem itens, nao pode usar
-  if (player.inventory.items.length === 0) {
-    return false
+export function shouldAIUseItem(ctx: AIDecisionContext): boolean {
+  const { aiPlayer, config } = ctx
+
+  // Sem itens = nao pode usar
+  if (aiPlayer.inventory.items.length === 0) return false
+
+  // Bonus de chance se risco alto/critico e tem item defensivo
+  let useChance = config.itemUseChance
+  if (config.usesTypeCounts) {
+    const risk = analyzePoolRisk(ctx)
+    const hasDefensiveItem = aiPlayer.inventory.items.some(
+      (i) => i.type === 'shield' || i.type === 'pocket_pill'
+    )
+    if ((risk.level === 'critical' || risk.level === 'high') && hasDefensiveItem) {
+      useChance = Math.min(useChance + 0.25, 1.0)
+    }
   }
 
-  // Rola chance base
-  return Math.random() < AI_ITEM_USE_CHANCE
+  return Math.random() < useChance
 }
 
 /**

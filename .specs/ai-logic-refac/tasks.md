@@ -8,13 +8,13 @@
 | Config | 3 | 3 | 0 |
 | AI Logic - Analise | 4 | 4 | 0 |
 | AI Logic - Selecao | 4 | 4 | 0 |
-| AI Logic - Itens | 4 | 0 | 4 |
+| AI Logic - Itens | 4 | 1 | 3 |
 | AI Logic - Pre-jogo/Loja | 4 | 0 | 4 |
 | Store | 3 | 0 | 3 |
 | Hooks | 4 | 0 | 4 |
 | Components | 3 | 0 | 3 |
 | Integration | 3 | 0 | 3 |
-| **TOTAL** | **37** | **16** | **21** |
+| **TOTAL** | **37** | **17** | **20** |
 
 ---
 
@@ -118,7 +118,7 @@
 
 ### Uso de Itens (Atualizado com Analise de Risco)
 
-- [ ] TASK-016: Refatorar `shouldAIUseItem()` para usar AIConfig + risco
+- [x] TASK-016: Refatorar `shouldAIUseItem()` para usar AIConfig + risco
   - Recebe contexto completo
   - Usa `config.itemUseChance`
   - Bonus de chance se risco CRITICO/ALTO e tem item defensivo

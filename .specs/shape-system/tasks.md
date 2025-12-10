@@ -296,13 +296,13 @@
 
 ### 4B.4 UI da Pill Store
 
-- [ ] TASK-SS-090: Criar componente `PillStore.tsx`
+- [x] TASK-SS-090: Criar componente `PillStore.tsx`
   - Header com timer e Pill Coins do jogador
   - Aviso se oponente confirmou (tempo reduzido)
   - Grid de StoreItemCard
   - Botao [CONFIRMAR]
 
-- [ ] TASK-SS-091: Criar componente `StoreItemCard.tsx`
+- [x] TASK-SS-091: Criar componente `StoreItemCard.tsx`
   - Icone, nome, descricao, custo
   - Estado: disponivel, indisponivel (cinza), nao pode comprar (coins insuficientes)
   - onClick para comprar

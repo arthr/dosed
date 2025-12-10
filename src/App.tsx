@@ -3,16 +3,17 @@ import { HashRouter, Routes, Route } from 'react-router-dom'
 import { TooltipProvider } from '@/components/ui/8bit/tooltip'
 import { Button } from '@/components/ui/8bit/button'
 import { GameLayout } from '@/components/layout/GameLayout'
-import { useGameActions, useGamePhase, useGameStats, useWinner, usePlayers } from '@/hooks'
+import { useGameActions, useGamePhase, useGameStats, useWinner, usePlayers, useMultiplayer } from '@/hooks'
 import { InfoPanel } from '@/components/game/InfoPanel'
 import { GameBoard } from '@/components/game/GameBoard'
 import { ItemSelectionScreen } from '@/components/game/ItemSelectionScreen'
 import { DifficultySelect } from '@/components/game/DifficultySelect'
+import { LobbyScreen, WaitingRoom } from '@/components/multiplayer'
 import { OverlayManager } from '@/components/overlays'
 import { ToastManager } from '@/components/toasts'
 import { useOverlayStore } from '@/stores/overlayStore'
 import { DevPage } from '@/components/dev'
-import type { DifficultyLevel } from '@/types'
+import type { DifficultyLevel, GameMode } from '@/types'
 
 function GameContent() {
   // State
@@ -21,7 +22,11 @@ function GameContent() {
   const stats = useGameStats()
   const { player1, player2 } = usePlayers()
 
-  // Estado local para dificuldade selecionada
+  // Multiplayer state
+  const { isMultiplayer, room, reset: resetMultiplayer } = useMultiplayer()
+
+  // Estado local para modo e dificuldade selecionados
+  const [selectedMode, setSelectedMode] = useState<GameMode>('single_player')
   const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel>('normal')
 
   // Actions
@@ -37,6 +42,11 @@ function GameContent() {
     }
   }, [phase, winner, player1, player2, stats, openGameOver])
 
+  // Se multiplayer e sala esta em waiting (host aguardando guest)
+  if (isMultiplayer && room?.status === 'waiting') {
+    return <WaitingRoom onCancel={() => resetMultiplayer()} />
+  }
+
   // Tela inicial - Setup
   if (phase === 'setup') {
     return (
@@ -50,22 +60,47 @@ function GameContent() {
           </p>
         </div>
 
-        {/* Seletor de dificuldade */}
-        <DifficultySelect
-          value={selectedDifficulty}
-          onChange={setSelectedDifficulty}
-        />
+        {/* Selector de modo de jogo */}
+        <div className="flex gap-2">
+          <Button
+            variant={selectedMode === 'single_player' ? 'default' : 'outline'}
+            onClick={() => setSelectedMode('single_player')}
+            className="min-w-[140px]"
+          >
+            Single Player
+          </Button>
+          <Button
+            variant={selectedMode === 'multiplayer' ? 'default' : 'outline'}
+            onClick={() => setSelectedMode('multiplayer')}
+            className="min-w-[140px]"
+          >
+            Multiplayer
+          </Button>
+        </div>
 
-        <Button
-          size="lg"
-          onClick={() => startGame({ difficulty: selectedDifficulty })}
-          className="px-8"
-        >
-          Iniciar Partida
-        </Button>
+        {/* Conteudo baseado no modo selecionado */}
+        {selectedMode === 'single_player' ? (
+          <>
+            {/* Seletor de dificuldade */}
+            <DifficultySelect
+              value={selectedDifficulty}
+              onChange={setSelectedDifficulty}
+            />
 
-        {/* Info/Tutorial Panel */}
-        <InfoPanel />
+            <Button
+              size="lg"
+              onClick={() => startGame({ difficulty: selectedDifficulty })}
+              className="px-8"
+            >
+              Iniciar Partida
+            </Button>
+
+            {/* Info/Tutorial Panel */}
+            <InfoPanel />
+          </>
+        ) : (
+          <LobbyScreen onBack={() => setSelectedMode('single_player')} />
+        )}
       </div>
     )
   }

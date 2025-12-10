@@ -284,13 +284,13 @@
 ## Fase 6: Integracao com UI Existente
 
 ### TASK-MP-023: Atualizar InfoPanel
-- [ ] Adicionar selector de modo (Single/Multi)
-- [ ] Mostrar `DifficultySelect` apenas em single player
-- [ ] Mostrar `LobbyScreen` em multiplayer
-- [ ] Ajustar layout para acomodar novos elementos
+- [x] Adicionar selector de modo (Single/Multi)
+- [x] Mostrar `DifficultySelect` apenas em single player
+- [x] Mostrar `LobbyScreen` em multiplayer
+- [x] Ajustar layout para acomodar novos elementos
 
 **Arquivos:**
-- `src/components/game/InfoPanel.tsx`
+- `src/App.tsx` (atualizado - selector de modo na tela setup)
 
 ---
 

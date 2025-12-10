@@ -18,6 +18,14 @@
 - `InventorySlot.tsx` - Slot individual de item
 - `ItemTargetSelector.tsx` - Overlay de selecao de alvo para itens
 
+### Shape System e Pill Store (`src/components/game/`)
+- `ShapeIcon.tsx` - Icone de shape isolado (para quests e seletores)
+- `ShapeQuestDisplay.tsx` - UI do objetivo de forma atual
+- `PillCoinsDisplay.tsx` - Display de Pill Coins (clicavel para toggle wantsStore)
+- `PillStore.tsx` - Tela da loja com timer e carrinho
+- `StoreItemCard.tsx` - Card de item na loja (com sistema add/remove)
+- `WaitingForOpponent.tsx` - Tela de espera enquanto oponente compra
+
 ### Overlays (`src/components/overlays/`)
 - `OverlayManager.tsx` - Gerencia qual overlay esta ativo
 - `PillReveal.tsx` - Revela o tipo da pilula consumida
@@ -33,7 +41,7 @@
 
 ### gameStore
 Estado central do jogo:
-- `players` - Dados dos jogadores (vidas, resistencia, inventario, efeitos)
+- `players` - Dados dos jogadores (vidas, resistencia, inventario, efeitos, pillCoins, wantsStore)
 - `pillPool` - Pilulas na mesa (com flags inverted, doubled)
 - `currentTurn` - Quem esta jogando
 - `phase` - setup | itemSelection | playing | roundEnding | shopping | ended
@@ -44,6 +52,8 @@ Estado central do jogo:
 - `itemSelectionConfirmed` - Status de confirmacao por jogador
 - `typeCounts` - Contagem publica de tipos de pilulas (informacao visivel a todos)
 - `shapeCounts` - Contagem publica de shapes (informacao visivel a todos)
+- `shapeQuests` - Objetivos de forma por jogador (`Record<PlayerId, ShapeQuest | null>`)
+- `storeState` - Estado da Pill Store (`StoreState | null`)
 
 Selectors:
 - `useDifficulty()` - Retorna dificuldade atual
@@ -279,7 +289,7 @@ Loja:
 - `selectAIStoreItems(ctx, coins, items)` - Selecao de compras
 
 ### itemCatalog.ts
-- `ITEM_CATALOG` - Definicoes de todos os 9 itens
+- `ITEM_CATALOG` - Definicoes de todos os 11 itens (scanner, inverter, double, shape_scanner, pocket_pill, shield, handcuffs, force_feed, shuffle, discard, shape_bomb)
 - `ITEMS_BY_CATEGORY` - Agrupamento por categoria
 - `CATEGORY_TEXT_COLORS`, `CATEGORY_HEX_COLORS` - Cores por categoria
 

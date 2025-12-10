@@ -9,7 +9,10 @@ import { PillPool } from './PillPool'
 import { TurnIndicator } from './TurnIndicator'
 import { ItemTargetSelector } from './ItemTargetSelector'
 import { ITEM_CATALOG } from '@/utils/itemCatalog'
-import type { ItemType } from '@/types'
+import type { ItemType, PlayerId } from '@/types'
+
+/** Tempo em ms para considerar um reset de quest como "recente" (para animacao de shake) */
+const QUEST_RESET_ANIMATION_DURATION = 600
 
 /**
  * GameBoard - Tabuleiro principal do jogo
@@ -27,6 +30,11 @@ export function GameBoard() {
   const round = useGameStore((s) => s.round)
   const gamePhase = useGameStore((s) => s.phase)
   const revealedPills = useGameStore((s) => s.revealedPills)
+
+  // Shape Quests state
+  const shapeQuests = useGameStore((s) => s.shapeQuests)
+  const lastQuestReset = useGameStore((s) => s.lastQuestReset)
+  const toggleWantsStore = useGameStore((s) => s.toggleWantsStore)
 
   const player1 = players.player1
   const player2 = players.player2
@@ -214,6 +222,13 @@ export function GameBoard() {
     return 'resistance'
   }
 
+  // Verifica se o quest do jogador foi resetado recentemente (para animacao de shake)
+  const isQuestResetRecent = (playerId: PlayerId): boolean => {
+    if (!lastQuestReset) return false
+    if (lastQuestReset.playerId !== playerId) return false
+    return Date.now() - lastQuestReset.timestamp < QUEST_RESET_ANIMATION_DURATION
+  }
+
   if (!player1 || !player2) return null
 
   return (
@@ -236,6 +251,9 @@ export function GameBoard() {
           effectType={getEffectType('player1')}
           onItemClick={handleItemClick}
           usingItemId={selectedItemId}
+          quest={shapeQuests.player1}
+          questJustReset={isQuestResetRecent('player1')}
+          onToggleStore={() => toggleWantsStore('player1')}
         />
 
         {/* Pill Pool - Centro */}
@@ -265,6 +283,9 @@ export function GameBoard() {
           animationType={getPlayerAnimation('player2')}
           effectValue={getEffectValue('player2')}
           effectType={getEffectType('player2')}
+          quest={shapeQuests.player2}
+          questJustReset={isQuestResetRecent('player2')}
+          onToggleStore={() => toggleWantsStore('player2')}
         />
       </div>
 

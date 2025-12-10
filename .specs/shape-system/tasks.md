@@ -397,21 +397,21 @@
 
 ### 6.2 Testes Unitarios - Quests
 
-- [ ] TASK-SS-057: Criar arquivo `src/utils/__tests__/questGenerator.test.ts`
+- [x] TASK-SS-057: Criar arquivo `src/utils/__tests__/questGenerator.test.ts`
 
-- [ ] TASK-SS-058: Testar `generateShapeQuest()` tamanho por rodada
+- [x] TASK-SS-058: Testar `generateShapeQuest()` tamanho por rodada
 
-- [ ] TASK-SS-059: Testar `generateShapeQuest()` reward valido
+- [x] TASK-SS-059: Testar `generateShapeQuest()` reward valido
 
-- [ ] TASK-SS-060: Testar `checkQuestProgress()` avanca com shape correta
+- [x] TASK-SS-060: Testar `checkQuestProgress()` avanca com shape correta
 
-- [ ] TASK-SS-061: Testar `checkQuestProgress()` reseta com shape errada
+- [x] TASK-SS-061: Testar `checkQuestProgress()` reseta com shape errada
 
-- [ ] TASK-SS-062: Testar `checkQuestProgress()` completa quest (marca completed, NAO gera novo)
+- [x] TASK-SS-062: Testar `checkQuestProgress()` completa quest (marca completed, NAO gera novo)
 
-- [ ] TASK-SS-062B: Testar `generateShapeQuest()` usa apenas shapes disponiveis no pool
+- [x] TASK-SS-062B: Testar `generateShapeQuest()` usa apenas shapes disponiveis no pool
 
-- [ ] TASK-SS-062C: Testar `generateShapeQuest()` limita sequencia ao tamanho do pool
+- [x] TASK-SS-062C: Testar `generateShapeQuest()` limita sequencia ao tamanho do pool
 
 ### 6.3 Testes de Integracao
 

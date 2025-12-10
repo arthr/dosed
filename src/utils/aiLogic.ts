@@ -10,6 +10,7 @@ import type {
   PoolRiskAnalysis,
   PoolRiskLevel,
 } from '@/types'
+import { getAIConfig } from './aiConfig'
 import { ITEM_CATALOG } from './itemCatalog'
 
 /**
@@ -862,5 +863,17 @@ export function selectAIInitialItems(
     default:
       return shuffleArray(availableItems).slice(0, 5)
   }
+}
+
+// ============================================
+// Comportamento na Loja
+// ============================================
+
+/**
+ * Decide se IA deve sinalizar interesse na loja
+ */
+export function shouldAIWantStore(difficulty: DifficultyLevel, pillCoins: number): boolean {
+  const config = getAIConfig(difficulty)
+  return pillCoins >= config.storeInterestThreshold
 }
 

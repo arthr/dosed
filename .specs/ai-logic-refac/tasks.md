@@ -9,12 +9,12 @@
 | AI Logic - Analise | 4 | 4 | 0 |
 | AI Logic - Selecao | 4 | 4 | 0 |
 | AI Logic - Itens | 4 | 4 | 0 |
-| AI Logic - Pre-jogo/Loja | 4 | 2 | 2 |
+| AI Logic - Pre-jogo/Loja | 4 | 3 | 1 |
 | Store | 3 | 0 | 3 |
 | Hooks | 4 | 0 | 4 |
 | Components | 3 | 0 | 3 |
 | Integration | 3 | 0 | 3 |
-| **TOTAL** | **37** | **22** | **15** |
+| **TOTAL** | **37** | **23** | **14** |
 
 ---
 
@@ -160,7 +160,7 @@
 
 ### Comportamento na Loja
 
-- [ ] TASK-022: Implementar `shouldAIWantStore(difficulty, coins)`
+- [x] TASK-022: Implementar `shouldAIWantStore(difficulty, coins)`
   - Usa `storeInterestThreshold` do config
   - Easy nunca quer, outros conforme threshold
 

@@ -347,12 +347,14 @@
 ---
 
 ### TASK-MP-029: Atualizar ItemSelectionScreen
-- [ ] Usar `useMultiplayer` para determinar interatividade
-- [ ] Em multiplayer, ambos jogadores veem mesma tela
-- [ ] Feedback quando oponente confirma
+- [x] Usar `useMultiplayer` para determinar interatividade
+- [x] Em multiplayer, ambos jogadores veem mesma tela
+- [x] Feedback quando oponente confirma
+- [x] Usar `localPlayerId` dinamicamente em vez de hardcoded 'player1'
+- [x] Exibir nome do oponente real em vez de "IA" em multiplayer
 
 **Arquivos:**
-- `src/components/game/ItemSelectionScreen.tsx`
+- `src/components/game/ItemSelectionScreen.tsx` (atualizado)
 
 ---
 

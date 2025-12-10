@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Check, Loader2 } from 'lucide-react'
-import type { ItemCategory, ItemType } from '@/types'
-import { useItemSelection } from '@/hooks'
+import type { ItemCategory, ItemType, PlayerId } from '@/types'
+import { useItemSelection, useMultiplayer } from '@/hooks'
 import { useAIItemSelection } from '@/hooks/useAIItemSelection'
 import { useGameStore } from '@/stores/gameStore'
 import { ItemCard } from './ItemCard'
@@ -17,8 +17,23 @@ import { Button } from '../ui/8bit/button'
 /**
  * Tela de selecao de itens pre-jogo
  * Jogador escolhe ate 5 itens para usar durante a partida
+ * Suporta single player (vs IA) e multiplayer (vs humano)
  */
 export function ItemSelectionScreen() {
+  // Contexto multiplayer
+  const { isMultiplayer, localPlayerId, opponentPlayerId, room, localRole } = useMultiplayer()
+
+  // Determina IDs dos jogadores
+  const myPlayerId: PlayerId = localPlayerId ?? 'player1'
+  const opponentId: PlayerId = isMultiplayer
+    ? (opponentPlayerId ?? 'player2')
+    : 'player2'
+
+  // Determina nomes para exibicao
+  const opponentName = isMultiplayer
+    ? (localRole === 'host' ? room?.guestName : room?.hostName) ?? 'Oponente'
+    : 'IA'
+
   const {
     selectedCount,
     maxItems,
@@ -28,13 +43,13 @@ export function ItemSelectionScreen() {
     deselectItem,
     confirmSelection,
     inventory,
-  } = useItemSelection('player1')
+  } = useItemSelection(myPlayerId)
 
-  // Status de confirmacao
-  const player1Confirmed = useGameStore((s) => s.itemSelectionConfirmed.player1)
-  const aiConfirmed = useGameStore((s) => s.itemSelectionConfirmed.player2)
+  // Status de confirmacao (dinamico baseado nos IDs corretos)
+  const myConfirmed = useGameStore((s) => s.itemSelectionConfirmed[myPlayerId])
+  const opponentConfirmed = useGameStore((s) => s.itemSelectionConfirmed[opponentId])
 
-  // Ativa selecao automatica da IA (player2)
+  // Ativa selecao automatica da IA (apenas em single player - hook ja tem early return)
   useAIItemSelection()
 
   const categories = getAllCategories()
@@ -127,27 +142,27 @@ export function ItemSelectionScreen() {
         transition={{ delay: 0.4 }}
       >
         <div className="flex items-center gap-2">
-          {player1Confirmed ? (
+          {myConfirmed ? (
             <Check className="size-4 text-emerald-500" />
           ) : (
             <div className="size-4 rounded-full border-2 border-muted-foreground/50" />
           )}
           <span className={cn(
-            player1Confirmed ? 'text-emerald-500' : 'text-muted-foreground'
+            myConfirmed ? 'text-emerald-500' : 'text-muted-foreground'
           )}>
-            Voce {player1Confirmed ? 'pronto' : 'selecionando...'}
+            Voce {myConfirmed ? 'pronto' : 'selecionando...'}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {aiConfirmed ? (
+          {opponentConfirmed ? (
             <Check className="size-4 text-emerald-500" />
           ) : (
             <Loader2 className="size-4 text-muted-foreground animate-spin" />
           )}
           <span className={cn(
-            aiConfirmed ? 'text-emerald-500' : 'text-muted-foreground'
+            opponentConfirmed ? 'text-emerald-500' : 'text-muted-foreground'
           )}>
-            IA {aiConfirmed ? 'pronta' : 'selecionando...'}
+            {opponentName} {opponentConfirmed ? 'pronto' : 'selecionando...'}
           </span>
         </div>
       </motion.div>
@@ -161,17 +176,17 @@ export function ItemSelectionScreen() {
       >
         <Button
           onClick={confirmSelection}
-          disabled={selectedCount === 0 || player1Confirmed}
+          disabled={selectedCount === 0 || myConfirmed}
           className={`
             px-4 py-3 rounded-sm font-normal text-xs
             transition-all duration-200
-            ${selectedCount > 0 && !player1Confirmed
+            ${selectedCount > 0 && !myConfirmed
               ? 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer'
               : 'bg-muted text-muted-foreground cursor-not-allowed'
             }
           `}
         >
-          {player1Confirmed ? 'Aguardando IA...' : 'Confirmar seleção'}
+          {myConfirmed ? `Aguardando ${opponentName}...` : 'Confirmar selecao'}
         </Button>
       </motion.div>
     </motion.div>

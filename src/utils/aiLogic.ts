@@ -11,7 +11,6 @@ import type {
   PoolRiskLevel,
   StoreItem,
 } from '@/types'
-import { getAIConfig } from './aiConfig'
 import { ITEM_CATALOG } from './itemCatalog'
 
 /**

@@ -70,6 +70,8 @@ export interface PlayerLeftEvent extends GameEventBase {
   type: 'player_left'
   payload: {
     reason: 'voluntary' | 'timeout' | 'error'
+    /** Role de quem saiu - host encerra sala, guest libera vaga. Opcional para retrocompatibilidade */
+    role?: 'host' | 'guest'
   }
 }
 

@@ -22,20 +22,20 @@ Polimento completo do modo multiplayer em tres frentes:
 
 #### Types (1 task)
 
-- [ ] TASK-MPP-001: Expandir tipo `PlayerLeftEvent` com campo `role`
+- [x] TASK-MPP-001: Expandir tipo `PlayerLeftEvent` com campo `role`
   - Arquivo: `src/types/events.ts`
   - Adicionar `role?: 'host' | 'guest'` ao payload (opcional para retrocompatibilidade)
   - Atualizar JSDoc
 
 #### Store (3 tasks)
 
-- [ ] TASK-MPP-002: Adicionar campo `hostLeftVoluntarily` ao multiplayerStore
+- [x] TASK-MPP-002: Adicionar campo `hostLeftVoluntarily` ao multiplayerStore
   - Arquivo: `src/stores/multiplayerStore.ts`
   - Novo campo: `hostLeftVoluntarily: boolean`
   - Adicionar ao `initialState` como `false`
   - Criar action: `setHostLeftVoluntarily(value: boolean)`
 
-- [ ] TASK-MPP-003: Modificar `leaveRoom` para enviar `role`
+- [x] TASK-MPP-003: Modificar `leaveRoom` para enviar `role`
   - Arquivo: `src/stores/multiplayerStore.ts`
   - Incluir `state.localRole` no payload do evento `player_left`
 

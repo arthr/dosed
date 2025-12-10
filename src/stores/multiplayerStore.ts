@@ -44,6 +44,10 @@ interface MultiplayerStore extends MultiplayerContext {
   // Estado de desconexao do oponente
   opponentDisconnected: boolean
   setOpponentDisconnected: (value: boolean) => void
+  
+  // Estado de saida voluntaria do host
+  hostLeftVoluntarily: boolean
+  setHostLeftVoluntarily: (value: boolean) => void
 }
 
 /**
@@ -55,6 +59,7 @@ const initialState: MultiplayerContext & {
   _unsubscribeEvent: (() => void) | null
   _unsubscribeStatus: (() => void) | null
   opponentDisconnected: boolean
+  hostLeftVoluntarily: boolean
 } = {
   mode: 'single_player',
   room: null,
@@ -67,6 +72,7 @@ const initialState: MultiplayerContext & {
   _unsubscribeEvent: null,
   _unsubscribeStatus: null,
   opponentDisconnected: false,
+  hostLeftVoluntarily: false,
 }
 
 /**
@@ -197,11 +203,14 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
   leaveRoom: async (): Promise<void> => {
     const state = get()
 
-    if (state.room) {
-      // Notifica outro jogador
+    if (state.room && state.localRole) {
+      // Notifica outro jogador com role para tratamento diferenciado
       get().sendEvent({
         type: 'player_left',
-        payload: { reason: 'voluntary' },
+        payload: { 
+          reason: 'voluntary',
+          role: state.localRole,
+        },
       })
     }
 
@@ -542,6 +551,13 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
    */
   setOpponentDisconnected: (value: boolean) => {
     set({ opponentDisconnected: value })
+  },
+
+  /**
+   * Define se host saiu voluntariamente (para UI do guest)
+   */
+  setHostLeftVoluntarily: (value: boolean) => {
+    set({ hostLeftVoluntarily: value })
   },
 
   /**

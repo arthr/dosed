@@ -459,6 +459,12 @@ function evaluateItem(item: InventoryItem, ctx: AIDecisionContext): ItemEvaluati
       break
 
     case 'pocket_pill':
+      // Inutil se resistencia cheia - penalidade maxima
+      if (aiResistPct >= 1.0) {
+        contextBonus = -100 // Garante score negativo
+        reason = 'resistencia cheia - sem necessidade'
+        break
+      }
       // Mais valioso se risco alto E resistencia baixa
       if (riskAnalysis?.level === 'high' && aiResistPct < 0.5) {
         contextBonus = 28
@@ -466,6 +472,10 @@ function evaluateItem(item: InventoryItem, ctx: AIDecisionContext): ItemEvaluati
       } else if (aiResistPct < 0.5) {
         contextBonus = 20
         reason = 'resistencia baixa - cura urgente'
+      } else {
+        // Resistencia media (50-99%) - penalidade leve
+        contextBonus = -5
+        reason = 'resistencia adequada - pouco valor'
       }
       break
 

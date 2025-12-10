@@ -357,7 +357,7 @@
   - Encontra TODAS pilulas dessa shape
   - Adiciona IDs em revealedPills
 
-- [ ] TASK-SS-051: Adicionar feedback visual/toast ao usar itens de shape
+- [x] TASK-SS-051: Adicionar feedback visual/toast ao usar itens de shape
   - Atualizar `TARGET_INSTRUCTIONS` em `ItemTargetSelector.tsx`
 
 ### 5.3 IA e Itens de Shape

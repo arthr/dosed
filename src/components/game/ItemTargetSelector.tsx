@@ -13,6 +13,7 @@ const TARGET_INSTRUCTIONS: Record<ItemType, string> = {
   scanner: 'Clique em uma pilula para revelar seu tipo.',
   inverter: 'Clique em uma pilula para inverter seu efeito.',
   double: 'Clique em uma pilula para dobrar seu efeito.',
+  shape_scanner: 'Clique em uma pilula para revelar TODAS dessa forma.',
   // Sustain (alvo: self - execucao imediata)
   pocket_pill: 'Aplicando cura...',
   shield: 'Ativando escudo...',
@@ -22,6 +23,7 @@ const TARGET_INSTRUCTIONS: Record<ItemType, string> = {
   // Chaos
   shuffle: 'Embaralhando pilulas...',
   discard: 'Clique em uma pilula para descarta-la.',
+  shape_bomb: 'Clique em uma pilula para eliminar TODAS dessa forma.',
 }
 
 /**

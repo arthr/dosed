@@ -32,6 +32,7 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
   },
   startingLives: 3,
   startingResistance: 6,
+  difficulty: 'normal',
 }
 
 /**

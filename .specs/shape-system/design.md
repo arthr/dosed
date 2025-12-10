@@ -77,8 +77,8 @@ src/
 |   +-- Pill.tsx               # MODIFICADO: renderizar shapes
 |   +-- ShapeIcon.tsx          # NOVO: icone de shape isolado
 |   +-- ShapeQuestDisplay.tsx  # NOVO: UI do objetivo
-|   +-- ShapeSelector.tsx      # NOVO: selecao de shape para itens
 |   +-- ShapeCounter.tsx       # NOVO (opcional): contagem de shapes
+|   +-- ItemTargetSelector.tsx # MODIFICADO: instrucoes para shape items
 ```
 
 ---
@@ -1237,30 +1237,34 @@ consumePill: (pillId: string) => {
 
 ## Novos Itens
 
-### Shape Bomb (`src/utils/itemCatalog.ts`)
+> **NOTA DE SIMPLIFICACAO:** Os itens de shape reutilizam o sistema de selecao de pill existente
+> (targetType: 'pill'). O jogador seleciona uma pill e o efeito e aplicado a TODAS pills com
+> a mesma shape. Isso segue principios DRY/KISS/YAGNI e evita componentes desnecessarios.
+
+### Shape Bomb e Shape Scanner (`src/utils/itemCatalog.ts`)
 
 ```typescript
 export const ITEM_CATALOG: Record<ItemType, ItemDefinition> = {
   // ... existentes ...
   
-  SHAPE_BOMB: {
-    type: 'SHAPE_BOMB',
+  shape_bomb: {
+    type: 'shape_bomb',
     name: 'Shape Bomb',
     description: 'Elimina todas pilulas de uma forma',
-    icon: Bomb, // lucide-react
+    icon: 'Bomb',
     category: 'chaos',
-    targetType: 'shape', // Novo target type
-    usableOnOpponent: false,
+    targetType: 'pill',  // Reutiliza selecao de pill existente
+    color: 'text-purple-400',
   },
   
-  SHAPE_SCANNER: {
-    type: 'SHAPE_SCANNER',
+  shape_scanner: {
+    type: 'shape_scanner',
     name: 'Shape Scanner',
     description: 'Revela todas pilulas de uma forma',
-    icon: ScanSearch, // lucide-react
+    icon: 'ScanSearch',
     category: 'intel',
-    targetType: 'shape',
-    usableOnOpponent: false,
+    targetType: 'pill',  // Reutiliza selecao de pill existente
+    color: 'text-blue-400',
   },
 }
 ```
@@ -1269,10 +1273,14 @@ export const ITEM_CATALOG: Record<ItemType, ItemDefinition> = {
 
 ```typescript
 // Dentro de executeItem:
-case 'SHAPE_BOMB': {
-  if (!targetShape) break
+case 'shape_bomb': {
+  // Jogador seleciona uma pill -> extraimos a shape
+  const targetPill = state.pillPool.find(p => p.id === targetPillId)
+  if (!targetPill) break
   
-  // Remove todas pilulas da shape selecionada
+  const targetShape = targetPill.visuals.shape
+  
+  // Remove TODAS pilulas dessa shape
   const pillsToRemove = state.pillPool.filter(p => p.visuals.shape === targetShape)
   const newPillPool = state.pillPool.filter(p => p.visuals.shape !== targetShape)
   
@@ -1285,104 +1293,54 @@ case 'SHAPE_BOMB': {
     newShapeCounts[pill.visuals.shape]--
   }
   
-  // Verifica se pool esvaziou
+  // Verifica se pool esvaziou -> trigger fim de rodada
   if (newPillPool.length === 0) {
-    // Trigger nova rodada
+    // checkAndStartShopping() ou resetRound()
   }
   
   return {
     pillPool: newPillPool,
     typeCounts: newTypeCounts,
     shapeCounts: newShapeCounts,
-    // ...
   }
 }
 
-case 'SHAPE_SCANNER': {
-  if (!targetShape) break
+case 'shape_scanner': {
+  // Jogador seleciona uma pill -> extraimos a shape
+  const targetPill = state.pillPool.find(p => p.id === targetPillId)
+  if (!targetPill) break
   
-  // Encontra todas pilulas da shape e revela
+  const targetShape = targetPill.visuals.shape
+  
+  // Revela TODAS pilulas dessa shape
   const pillsToReveal = state.pillPool
     .filter(p => p.visuals.shape === targetShape)
     .map(p => p.id)
   
-  const newRevealedPills = new Set([...state.revealedPills, ...pillsToReveal])
+  const newRevealedPills = [...state.revealedPills, ...pillsToReveal]
   
   return {
     revealedPills: newRevealedPills,
-    // ...
   }
 }
 ```
 
-### Componente ShapeSelector.tsx (Novo)
+### Fluxo de Uso
 
-```tsx
-import type { PillShape } from '@/types'
-import { ShapeIcon } from './ShapeIcon'
-import { motion } from 'framer-motion'
-import { SHAPE_LABELS } from '@/utils/constants'
-
-interface ShapeSelectorProps {
-  /** Shapes disponiveis para selecao (apenas as que existem no pool) */
-  availableShapes: PillShape[]
-  /** Contagem de cada shape */
-  shapeCounts: Record<PillShape, number>
-  onSelect: (shape: PillShape) => void
-  onCancel: () => void
-}
-
-export function ShapeSelector({
-  availableShapes,
-  shapeCounts,
-  onSelect,
-  onCancel,
-}: ShapeSelectorProps) {
-  // Filtra apenas shapes com count > 0
-  const selectableShapes = availableShapes.filter(s => shapeCounts[s] > 0)
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-      onClick={onCancel}
-    >
-      <motion.div
-        initial={{ scale: 0.9 }}
-        animate={{ scale: 1 }}
-        className="bg-card p-6 rounded-lg shadow-xl"
-        onClick={e => e.stopPropagation()}
-      >
-        <h3 className="text-lg font-bold mb-4">Selecione uma Forma</h3>
-        
-        <div className="flex gap-4">
-          {selectableShapes.map(shape => (
-            <button
-              key={shape}
-              onClick={() => onSelect(shape)}
-              className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-muted transition-colors"
-            >
-              <ShapeIcon shape={shape} size="lg" color="#6b7280" />
-              <span className="text-sm">{SHAPE_LABELS[shape]}</span>
-              <span className="text-xs text-muted-foreground">
-                ({shapeCounts[shape]})
-              </span>
-            </button>
-          ))}
-        </div>
-        
-        <button
-          onClick={onCancel}
-          className="mt-4 w-full py-2 text-muted-foreground hover:text-foreground"
-        >
-          Cancelar
-        </button>
-      </motion.div>
-    </motion.div>
-  )
-}
+```
+[Jogador usa Shape Bomb/Scanner]
+       |
+       v
+[ItemTargetSelector: "Clique em uma pilula..."]
+       |
+       v
+[Jogador clica em uma pill]
+       |
+       v
+[executeItem() extrai shape da pill]
+       |
+       v
+[Aplica efeito em TODAS pills dessa shape]
 ```
 
 ---

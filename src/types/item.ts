@@ -26,7 +26,6 @@ export type ItemTargetType =
   | 'opponent'        // Efeito no oponente
   | 'pill_to_opponent' // Seleciona pilula para forcar oponente
   | 'table'           // Efeito na mesa (todas as pilulas)
-  | 'shape'           // Seleciona uma shape (forma)
 
 // ============================================
 // Interfaces

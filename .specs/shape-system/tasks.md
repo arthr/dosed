@@ -330,47 +330,41 @@
 
 ## Fase 5: Itens de Shape
 
+> **NOTA DE SIMPLIFICACAO:** Os itens de shape (Shape Bomb, Shape Scanner) reutilizam
+> o sistema de selecao de pill existente (targetType: 'pill'). O jogador seleciona
+> uma pill e o efeito e aplicado a TODAS pills com a mesma shape. Isso segue DRY/KISS/YAGNI.
+
 ### 5.1 Definicao de Itens
 
 - [x] TASK-SS-042: Adicionar `SHAPE_BOMB` e `SHAPE_SCANNER` ao tipo `ItemType` em `src/types/item.ts`
 
-- [x] TASK-SS-043: Adicionar `'shape'` ao `targetType` em `ItemDefinition` se necessario
-
 - [x] TASK-SS-044: Adicionar definicoes de `SHAPE_BOMB` e `SHAPE_SCANNER` em `src/utils/itemCatalog.ts`
-  - SHAPE_BOMB: categoria chaos, targetType: shape
-  - SHAPE_SCANNER: categoria intel, targetType: shape
+  - SHAPE_BOMB: categoria chaos, targetType: pill (extrai shape da pill selecionada)
+  - SHAPE_SCANNER: categoria intel, targetType: pill (extrai shape da pill selecionada)
 
-### 5.2 Componente ShapeSelector
-
-- [x] TASK-SS-045: Criar componente `ShapeSelector.tsx` em `src/components/game/`
-  - Lista shapes disponiveis no pool (count > 0)
-  - Mostra contagem de cada shape
-  - Callback onSelect e onCancel
-
-### 5.3 Logica dos Itens
-
-- [ ] TASK-SS-046: Atualizar `TargetSelectionState` em `src/types/game.ts` para suportar targetShape
-
-- [ ] TASK-SS-047: Atualizar `useItemUsage.ts` para detectar targetType: 'shape' e abrir ShapeSelector
+### 5.2 Logica dos Itens
 
 - [ ] TASK-SS-048: Implementar logica de `SHAPE_BOMB` em `gameStore.executeItem()`
-  - Remove todas pilulas da shape selecionada
+  - Jogador seleciona uma pill (sistema existente)
+  - Extrai shape da pill selecionada
+  - Remove TODAS pilulas dessa shape do pool
   - Atualiza typeCounts e shapeCounts
-  - Verifica se pool esvaziou
+  - Verifica se pool esvaziou (trigger fim de rodada)
 
 - [ ] TASK-SS-049: Implementar logica de `SHAPE_SCANNER` em `gameStore.executeItem()`
-  - Encontra pilulas da shape selecionada
+  - Jogador seleciona uma pill (sistema existente)
+  - Extrai shape da pill selecionada
+  - Encontra TODAS pilulas dessa shape
   - Adiciona IDs em revealedPills
 
-- [ ] TASK-SS-050: Integrar `ShapeSelector` no `ItemTargetSelector.tsx` ou como overlay separado
-
 - [ ] TASK-SS-051: Adicionar feedback visual/toast ao usar itens de shape
+  - Atualizar `TARGET_INSTRUCTIONS` em `ItemTargetSelector.tsx`
 
-### 5.4 IA e Itens de Shape
+### 5.3 IA e Itens de Shape
 
-- [ ] TASK-SS-052: Atualizar `selectAIItemTarget()` em `aiLogic.ts` para suportar targetType: shape
-  - Shape Bomb: selecionar shape com mais pilulas
-  - Shape Scanner: selecionar shape com mais pilulas nao reveladas
+- [ ] TASK-SS-052: Atualizar `selectAIItemTarget()` em `aiLogic.ts` para itens de shape
+  - Shape Bomb: selecionar pill da shape com mais pilulas no pool
+  - Shape Scanner: selecionar pill da shape com mais pilulas nao reveladas
 
 ---
 
@@ -487,7 +481,6 @@
 | `src/hooks/useStoreTimer.ts` | Hook para timer da loja |
 | `src/components/game/ShapeIcon.tsx` | Icone de shape isolado |
 | `src/components/game/ShapeQuestDisplay.tsx` | UI do objetivo atual |
-| `src/components/game/ShapeSelector.tsx` | Selecao de shape para itens |
 | `src/components/game/ShapeCounter.tsx` | Contagem de shapes (opcional) |
 | `src/components/game/PillStore.tsx` | UI da loja de compras |
 | `src/components/game/StoreItemCard.tsx` | Card de item na loja |
@@ -501,18 +494,17 @@
 | `src/types/pill.ts` | (ja tem PillShape, sem mudancas) |
 | `src/types/game.ts` | shapeCounts, shapeQuests, storeState, novas phases |
 | `src/types/player.ts` | pillCoins, wantsStore |
-| `src/types/item.ts` | SHAPE_BOMB, SHAPE_SCANNER |
+| `src/types/item.ts` | shape_bomb, shape_scanner |
 | `src/types/index.ts` | Exportar novos tipos |
 | `src/utils/constants.ts` | SHAPE_CLASSES, SHAPE_CLIP_PATHS, SHAPE_LABELS |
 | `src/utils/pillGenerator.ts` | generatePillPool() usa shapeProgression, createPillWithShape() |
-| `src/utils/itemCatalog.ts` | Novos itens |
-| `src/utils/itemLogic.ts` | Logica dos novos itens (se necessario) |
-| `src/utils/aiLogic.ts` | selectAIItemTarget para shape items |
-| `src/stores/gameStore.ts` | Estado, quests, pillCoins, store actions |
+| `src/utils/itemCatalog.ts` | Novos itens (shape_bomb, shape_scanner com targetType: pill) |
+| `src/utils/aiLogic.ts` | selectAIItemTarget para shape items (seleciona pill da shape desejada) |
+| `src/stores/gameStore.ts` | Estado, quests, pillCoins, store actions, logica shape items |
 | `src/components/game/Pill.tsx` | Renderizacao de shapes |
 | `src/components/game/AnimatedPlayerArea.tsx` | ShapeQuestDisplay, Pill Coins |
 | `src/components/game/Game.tsx` | Renderizar overlays da loja |
-| `src/hooks/useItemUsage.ts` | Suporte a targetType: shape |
+| `src/components/game/ItemTargetSelector.tsx` | Instrucoes para shape items |
 
 ---
 
@@ -647,6 +639,24 @@ A quest DEVE ser realizavel:
 - UI deve indicar "Completado - aguardando proxima rodada"
 - `resetRound()` e o UNICO lugar que gera novos quests
 
+### Itens de Shape (Shape Bomb, Shape Scanner)
+
+**Simplificacao aplicada:** Os itens de shape reutilizam o sistema de selecao de pill existente:
+- Jogador usa o item -> seleciona uma PILL (nao uma shape diretamente)
+- O sistema extrai a shape da pill selecionada
+- Aplica o efeito em TODAS pills dessa shape
+
+Isso evita criar componentes desnecessarios (ShapeSelector) e segue DRY/KISS/YAGNI.
+
+**Shape Bomb:**
+- Remove TODAS pills da shape da pill selecionada
+- Atualiza typeCounts e shapeCounts
+- Se pool esvaziar: trigger fim de rodada (checkAndStartShopping)
+
+**Shape Scanner:**
+- Revela TODAS pills da shape da pill selecionada
+- Adiciona IDs em revealedPills
+
 ### Shape Bomb e Pool Vazio
 
 Se Shape Bomb remover todas as pilulas restantes, iniciar fluxo de fim de rodada (Pill Store). Reutilizar logica existente de Discard.
@@ -690,7 +700,9 @@ Para MVP, a IA:
 Para MVP, a IA:
 - NAO considera shapes ao escolher pilulas
 - NAO tenta completar seus quests
-- PODE usar Shape Bomb/Scanner com heuristicas simples (shape com mais pilulas)
+- PODE usar Shape Bomb/Scanner com heuristicas simples:
+  - Seleciona uma PILL da shape com mais pilulas no pool
+  - Para Shape Scanner: prioriza shape com mais pills nao reveladas
 
 Futuro: IA avancada pode considerar quests e otimizar compras na loja.
 

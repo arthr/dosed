@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion'
 import { Shield, Lock } from 'lucide-react'
-import type { Player } from '@/types'
+import type { Player, ShapeQuest } from '@/types'
 import { LivesDisplay } from './LivesDisplay'
 import { FloatingNumber } from './FloatingNumber'
 import { InventoryBar } from './InventoryBar'
+import { ShapeQuestDisplay } from './ShapeQuestDisplay'
 import { PlayerToasts } from '../toasts/PlayerToasts'
 import { Card, CardContent, CardHeader } from '../ui/8bit/card'
 import { cn } from '@/lib/utils'
@@ -23,6 +24,8 @@ interface AnimatedPlayerAreaProps {
   onItemClick?: (itemId: string) => void
   /** ID do item sendo usado (para highlight) */
   usingItemId?: string | null
+  /** Quest de shape do jogador */
+  quest?: ShapeQuest | null
 }
 
 // Cores para os efeitos de glow e borda
@@ -67,6 +70,7 @@ export function AnimatedPlayerArea({
   effectType = 'resistance',
   onItemClick,
   usingItemId = null,
+  quest = null,
 }: AnimatedPlayerAreaProps) {
   // Detecta efeitos ativos
   const shieldEffect = player.effects.find((e) => e.type === 'shield')
@@ -265,6 +269,9 @@ export function AnimatedPlayerArea({
         disabled={!isInventoryInteractive}
         onItemClick={isInventoryInteractive ? onItemClick : undefined}
       />
+
+      {/* Quest de shape do jogador */}
+      <ShapeQuestDisplay quest={quest} />
     </div>
   )
 }

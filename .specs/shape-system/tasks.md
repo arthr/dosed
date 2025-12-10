@@ -203,7 +203,7 @@
   - Mostra "+1 Pill Coin" como recompensa
   - Mostra estado "Completado - aguardando proxima rodada" quando quest.completed = true
 
-- [ ] TASK-SS-038: Integrar `ShapeQuestDisplay` no `AnimatedPlayerArea.tsx`
+- [x] TASK-SS-038: Integrar `ShapeQuestDisplay` no `AnimatedPlayerArea.tsx`
   - Posicionar abaixo do inventario ou em local adequado
   - Mostrar apenas quest do jogador correspondente
 

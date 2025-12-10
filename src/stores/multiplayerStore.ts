@@ -454,6 +454,29 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
         break
       }
 
+      case 'round_reset': {
+        // Nova rodada iniciada pelo host - guest sincroniza
+        if (state.localRole === 'guest') {
+          const resetPayload = (payload.payload as {
+            roundNumber?: number
+            syncData?: {
+              pillPool: unknown[]
+              shapeQuests: Record<string, unknown>
+            }
+          }) ?? {}
+
+          if (resetPayload.syncData) {
+            const gameStore = useGameStore.getState()
+            gameStore.resetRound(resetPayload.syncData as {
+              pillPool: import('@/types').Pill[]
+              shapeQuests: Record<import('@/types').PlayerId, import('@/types').ShapeQuest | null>
+            })
+            console.log('[MultiplayerStore] Guest aplicou round_reset com dados do host')
+          }
+        }
+        break
+      }
+
       // Eventos de gameplay - delega para gameStore
       case 'pill_consumed':
       case 'item_used':

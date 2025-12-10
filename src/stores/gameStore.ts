@@ -104,7 +104,7 @@ interface GameStore extends GameState {
   consumePill: (pillId: string, options?: { forcedTarget?: PlayerId }) => void
   revealPillById: (pillId: string) => void
   nextTurn: () => void
-  resetRound: () => void
+  resetRound: (syncData?: { pillPool: Pill[]; shapeQuests: Record<PlayerId, ShapeQuest | null> }) => void
   endGame: (winnerId: PlayerId) => void
   resetGame: () => void
 
@@ -617,8 +617,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   /**
    * Inicia nova rodada (chamado apos fase roundEnding)
+   * Em multiplayer, apenas host gera dados e emite evento para sincronizar
+   * Guest deve chamar com syncData recebido via evento round_reset
+   * @param syncData - Dados sincronizados (apenas guest em multiplayer)
    */
-  resetRound: () => {
+  resetRound: (syncData?: { pillPool: Pill[]; shapeQuests: Record<PlayerId, ShapeQuest | null> }) => {
     const state = get()
     // Aceita tanto 'playing' quanto 'roundEnding' quanto 'shopping'
     if (state.phase !== 'playing' && state.phase !== 'roundEnding' && state.phase !== 'shopping') return
@@ -642,17 +645,44 @@ export const useGameStore = create<GameStore>((set, get) => ({
       wantsStore: false,
     }
 
-    // Quantidade dinamica baseada na rodada (usa POOL_SCALING)
     const newRound = state.round + 1
-    const newPillPool = generatePillPool(newRound)
+
+    // Em multiplayer com syncData (guest), usa dados do host
+    // Caso contrario (host ou single player), gera localmente
+    let newPillPool: Pill[]
+    let newShapeQuests: Record<PlayerId, ShapeQuest | null>
+
+    if (syncData) {
+      // Guest: usa dados sincronizados do host
+      newPillPool = syncData.pillPool
+      newShapeQuests = syncData.shapeQuests
+      console.log('[GameStore] resetRound: usando dados sincronizados do host')
+    } else {
+      // Host ou single player: gera localmente
+      newPillPool = generatePillPool(newRound)
+      const newShapeCounts = countPillShapes(newPillPool)
+      newShapeQuests = {
+        player1: generateShapeQuest(newRound, newShapeCounts),
+        player2: generateShapeQuest(newRound, newShapeCounts),
+      }
+
+      // Em multiplayer (host), emite evento para sincronizar com guest
+      if (state.mode === 'multiplayer') {
+        emitMultiplayerEvent(state.mode, {
+          type: 'round_reset',
+          payload: {
+            roundNumber: newRound,
+            syncData: {
+              pillPool: newPillPool,
+              shapeQuests: newShapeQuests,
+            },
+          },
+        })
+      }
+    }
+
     const newTypeCounts = countPillTypes(newPillPool)
     const newShapeCounts = countPillShapes(newPillPool)
-
-    // Gera novos quests para nova rodada baseados no novo pool
-    const newShapeQuests = {
-      player1: generateShapeQuest(newRound, newShapeCounts),
-      player2: generateShapeQuest(newRound, newShapeCounts),
-    }
 
     // Aplica revealAtStart - revela pills automaticamente para quem comprou Scanner-2X
     const { revealAtStart } = state
@@ -1409,6 +1439,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   /**
    * Verifica se deve abrir loja ao fim da rodada
    * Chamado quando pool esvazia (apos verificar Game Over)
+   * Em multiplayer, apenas host inicia nova rodada - guest aguarda evento
    */
   checkAndStartShopping: () => {
     const state = get()
@@ -1432,7 +1463,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
       })
     } else {
       // Ninguem quer ir a loja, proxima rodada direto
-      get().resetRound()
+      // Em multiplayer, apenas host inicia - guest aguarda evento round_reset
+      if (state.mode === 'multiplayer') {
+        import('@/stores/multiplayerStore').then(({ useMultiplayerStore }) => {
+          const mpState = useMultiplayerStore.getState()
+          if (mpState.localRole === 'host') {
+            get().resetRound()
+          } else {
+            console.log('[GameStore] Guest aguardando round_reset do host')
+          }
+        })
+      } else {
+        get().resetRound()
+      }
     }
   },
 
@@ -1781,7 +1824,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (p1Done && p2Done) {
       // Todos confirmaram - aplica boosts e inicia nova rodada
       get().applyPendingBoosts()
-      get().resetRound()
+
+      // Em multiplayer, apenas host inicia nova rodada - guest aguarda evento
+      const currentState = get()
+      if (currentState.mode === 'multiplayer') {
+        import('@/stores/multiplayerStore').then(({ useMultiplayerStore }) => {
+          const mpState = useMultiplayerStore.getState()
+          if (mpState.localRole === 'host') {
+            get().resetRound()
+          } else {
+            console.log('[GameStore] Guest aguardando round_reset do host (shopping)')
+          }
+        })
+      } else {
+        get().resetRound()
+      }
     }
   },
 

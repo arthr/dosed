@@ -620,6 +620,20 @@
 
 ---
 
+### HOTFIX-MP-006: Sincronizar novas rodadas (round_reset)
+- [x] Adicionar evento `round_reset` com syncData (pillPool + shapeQuests)
+- [x] Host gera dados e emite evento `round_reset` para guest
+- [x] Guest aguarda evento ao inves de gerar dados localmente
+- [x] Handler em multiplayerStore para `round_reset`
+- [x] Modificar `checkAndStartShopping` para verificar role
+- [x] Modificar `checkShoppingComplete` para verificar role
+
+**Arquivos:**
+- `src/stores/gameStore.ts` (resetRound com syncData, checkAndStart*, checkShoppingComplete)
+- `src/stores/multiplayerStore.ts` (handler round_reset)
+
+---
+
 ## Ordem de Execucao Recomendada
 
 1. **Infraestrutura:** TASK-MP-001, TASK-MP-002

@@ -211,11 +211,11 @@
   - Shape completada: marca verde
   - Shape atual: highlight/ring
 
-- [ ] TASK-SS-040: Adicionar feedback de reset
+- [x] TASK-SS-040: Adicionar feedback de reset
   - Shake animation quando errar shape
   - Toast "Sequencia reiniciada"
 
-- [ ] TASK-SS-041: Adicionar feedback de completar
+- [x] TASK-SS-041: Adicionar feedback de completar
   - Animacao de celebracao
   - Toast "+1 Pill Coin!"
   - UI mostra "Aguardando proxima rodada" (nao gera novo quest)

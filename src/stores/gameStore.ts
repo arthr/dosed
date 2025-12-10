@@ -25,6 +25,7 @@ import { countPillShapes } from '@/utils/shapeProgression'
 import { ITEM_CATALOG } from '@/utils/itemCatalog'
 import { POCKET_PILL_HEAL } from '@/utils/itemLogic'
 import { generateShapeQuest, checkQuestProgress } from '@/utils/questGenerator'
+import { useToastStore } from '@/stores/toastStore'
 
 /**
  * Interface do Store com estado e actions
@@ -168,6 +169,7 @@ const initialState: GameState = {
     player2: false,
   },
   storeState: null,
+  lastQuestReset: null,
 }
 
 /**
@@ -280,11 +282,37 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const currentQuest = state.shapeQuests[consumerId]
     let newShapeQuests = { ...state.shapeQuests }
     let earnedPillCoin = false
+    let questWasReset = false
 
     if (currentQuest && !currentQuest.completed) {
-      const { updatedQuest, justCompleted } = checkQuestProgress(currentQuest, consumedShape)
+      const { updatedQuest, justCompleted, wasReset } = checkQuestProgress(currentQuest, consumedShape)
       newShapeQuests[consumerId] = updatedQuest
       earnedPillCoin = justCompleted
+      questWasReset = wasReset
+    }
+
+    // Toast de feedback do quest (apos pequeno delay para nao sobrepor toast da pilula)
+    if (questWasReset) {
+      setTimeout(() => {
+        useToastStore.getState().show({
+          type: 'quest',
+          message: 'Sequencia reiniciada!',
+          playerId: consumerId,
+          duration: 1200,
+        })
+      }, 800)
+    }
+
+    // Toast de celebracao quando completar quest
+    if (earnedPillCoin) {
+      setTimeout(() => {
+        useToastStore.getState().show({
+          type: 'quest',
+          message: '+1 Pill Coin!',
+          playerId: consumerId,
+          duration: 2000,
+        })
+      }, 800)
     }
 
     // Registra acao
@@ -346,6 +374,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         phase: 'ended',
         winner: winnerId,
         actionHistory: [...state.actionHistory, ...actions],
+        lastQuestReset: questWasReset ? { playerId: consumerId, timestamp: Date.now() } : null,
       })
       return
     }
@@ -368,6 +397,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         shapeCounts: newShapeCounts,
         shapeQuests: newShapeQuests,
         actionHistory: [...state.actionHistory, ...actions],
+        lastQuestReset: questWasReset ? { playerId: consumerId, timestamp: Date.now() } : null,
       })
 
       // Verifica se pool esvaziou
@@ -414,6 +444,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       shapeQuests: newShapeQuests,
       currentTurn: actualNextTurn,
       actionHistory: [...state.actionHistory, ...actions],
+      lastQuestReset: questWasReset ? { playerId: consumerId, timestamp: Date.now() } : null,
     })
 
     // Verifica se pool esvaziou - inicia fase de transicao

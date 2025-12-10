@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Coins, Sparkles } from 'lucide-react'
+import { Check, Coins, Sparkles, RotateCcw } from 'lucide-react'
 import type { ShapeQuest } from '@/types'
 import { ShapeIcon } from './ShapeIcon'
 
@@ -8,13 +9,27 @@ interface ShapeQuestDisplayProps {
   quest: ShapeQuest | null
   /** Classes CSS adicionais */
   className?: string
+  /** Indica se o quest foi recentemente resetado (para animacao de shake) */
+  justReset?: boolean
 }
 
 /**
  * Exibe o objetivo de sequencia de shapes do jogador
  * Mostra progresso, shapes a consumir e recompensa
  */
-export function ShapeQuestDisplay({ quest, className = '' }: ShapeQuestDisplayProps) {
+export function ShapeQuestDisplay({ quest, className = '', justReset = false }: ShapeQuestDisplayProps) {
+  // Estado local para controlar animacao de shake
+  const [isShaking, setIsShaking] = useState(false)
+
+  // Dispara animacao de shake quando justReset muda para true
+  useEffect(() => {
+    if (justReset) {
+      setIsShaking(true)
+      const timer = setTimeout(() => setIsShaking(false), 600)
+      return () => clearTimeout(timer)
+    }
+  }, [justReset])
+
   if (!quest) return null
 
   // Quest completado - aguardando proxima rodada
@@ -61,13 +76,42 @@ export function ShapeQuestDisplay({ quest, className = '' }: ShapeQuestDisplayPr
     )
   }
 
+  // Variantes de animacao de shake
+  const shakeVariants = {
+    idle: { x: 0 },
+    shake: {
+      x: [-4, 4, -4, 4, -2, 2, 0],
+      transition: { duration: 0.5 },
+    },
+  }
+
   return (
-    <div className={`flex flex-col gap-1.5 ${className}`}>
+    <motion.div
+      className={`flex flex-col gap-1.5 ${className}`}
+      variants={shakeVariants}
+      animate={isShaking ? 'shake' : 'idle'}
+    >
       {/* Header com label e recompensa */}
       <div className="flex items-center justify-between px-0.5">
-        <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
-          Objetivo
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+            Objetivo
+          </span>
+          {/* Indicador de reset */}
+          <AnimatePresence>
+            {isShaking && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0 }}
+                className="flex items-center gap-0.5 text-red-400"
+              >
+                <RotateCcw size={10} className="animate-spin" />
+                <span className="text-[9px]">Reset!</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
         <div className="flex items-center gap-1 text-[10px] text-amber-400/80">
           <Coins size={10} />
           <span>+1</span>
@@ -167,6 +211,6 @@ export function ShapeQuestDisplay({ quest, className = '' }: ShapeQuestDisplayPr
           })}
         </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   )
 }

@@ -26,6 +26,8 @@ interface AnimatedPlayerAreaProps {
   usingItemId?: string | null
   /** Quest de shape do jogador */
   quest?: ShapeQuest | null
+  /** Indica se o quest foi recentemente resetado */
+  questJustReset?: boolean
 }
 
 // Cores para os efeitos de glow e borda
@@ -71,6 +73,7 @@ export function AnimatedPlayerArea({
   onItemClick,
   usingItemId = null,
   quest = null,
+  questJustReset = false,
 }: AnimatedPlayerAreaProps) {
   // Detecta efeitos ativos
   const shieldEffect = player.effects.find((e) => e.type === 'shield')
@@ -271,7 +274,7 @@ export function AnimatedPlayerArea({
       />
 
       {/* Quest de shape do jogador */}
-      <ShapeQuestDisplay quest={quest} />
+      <ShapeQuestDisplay quest={quest} justReset={questJustReset} />
     </div>
   )
 }

@@ -20,6 +20,7 @@ const toastStyles: Record<ToastVariant, { bg: string; text: string; icon: string
   safe: { bg: 'bg-green-600/90', text: 'text-white', icon: '' },
   fatal: { bg: 'bg-purple-900/90', text: 'text-white', icon: 'X' },
   item: { bg: 'bg-blue-600/90', text: 'text-white', icon: '' },
+  quest: { bg: 'bg-amber-600/90', text: 'text-white', icon: '' },
 }
 
 /**

@@ -75,19 +75,32 @@ export function generateShapeQuest(
 }
 
 /**
+ * Resultado da verificacao de progresso do quest
+ */
+export interface QuestProgressResult {
+  /** Quest atualizado */
+  updatedQuest: ShapeQuest
+  /** Se o quest foi completado nesta verificacao */
+  justCompleted: boolean
+  /** Se o progresso foi resetado (errou a shape) */
+  wasReset: boolean
+}
+
+/**
  * Verifica progresso do quest ao consumir pilula
  * @param quest - Quest atual do jogador
  * @param consumedShape - Shape da pilula consumida
- * @returns updatedQuest e justCompleted
+ * @returns updatedQuest, justCompleted e wasReset
  * Se justCompleted = true, caller deve dar +1 Pill Coin ao jogador
+ * Se wasReset = true, caller deve mostrar feedback de reset
  */
 export function checkQuestProgress(
   quest: ShapeQuest,
   consumedShape: PillShape
-): { updatedQuest: ShapeQuest; justCompleted: boolean } {
+): QuestProgressResult {
   // Quest ja completado, nao faz nada
   if (quest.completed) {
-    return { updatedQuest: quest, justCompleted: false }
+    return { updatedQuest: quest, justCompleted: false, wasReset: false }
   }
 
   const expectedShape = quest.sequence[quest.progress]
@@ -104,13 +117,16 @@ export function checkQuestProgress(
         completed: justCompleted,
       },
       justCompleted,
+      wasReset: false,
     }
   }
 
-  // Shape errada: reseta progresso
+  // Shape errada: reseta progresso (apenas se tinha progresso)
+  const hadProgress = quest.progress > 0
   return {
     updatedQuest: { ...quest, progress: 0 },
     justCompleted: false,
+    wasReset: hadProgress,
   }
 }
 

@@ -48,6 +48,8 @@ export interface GameState {
   itemSelectionConfirmed: Record<PlayerId, boolean>
   /** Estado da Pill Store (apenas durante fase shopping) */
   storeState: StoreState | null
+  /** Ultimo reset de quest (para animacao de shake) */
+  lastQuestReset: { playerId: PlayerId; timestamp: number } | null
 }
 
 /**

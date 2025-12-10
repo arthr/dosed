@@ -94,7 +94,7 @@ export function ItemEffectOverlay({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-2xl font-bold text-white"
+            className="text-2xl font-normal text-white"
           >
             {itemDef.name}
           </motion.h3>

@@ -59,7 +59,7 @@ export function NewRoundOverlay({
         >
           <div className="text-center">
             <p className="text-sm uppercase tracking-wider opacity-80">Nova Rodada</p>
-            <p className="text-4xl font-bold">{round}</p>
+            <p className="text-4xl font-normal">{round}</p>
           </div>
         </motion.div>
       </motion.div>

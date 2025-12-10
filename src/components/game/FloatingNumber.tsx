@@ -78,7 +78,7 @@ export function FloatingNumber({ value, type = 'resistance', onComplete }: Float
         exit={{ opacity: 0 }}
         transition={{ duration: 0.8, ease: 'easeOut' as const }}
         onAnimationComplete={handleAnimationComplete}
-        className={`absolute -top-2 right-0 text-2xl font-bold ${colorClass} pointer-events-none drop-shadow-lg`}
+        className={`absolute -top-2 right-0 text-2xl font-normal ${colorClass} pointer-events-none drop-shadow-lg`}
       >
         {formattedValue}
       </motion.div>

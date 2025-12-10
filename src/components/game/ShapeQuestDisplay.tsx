@@ -60,8 +60,8 @@ export function ShapeQuestDisplay({ quest, className = '', justReset = false }: 
         >
           <Sparkles size={14} className="text-emerald-400 shrink-0" />
         </motion.div>
-        <span className="text-[10px] text-emerald-300 font-medium relative z-10">
-          Quest completo! Aguarde proxima rodada
+        <span className="text-[9px] text-emerald-300 font-normal relative z-10">
+          Quest conluida!
         </span>
         <motion.div
           initial={{ scale: 0 }}
@@ -70,7 +70,7 @@ export function ShapeQuestDisplay({ quest, className = '', justReset = false }: 
           className="flex items-center gap-0.5 text-amber-400 ml-auto"
         >
           <Coins size={12} />
-          <span className="text-[10px] font-bold">+1</span>
+          <span className="text-[9px] font-normal">+1</span>
         </motion.div>
       </motion.div>
     )
@@ -94,8 +94,8 @@ export function ShapeQuestDisplay({ quest, className = '', justReset = false }: 
       {/* Header com label e recompensa */}
       <div className="flex items-center justify-between px-0.5">
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
-            Objetivo
+          <span className="text-[8px] text-muted-foreground uppercase tracking-wider font-medium">
+            Quest
           </span>
           {/* Indicador de reset */}
           <AnimatePresence>
@@ -111,10 +111,6 @@ export function ShapeQuestDisplay({ quest, className = '', justReset = false }: 
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
-        <div className="flex items-center gap-1 text-[10px] text-amber-400/80">
-          <Coins size={10} />
-          <span>+1</span>
         </div>
       </div>
 
@@ -199,7 +195,7 @@ export function ShapeQuestDisplay({ quest, className = '', justReset = false }: 
                     animate={{ opacity: isCompleted ? 0.4 : 0.6, x: 0 }}
                     transition={{ delay: index * 0.08 + 0.1 }}
                     className={`
-                      ml-1 text-xs font-bold
+                      ml-1 text-xs font-normal
                       ${isCompleted ? 'text-emerald-500/60' : 'text-muted-foreground/60'}
                     `}
                   >

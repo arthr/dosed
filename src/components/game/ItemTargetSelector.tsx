@@ -61,7 +61,7 @@ export function ItemTargetSelector() {
             <div className="bg-card border-2 border-primary rounded-lg px-6 py-3 shadow-lg">
               <div className="flex flex-col items-center gap-4">
                 {/* Nome do item */}
-                <span className={`flex w-full justify-left font-bold ${itemDef.color}`}>
+                <span className={`flex w-full justify-left font-normal ${itemDef.color}`}>
                   {itemDef.name}
                 </span>
 

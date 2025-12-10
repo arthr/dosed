@@ -30,7 +30,7 @@ export function WaitingForOpponent() {
         <div className="bg-muted/50 border-b border-border p-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <ShoppingBag size={20} className="text-amber-400" />
-            <h2 className="text-lg font-bold text-foreground">Pill Store</h2>
+            <h2 className="text-lg font-normal text-foreground">Pill Store</h2>
           </div>
           <p className="text-xs text-muted-foreground">
             Voce nao sinalizou interesse em compras

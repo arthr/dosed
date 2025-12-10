@@ -98,7 +98,7 @@ export function ItemCard({
               "font-mono uppercase tracking-wider transition-colors duration-200"
             )}
           >
-            <span className="truncate px-1 font-bold drop-shadow-md">
+            <span className="truncate px-1 font-normal drop-shadow-md">
               {itemDef.name}
             </span>
           </div>
@@ -117,7 +117,7 @@ export function ItemCard({
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-52">
         <div className="space-y-1">
-          <p className="font-bold text-sm">{itemDef.name}</p>
+          <p className="font-normal text-sm">{itemDef.name}</p>
           <p className="text-xs text-muted-foreground">{itemDef.description}</p>
           <p className="text-[10px] text-primary/80 uppercase tracking-wider">
             {CATEGORY_LABELS[itemDef.category]}

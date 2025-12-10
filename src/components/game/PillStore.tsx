@@ -60,12 +60,12 @@ export function PillStore({ playerId }: PillStoreProps) {
         {/* Header */}
         <div className="bg-muted/50 border-b border-border p-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-foreground">Pill Store</h2>
+            <h2 className="text-lg font-normal text-foreground">Pill Store</h2>
             
             {/* Pill Coins */}
             <div className="flex items-center gap-2 bg-amber-500/20 px-3 py-1 rounded-full">
               <img src={dosedPill} alt="Pill Coin" className="w-5 h-5" />
-              <span className="text-amber-400 font-bold">{player.pillCoins}</span>
+              <span className="text-amber-400 font-normal">{player.pillCoins}</span>
             </div>
           </div>
 

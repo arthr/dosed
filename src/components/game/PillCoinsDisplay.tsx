@@ -86,7 +86,7 @@ export function PillCoinsDisplay({
       {/* Contador */}
       <span
         className={`
-          text-xs font-bold tabular-nums
+          text-xs font-normal tabular-nums
           ${hasCoins ? 'text-amber-400' : 'text-muted-foreground'}
         `}
       >

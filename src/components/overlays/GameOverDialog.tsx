@@ -213,7 +213,7 @@ export function GameOverDialog({
             <div className="grid grid-cols-[1fr_100px_1fr] align-middle justify-center font-mono text-[10px] sm:text-xs">
               <div className="flex items-center gap-1.5">
                 <div className="size-1.5 sm:size-2 bg-primary animate-pulse" />
-                <span className="text-primary font-bold truncate max-w-[80px] sm:max-w-none">
+                <span className="text-primary font-normal truncate max-w-[80px] sm:max-w-none">
                   {players.player1.name}
                 </span>
               </div>

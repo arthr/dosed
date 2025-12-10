@@ -85,7 +85,7 @@ export function Toast({ toast }: ToastProps) {
 
         {/* Valor numerico (para damage/heal) */}
         {toast.value !== undefined && (
-          <span className="font-bold">
+          <span className="font-normal">
             {styles.icon}{Math.abs(toast.value)}
           </span>
         )}

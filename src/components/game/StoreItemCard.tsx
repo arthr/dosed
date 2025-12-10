@@ -97,7 +97,7 @@ export function StoreItemCard({
       >
         <img src={dosedPill} alt="Pill Coin" className="w-3.5 h-3.5" />
         <span
-          className={`text-xs font-bold ${canAfford ? 'text-amber-400' : 'text-red-400'}`}
+          className={`text-xs font-normal ${canAfford ? 'text-amber-400' : 'text-red-400'}`}
         >
           {item.cost}
         </span>

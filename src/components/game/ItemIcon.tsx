@@ -143,7 +143,7 @@ export function ItemIcon({
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-48">
         <div className="space-y-1">
-          <p className="font-bold text-sm">{itemDef.name}</p>
+          <p className="font-normal text-sm">{itemDef.name}</p>
           <p className="text-xs text-muted-foreground">{itemDef.description}</p>
           <p className="text-[10px] text-primary/80 uppercase tracking-wider">
             {CATEGORY_LABELS[itemDef.category]}

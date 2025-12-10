@@ -154,7 +154,7 @@ export function Pill({
           animate={{ scale: 1 }}
           title="Efeito dobrado"
         >
-          <span className="text-[8px] font-bold text-white">x2</span>
+          <span className="text-[8px] font-normal text-white">x2</span>
         </motion.div>
       )}
     </motion.button>

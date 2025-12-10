@@ -128,7 +128,7 @@ export function PillReveal({ pill, isAITurn, onComplete }: PillRevealProps) {
           {pill.type === 'LIFE' ? (
             <Heart className="w-12 h-12 text-white drop-shadow-lg" fill="currentColor" />
           ) : (
-            <span className="text-4xl font-bold text-white drop-shadow-lg">
+            <span className="text-4xl font-normal text-white drop-shadow-lg">
               {PILL_LABELS[pill.type].charAt(0)}
             </span>
           )}
@@ -140,7 +140,7 @@ export function PillReveal({ pill, isAITurn, onComplete }: PillRevealProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-2xl font-bold text-white"
+            className="text-2xl font-normal text-white"
           >
             {PILL_LABELS[pill.type]}
           </motion.h3>
@@ -197,7 +197,7 @@ export function PillReveal({ pill, isAITurn, onComplete }: PillRevealProps) {
             <>
               <p className="text-sm text-muted-foreground">
                 Avancando em{' '}
-                <span className="text-primary font-bold tabular-nums">{countdown}s</span>
+                <span className="text-primary font-normal tabular-nums">{countdown}s</span>
               </p>
               <p className="text-xs text-muted-foreground/70">ou clique para continuar</p>
             </>

@@ -202,7 +202,7 @@ function RoundDetail({ round, config, pillCount }: RoundDetailProps) {
         {activeShapes.map((shape) => (
           <div key={shape} className="relative" title={SHAPE_LABELS[shape]}>
             <ShapeIcon shape={shape} size="md" />
-            <span className="absolute -bottom-1 -right-1 text-[10px] font-mono font-bold bg-primary text-primary-foreground px-1 rounded">
+            <span className="absolute -bottom-1 -right-1 text-[10px] font-mono font-normal bg-primary text-primary-foreground px-1 rounded">
               {distribution[shape]}
             </span>
           </div>

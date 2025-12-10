@@ -189,46 +189,46 @@
 ## Fase 5: Componentes Multiplayer
 
 ### TASK-MP-015: Criar estrutura de componentes
-- [ ] Criar diretorio `src/components/multiplayer/`
-- [ ] Criar `src/components/multiplayer/index.ts` (barrel)
+- [x] Criar diretorio `src/components/multiplayer/`
+- [x] Criar `src/components/multiplayer/index.ts` (barrel)
 
 **Arquivos:**
-- `src/components/multiplayer/index.ts` (novo)
+- `src/components/multiplayer/index.ts` (criado, atualizado com exports)
 
 ---
 
 ### TASK-MP-016: Criar LobbyScreen
-- [ ] Criar `src/components/multiplayer/LobbyScreen.tsx`
-- [ ] Implementar view switcher (menu/create/join)
-- [ ] Estilizar com visual 8bit consistente
+- [x] Criar `src/components/multiplayer/LobbyScreen.tsx`
+- [x] Implementar view switcher (menu/create/join)
+- [x] Estilizar com visual 8bit consistente
 
 **Arquivos:**
-- `src/components/multiplayer/LobbyScreen.tsx` (novo)
+- `src/components/multiplayer/LobbyScreen.tsx` (criado)
 
 ---
 
 ### TASK-MP-017: Criar CreateRoomForm
-- [ ] Criar `src/components/multiplayer/CreateRoomForm.tsx`
-- [ ] Input para nome do host
-- [ ] Botao para criar sala
-- [ ] Loading state durante criacao
-- [ ] Tratamento de erros
+- [x] Criar `src/components/multiplayer/CreateRoomForm.tsx`
+- [x] Input para nome do host
+- [x] Botao para criar sala
+- [x] Loading state durante criacao
+- [x] Tratamento de erros
 
 **Arquivos:**
-- `src/components/multiplayer/CreateRoomForm.tsx` (novo)
+- `src/components/multiplayer/CreateRoomForm.tsx` (criado)
 
 ---
 
 ### TASK-MP-018: Criar JoinRoomForm
-- [ ] Criar `src/components/multiplayer/JoinRoomForm.tsx`
-- [ ] Input para codigo da sala
-- [ ] Input para nome do guest
-- [ ] Validacao de codigo (6 caracteres alfanumericos)
-- [ ] Loading state durante conexao
-- [ ] Tratamento de erros
+- [x] Criar `src/components/multiplayer/JoinRoomForm.tsx`
+- [x] Input para codigo da sala
+- [x] Input para nome do guest
+- [x] Validacao de codigo (6 caracteres alfanumericos)
+- [x] Loading state durante conexao
+- [x] Tratamento de erros
 
 **Arquivos:**
-- `src/components/multiplayer/JoinRoomForm.tsx` (novo)
+- `src/components/multiplayer/JoinRoomForm.tsx` (criado)
 
 ---
 

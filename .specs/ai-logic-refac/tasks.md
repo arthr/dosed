@@ -4,7 +4,7 @@
 
 | Area | Total | Concluidas | Pendentes |
 | :--- | :---: | :---: | :---: |
-| Types | 5 | 4 | 1 |
+| Types | 5 | 5 | 0 |
 | Config | 3 | 0 | 3 |
 | AI Logic - Analise | 4 | 0 | 4 |
 | AI Logic - Selecao | 4 | 0 | 4 |
@@ -14,7 +14,7 @@
 | Hooks | 4 | 0 | 4 |
 | Components | 3 | 0 | 3 |
 | Integration | 3 | 0 | 3 |
-| **TOTAL** | **37** | **4** | **33** |
+| **TOTAL** | **37** | **5** | **32** |
 
 ---
 
@@ -42,7 +42,7 @@
   - Exportar novos types de `ai.ts`
   - Exportar `DifficultyLevel` e constantes
 
-- [ ] TASK-004B: Documentar uso de `typeCounts` e `shapeCounts` em `ai.ts`
+- [x] TASK-004B: Documentar uso de `typeCounts` e `shapeCounts` em `ai.ts`
   - JSDoc explicando que sao informacoes publicas
   - Exemplos de uso para calculo de probabilidades
 

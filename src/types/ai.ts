@@ -1,4 +1,3 @@
-import type { DifficultyLevel } from './game'
 import type { InventoryItem } from './item'
 import type { Pill, PillShape, PillType } from './pill'
 import type { Player } from './player'
@@ -38,6 +37,16 @@ export interface AIConfig {
  * Nota: typeCounts e shapeCounts sao informacoes PUBLICAS visiveis a todos os jogadores.
  * Eles representam a distribuicao total de pilulas na rodada, permitindo calcular
  * probabilidades baseadas nas pilulas restantes (total - consumidas - reveladas).
+ * 
+ * @example
+ * // Calcular probabilidade de FATAL no pool nao-revelado:
+ * const fatalTotal = ctx.typeCounts.FATAL
+ * const fatalRevealed = ctx.revealedPills.filter(id =>
+ *   ctx.pillPool.find(p => p.id === id)?.type === 'FATAL'
+ * ).length
+ * const fatalRemaining = fatalTotal - fatalRevealed
+ * const unrevealed = ctx.pillPool.length - ctx.revealedPills.length
+ * const fatalOdds = unrevealed > 0 ? fatalRemaining / unrevealed : 0
  */
 export interface AIDecisionContext {
   /** Jogador IA */

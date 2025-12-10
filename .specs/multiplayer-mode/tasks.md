@@ -76,17 +76,17 @@
 ---
 
 ### TASK-MP-006: Criar multiplayerStore
-- [ ] Criar `src/stores/multiplayerStore.ts`
-- [ ] Implementar estado inicial
-- [ ] Implementar `createRoom()` - chama realtimeService
-- [ ] Implementar `joinRoom()` - valida e conecta
-- [ ] Implementar `leaveRoom()` - notifica e desconecta
-- [ ] Implementar `sendEvent()` - emite via WebSocket
-- [ ] Implementar `handleEvent()` - aplica no gameStore
-- [ ] Implementar helpers: `connect()`, `disconnect()`, `reset()`
+- [x] Criar `src/stores/multiplayerStore.ts`
+- [x] Implementar estado inicial
+- [x] Implementar `createRoom()` - chama realtimeService
+- [x] Implementar `joinRoom()` - valida e conecta
+- [x] Implementar `leaveRoom()` - notifica e desconecta
+- [x] Implementar `sendEvent()` - emite via WebSocket
+- [x] Implementar `handleEvent()` - aplica no gameStore
+- [x] Implementar helpers: `connect()`, `disconnect()`, `reset()`
 
 **Arquivos:**
-- `src/stores/multiplayerStore.ts` (novo)
+- `src/stores/multiplayerStore.ts` (criado)
 
 ---
 

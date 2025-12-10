@@ -269,12 +269,12 @@
   - Se power_up: adiciona ao inventario
   - Se boost: adiciona a pendingBoosts
 
-- [ ] TASK-SS-085: Implementar `confirmStorePurchases(playerId)` no gameStore
+- [x] TASK-SS-085: Implementar `confirmStorePurchases(playerId)` no gameStore
   - Marca confirmed[playerId] = true
   - Se outro comprando e nao confirmou: reduz timer, avisa
   - Chama checkShoppingComplete()
 
-- [ ] TASK-SS-086: Implementar `checkShoppingComplete()` no gameStore
+- [x] TASK-SS-086: Implementar `checkShoppingComplete()` no gameStore
   - Verifica se todos que precisam confirmar ja confirmaram
   - Chama applyPendingBoosts() e resetRound()
 

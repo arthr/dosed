@@ -72,6 +72,8 @@ interface GameStore extends GameState {
   toggleWantsStore: (playerId: PlayerId) => void
   checkAndStartShopping: () => void
   purchaseStoreItem: (playerId: PlayerId, itemId: string) => void
+  confirmStorePurchases: (playerId: PlayerId) => void
+  checkShoppingComplete: () => void
 
   // Selectors (computed)
   getCurrentPlayer: () => Player
@@ -1312,6 +1314,90 @@ export const useGameStore = create<GameStore>((set, get) => ({
       playerId,
       duration: 1500,
     })
+  },
+
+  /**
+   * Jogador confirma que terminou de fazer compras
+   * @param playerId - ID do jogador confirmando
+   */
+  confirmStorePurchases: (playerId: PlayerId) => {
+    const state = get()
+    const storeState = state.storeState
+
+    // Validacao: precisa estar na fase shopping
+    if (state.phase !== 'shopping' || !storeState) {
+      return
+    }
+
+    // Ja confirmou
+    if (storeState.confirmed[playerId]) {
+      return
+    }
+
+    const otherPlayerId: PlayerId = playerId === 'player1' ? 'player2' : 'player1'
+    const otherPlayer = state.players[otherPlayerId]
+
+    // Verifica se outro jogador esta comprando (wantsStore && tem coins)
+    const otherIsShopping = otherPlayer.wantsStore && otherPlayer.pillCoins > 0
+
+    let newTimerDuration = storeState.timerDuration
+
+    // Se outro ainda comprando e nao confirmou, reduz timer
+    if (otherIsShopping && !storeState.confirmed[otherPlayerId]) {
+      const elapsed = Date.now() - (storeState.timerStartedAt ?? 0)
+      const remaining = storeState.timerDuration - elapsed
+      newTimerDuration = elapsed + (remaining * DEFAULT_STORE_CONFIG.reduceMultiplier)
+
+      // Avisa o outro jogador
+      useToastStore.getState().show({
+        type: 'quest',
+        message: 'Oponente finalizou! Tempo reduzido.',
+        playerId: otherPlayerId,
+        duration: 2000,
+      })
+    }
+
+    // Atualiza estado
+    set({
+      storeState: {
+        ...storeState,
+        confirmed: {
+          ...storeState.confirmed,
+          [playerId]: true,
+        },
+        timerDuration: newTimerDuration,
+      },
+    })
+
+    // Verifica se shopping terminou
+    get().checkShoppingComplete()
+  },
+
+  /**
+   * Verifica se a fase de shopping terminou
+   * Chamado apos confirmacao ou timeout
+   */
+  checkShoppingComplete: () => {
+    const state = get()
+    const { storeState, players } = state
+
+    if (state.phase !== 'shopping' || !storeState) {
+      return
+    }
+
+    // Quem precisa confirmar: quem queria ir E tem coins (ou tinha no inicio)
+    const p1NeedsConfirm = players.player1.wantsStore
+    const p2NeedsConfirm = players.player2.wantsStore
+
+    // Verifica se todos que precisam ja confirmaram
+    const p1Done = !p1NeedsConfirm || storeState.confirmed.player1
+    const p2Done = !p2NeedsConfirm || storeState.confirmed.player2
+
+    if (p1Done && p2Done) {
+      // Todos confirmaram - aplica boosts e inicia nova rodada
+      // applyPendingBoosts sera implementado na proxima task
+      get().resetRound()
+    }
   },
 
   // ============ SELECTORS ============

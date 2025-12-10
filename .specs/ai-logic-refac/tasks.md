@@ -5,7 +5,7 @@
 | Area | Total | Concluidas | Pendentes |
 | :--- | :---: | :---: | :---: |
 | Types | 5 | 5 | 0 |
-| Config | 3 | 0 | 3 |
+| Config | 3 | 1 | 2 |
 | AI Logic - Analise | 4 | 0 | 4 |
 | AI Logic - Selecao | 4 | 0 | 4 |
 | AI Logic - Itens | 4 | 0 | 4 |
@@ -14,7 +14,7 @@
 | Hooks | 4 | 0 | 4 |
 | Components | 3 | 0 | 3 |
 | Integration | 3 | 0 | 3 |
-| **TOTAL** | **37** | **5** | **32** |
+| **TOTAL** | **37** | **6** | **31** |
 
 ---
 
@@ -48,7 +48,7 @@
 
 ### Config
 
-- [ ] TASK-005: Criar arquivo `utils/aiConfig.ts`
+- [x] TASK-005: Criar arquivo `utils/aiConfig.ts`
   - `AI_CONFIGS: Record<DifficultyLevel, AIConfig>`
   - Incluir novos campos: `usesTypeCounts`, `usesDeduction`
   - Valores conforme tabela de requisitos atualizada

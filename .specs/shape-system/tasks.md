@@ -222,7 +222,7 @@
 
 ### 4.4 UI de Pill Coins
 
-- [ ] TASK-SS-041B: Criar exibicao de Pill Coins no `AnimatedPlayerArea.tsx`
+- [x] TASK-SS-041B: Criar exibicao de Pill Coins no `AnimatedPlayerArea.tsx`
   - Icone `dosed_pill.svg` com contador discreto
   - Clicavel APENAS se `pillCoins > 0`
   - Click funciona como toggle para `wantsStore`

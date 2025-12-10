@@ -5,6 +5,7 @@ import { LivesDisplay } from './LivesDisplay'
 import { FloatingNumber } from './FloatingNumber'
 import { InventoryBar } from './InventoryBar'
 import { ShapeQuestDisplay } from './ShapeQuestDisplay'
+import { PillCoinsDisplay } from './PillCoinsDisplay'
 import { PlayerToasts } from '../toasts/PlayerToasts'
 import { Card, CardContent, CardHeader } from '../ui/8bit/card'
 import { cn } from '@/lib/utils'
@@ -28,6 +29,8 @@ interface AnimatedPlayerAreaProps {
   quest?: ShapeQuest | null
   /** Indica se o quest foi recentemente resetado */
   questJustReset?: boolean
+  /** Callback para toggle wantsStore (Pill Coins) */
+  onToggleStore?: () => void
 }
 
 // Cores para os efeitos de glow e borda
@@ -74,6 +77,7 @@ export function AnimatedPlayerArea({
   usingItemId = null,
   quest = null,
   questJustReset = false,
+  onToggleStore,
 }: AnimatedPlayerAreaProps) {
   // Detecta efeitos ativos
   const shieldEffect = player.effects.find((e) => e.type === 'shield')
@@ -273,8 +277,16 @@ export function AnimatedPlayerArea({
         onItemClick={isInventoryInteractive ? onItemClick : undefined}
       />
 
-      {/* Quest de shape do jogador */}
-      <ShapeQuestDisplay quest={quest} justReset={questJustReset} />
+      {/* Quest e Pill Coins em linha */}
+      <div className="flex items-start justify-between gap-2">
+        <ShapeQuestDisplay quest={quest} justReset={questJustReset} className="flex-1" />
+        <PillCoinsDisplay
+          pillCoins={player.pillCoins}
+          wantsStore={player.wantsStore}
+          onToggleStore={!player.isAI ? onToggleStore : undefined}
+          disabled={player.isAI}
+        />
+      </div>
     </div>
   )
 }

@@ -1203,7 +1203,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newWantsStore = !player.wantsStore
     useToastStore.getState().show({
       type: 'quest',
-      message: newWantsStore ? 'Visita a loja agendada!' : 'Visita a loja cancelada',
+      message: newWantsStore ? 'Loja agendada!' : 'Loja cancelada',
       playerId,
       duration: 1200,
     })

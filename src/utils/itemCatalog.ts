@@ -77,6 +77,15 @@ export const ITEM_CATALOG: Record<ItemType, ItemDefinition> = {
     icon: 'CopyPlus',
     color: 'text-blue-400',
   },
+  shape_scanner: {
+    type: 'shape_scanner',
+    category: 'intel',
+    name: 'Shape Scanner',
+    description: 'Revela todas pilulas de uma forma',
+    targetType: 'shape',
+    icon: 'ScanSearch',
+    color: 'text-blue-400',
+  },
 
   // === SUSTAIN (Sobrevivencia) ===
   pocket_pill: {
@@ -137,6 +146,15 @@ export const ITEM_CATALOG: Record<ItemType, ItemDefinition> = {
     icon: 'Trash2',
     color: 'text-purple-400',
   },
+  shape_bomb: {
+    type: 'shape_bomb',
+    category: 'chaos',
+    name: 'Shape Bomb',
+    description: 'Elimina todas pilulas de uma forma',
+    targetType: 'shape',
+    icon: 'Bomb',
+    color: 'text-purple-400',
+  },
 }
 
 // ============================================
@@ -144,10 +162,10 @@ export const ITEM_CATALOG: Record<ItemType, ItemDefinition> = {
 // ============================================
 
 export const ITEMS_BY_CATEGORY: Record<ItemCategory, ItemType[]> = {
-  intel: ['scanner', 'inverter', 'double'],
+  intel: ['scanner', 'inverter', 'double', 'shape_scanner'],
   sustain: ['pocket_pill', 'shield'],
   control: ['handcuffs', 'force_feed'],
-  chaos: ['shuffle', 'discard'],
+  chaos: ['shuffle', 'discard', 'shape_bomb'],
 }
 
 // ============================================

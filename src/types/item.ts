@@ -16,6 +16,8 @@ export type ItemType =
   | 'force_feed'
   | 'shuffle'
   | 'discard'
+  | 'shape_bomb'
+  | 'shape_scanner'
 
 /** Tipo de alvo que o item requer */
 export type ItemTargetType =
@@ -24,6 +26,7 @@ export type ItemTargetType =
   | 'opponent'        // Efeito no oponente
   | 'pill_to_opponent' // Seleciona pilula para forcar oponente
   | 'table'           // Efeito na mesa (todas as pilulas)
+  | 'shape'           // Seleciona uma shape (forma)
 
 // ============================================
 // Interfaces

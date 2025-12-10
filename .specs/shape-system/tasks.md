@@ -332,11 +332,11 @@
 
 ### 5.1 Definicao de Itens
 
-- [ ] TASK-SS-042: Adicionar `SHAPE_BOMB` e `SHAPE_SCANNER` ao tipo `ItemType` em `src/types/item.ts`
+- [x] TASK-SS-042: Adicionar `SHAPE_BOMB` e `SHAPE_SCANNER` ao tipo `ItemType` em `src/types/item.ts`
 
-- [ ] TASK-SS-043: Adicionar `'shape'` ao `targetType` em `ItemDefinition` se necessario
+- [x] TASK-SS-043: Adicionar `'shape'` ao `targetType` em `ItemDefinition` se necessario
 
-- [ ] TASK-SS-044: Adicionar definicoes de `SHAPE_BOMB` e `SHAPE_SCANNER` em `src/utils/itemCatalog.ts`
+- [x] TASK-SS-044: Adicionar definicoes de `SHAPE_BOMB` e `SHAPE_SCANNER` em `src/utils/itemCatalog.ts`
   - SHAPE_BOMB: categoria chaos, targetType: shape
   - SHAPE_SCANNER: categoria intel, targetType: shape
 

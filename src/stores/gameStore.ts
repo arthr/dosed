@@ -309,16 +309,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     // Toast de feedback do quest (apos pequeno delay para nao sobrepor toast da pilula)
-    if (questWasReset) {
-      setTimeout(() => {
-        useToastStore.getState().show({
-          type: 'quest',
-          message: 'Sequencia reiniciada!',
-          playerId: consumerId,
-          duration: 1200,
-        })
-      }, 800)
-    }
+    // Nota: desativado temporariamente para nao sobrepor toast da pilula
+    // if (questWasReset) {
+    //   setTimeout(() => {
+    //     useToastStore.getState().show({
+    //       type: 'quest',
+    //       message: 'Sequencia reiniciada!',
+    //       playerId: consumerId,
+    //       duration: 1200,
+    //     })
+    //   }, 800)
+    // }
 
     // Toast de celebracao quando completar quest
     if (earnedPillCoin) {
@@ -1526,14 +1527,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })
 
     // Toast de confirmacao
-    if (totalCost > 0) {
-      useToastStore.getState().show({
-        type: 'quest',
-        message: `-${totalCost} Pill Coins`,
-        playerId,
-        duration: 2000,
-      })
-    }
+    // Nota: desativado temporariamente para nao sobrepor toast da pilula
+    // if (totalCost > 0) {
+    //   useToastStore.getState().show({
+    //     type: 'quest',
+    //     message: `-${totalCost} Pill Coins`,
+    //     playerId,
+    //     duration: 2000,
+    //   })
+    // }
   },
 
   /**

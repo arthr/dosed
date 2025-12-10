@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Swap } from '@/components/ui/paceui/swap'
 import dosedPill from '/dosed_pill.svg'
 
 interface PillCoinsDisplayProps {
@@ -83,15 +84,24 @@ export function PillCoinsDisplay({
         )}
       </div>
 
-      {/* Contador */}
-      <span
-        className={`
-          text-xs font-normal tabular-nums
-          ${hasCoins ? 'text-amber-400' : 'text-muted-foreground'}
-        `}
+      {/* Contador com animacao Swap */}
+      <Swap
+        state={pillCoins}
+        effects={['slideUp', 'opacity']}
+        duration={0.3}
+        className="overflow-hidden"
       >
-        {pillCoins}
-      </span>
+        {(value) => (
+          <span
+            className={`
+              text-xs font-normal tabular-nums
+              ${hasCoins ? 'text-amber-400' : 'text-muted-foreground'}
+            `}
+          >
+            {value}
+          </span>
+        )}
+      </Swap>
 
       {/* Indicador de "quer ir a loja" */}
       {wantsStore && hasCoins && (

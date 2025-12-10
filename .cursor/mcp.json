@@ -1,3 +1,11 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "paceui": {
+            "command": "npx",
+            "args": ["-y", "shadcn@canary", "registry:mcp"],
+            "env": {
+                "REGISTRY_URL": "https://ui.paceui.com/r/mcp.json"
+            }
+        }
+  }
 }

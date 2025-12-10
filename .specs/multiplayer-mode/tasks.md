@@ -372,13 +372,13 @@
 ## Fase 7: Tratamento de Erros e Edge Cases
 
 ### TASK-MP-031: Implementar timeout de sala
-- [ ] Sala expira apos 5 minutos sem guest
-- [ ] Host recebe notificacao
-- [ ] Sala e removida automaticamente
+- [x] Sala expira apos 5 minutos sem guest
+- [x] Host recebe notificacao (aviso visual quando < 1 min)
+- [x] Sala e removida automaticamente (auto-sai ao expirar)
+- [x] Timer visual com countdown
 
 **Arquivos:**
-- `src/stores/multiplayerStore.ts`
-- `src/components/multiplayer/WaitingRoom.tsx`
+- `src/components/multiplayer/WaitingRoom.tsx` (atualizado - timer de expiracao)
 
 ---
 

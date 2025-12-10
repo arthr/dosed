@@ -1,9 +1,15 @@
-import { useState, useEffect } from 'react'
-import { Copy, Check, X, Loader2 } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Copy, Check, X, Loader2, Clock, AlertTriangle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/8bit/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/8bit/card'
 import { useMultiplayer } from '@/hooks'
+
+/** Tempo em ms ate a sala expirar (5 minutos) */
+const ROOM_EXPIRATION_MS = 5 * 60 * 1000
+
+/** Tempo em ms para mostrar aviso de expiracao (1 minuto) */
+const EXPIRATION_WARNING_MS = 60 * 1000
 
 interface WaitingRoomProps {
   /** Callback quando sala e cancelada (opcional) */
@@ -13,13 +19,17 @@ interface WaitingRoomProps {
 /**
  * Tela de espera do host aguardando guest entrar na sala
  * Exibe codigo da sala para compartilhar
+ * Inclui timer de expiracao de 5 minutos
  */
 export function WaitingRoom({ onCancel }: WaitingRoomProps) {
   const { room, leaveRoom, connectionStatus } = useMultiplayer()
   const [copied, setCopied] = useState(false)
   const [isLeaving, setIsLeaving] = useState(false)
+  const [timeRemaining, setTimeRemaining] = useState(ROOM_EXPIRATION_MS)
+  const [hasExpired, setHasExpired] = useState(false)
 
   const roomCode = room?.id ?? ''
+  const roomCreatedAt = room?.createdAt ?? Date.now()
 
   const handleCopy = async () => {
     if (!roomCode) return
@@ -40,6 +50,45 @@ export function WaitingRoom({ onCancel }: WaitingRoomProps) {
       return () => clearTimeout(timer)
     }
   }, [copied])
+
+  // Timer de expiracao da sala
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - roomCreatedAt
+      const remaining = Math.max(0, ROOM_EXPIRATION_MS - elapsed)
+      setTimeRemaining(remaining)
+
+      if (remaining === 0 && !hasExpired) {
+        setHasExpired(true)
+      }
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [roomCreatedAt, hasExpired])
+
+  // Handler de expiracao
+  const handleExpiration = useCallback(async () => {
+    setIsLeaving(true)
+    try {
+      await leaveRoom()
+      onCancel?.()
+    } catch {
+      setIsLeaving(false)
+    }
+  }, [leaveRoom, onCancel])
+
+  // Auto-sai quando expira
+  useEffect(() => {
+    if (hasExpired) {
+      handleExpiration()
+    }
+  }, [hasExpired, handleExpiration])
+
+  // Calcula tempo formatado
+  const minutes = Math.floor(timeRemaining / 60000)
+  const seconds = Math.floor((timeRemaining % 60000) / 1000)
+  const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`
+  const isWarning = timeRemaining <= EXPIRATION_WARNING_MS && timeRemaining > 0
 
   const handleCancel = async () => {
     setIsLeaving(true)
@@ -135,6 +184,36 @@ export function WaitingRoom({ onCancel }: WaitingRoomProps) {
             >
               {copied && 'Codigo copiado!'}
             </motion.p>
+          </div>
+
+          {/* Timer de expiracao */}
+          <div className="w-full">
+            <div
+              className={`flex items-center justify-center gap-2 p-2 rounded-lg border ${
+                isWarning
+                  ? 'bg-amber-500/10 border-amber-500/30'
+                  : 'bg-muted/30 border-border'
+              }`}
+            >
+              <Clock size={14} className={isWarning ? 'text-amber-500' : 'text-muted-foreground'} />
+              <span
+                className={`text-sm font-mono ${
+                  isWarning ? 'text-amber-500' : 'text-muted-foreground'
+                }`}
+              >
+                {formattedTime}
+              </span>
+            </div>
+            {isWarning && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center justify-center gap-1 mt-2 text-xs text-amber-500"
+              >
+                <AlertTriangle size={12} />
+                <span>Sala expira em breve!</span>
+              </motion.div>
+            )}
           </div>
 
           {/* Status de conexao */}

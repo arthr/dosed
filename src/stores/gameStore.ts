@@ -1454,7 +1454,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Toast de feedback
     useToastStore.getState().show({
       type: 'quest',
-      message: newWantsStore ? 'Loja agendada!' : 'Loja cancelada',
+      message: newWantsStore ? 'Loja solicitada!' : 'Loja cancelada!',
       playerId,
       duration: 1200,
     })

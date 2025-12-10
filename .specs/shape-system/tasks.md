@@ -283,7 +283,7 @@
   - Marca flag para reveal_start na proxima rodada
   - Reseta `wantsStore = false` para ambos jogadores
 
-- [ ] TASK-SS-088: Adicionar flag `revealAtStart: number` ao GameState
+- [x] TASK-SS-088: Adicionar flag `revealAtStart: number` ao GameState
   - Indica quantas pills revelar automaticamente ao iniciar rodada
   - Consumida em resetRound() apos revelar
 

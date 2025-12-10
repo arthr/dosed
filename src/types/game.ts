@@ -50,6 +50,8 @@ export interface GameState {
   storeState: StoreState | null
   /** Ultimo reset de quest (para animacao de shake) */
   lastQuestReset: { playerId: PlayerId; timestamp: number } | null
+  /** Quantidade de pills a revelar automaticamente no inicio da proxima rodada (por jogador) */
+  revealAtStart: Record<PlayerId, number>
 }
 
 /**

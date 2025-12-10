@@ -179,6 +179,10 @@ const initialState: GameState = {
   },
   storeState: null,
   lastQuestReset: null,
+  revealAtStart: {
+    player1: 0,
+    player2: 0,
+  },
 }
 
 /**
@@ -511,8 +515,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
    */
   resetRound: () => {
     const state = get()
-    // Aceita tanto 'playing' quanto 'roundEnding'
-    if (state.phase !== 'playing' && state.phase !== 'roundEnding') return
+    // Aceita tanto 'playing' quanto 'roundEnding' quanto 'shopping'
+    if (state.phase !== 'playing' && state.phase !== 'roundEnding' && state.phase !== 'shopping') return
 
     // Verifica se ambos jogadores ainda tem vidas
     const { player1, player2 } = state.players
@@ -545,6 +549,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
       player2: generateShapeQuest(newRound, newShapeCounts),
     }
 
+    // Aplica revealAtStart - revela pills automaticamente para quem comprou Scanner-2X
+    const { revealAtStart } = state
+    const pillsToReveal: string[] = []
+
+    // Calcula total de pills a revelar (soma de ambos jogadores)
+    const totalToReveal = revealAtStart.player1 + revealAtStart.player2
+
+    if (totalToReveal > 0 && newPillPool.length > 0) {
+      // Seleciona pills aleatorias para revelar
+      const shuffledPillIds = shuffleArray(newPillPool.map((p) => p.id))
+      const revealCount = Math.min(totalToReveal, shuffledPillIds.length)
+      for (let i = 0; i < revealCount; i++) {
+        pillsToReveal.push(shuffledPillIds[i])
+      }
+    }
+
     const roundAction: GameAction = {
       type: 'NEW_ROUND',
       playerId: state.currentTurn,
@@ -560,8 +580,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       shapeQuests: newShapeQuests,
       round: newRound,
       actionHistory: [...state.actionHistory, roundAction],
-      revealedPills: [], // Limpa pilulas reveladas da rodada anterior
+      revealedPills: pillsToReveal, // Pills reveladas automaticamente
       storeState: null, // Limpa estado da loja
+      revealAtStart: { player1: 0, player2: 0 }, // Reseta flag
       players: {
         player1: player1Updated,
         player2: player2Updated,
@@ -1407,13 +1428,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
    */
   applyPendingBoosts: () => {
     const state = get()
-    const { storeState, players } = state
+    const { storeState, players, revealAtStart } = state
 
     if (!storeState) {
       return
     }
 
     const newPlayers = { ...players }
+    const newRevealAtStart = { ...revealAtStart }
 
     // Aplica boosts para cada jogador
     for (const playerId of ['player1', 'player2'] as PlayerId[]) {
@@ -1439,10 +1461,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
             break
 
           case 'reveal_start':
-            // Flag para revelar pills no inicio da rodada
-            // Sera tratado em resetRound (via revealAtStart)
-            // Por enquanto, apenas registramos - a implementacao
-            // do revealAtStart sera feita na proxima task
+            // Acumula quantidade de pills a revelar no inicio da rodada
+            // Scanner-2X revela 2 pills
+            newRevealAtStart[playerId] = (newRevealAtStart[playerId] || 0) + 2
             break
         }
       }
@@ -1456,10 +1477,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       newPlayers[playerId] = player
     }
 
-    // Atualiza jogadores e limpa storeState
+    // Atualiza jogadores, revealAtStart e limpa storeState
     set({
       players: newPlayers,
       storeState: null,
+      revealAtStart: newRevealAtStart,
     })
   },
 

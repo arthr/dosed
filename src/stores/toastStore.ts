@@ -4,7 +4,7 @@ import type { ItemType, PillType, PlayerId } from '@/types'
 /**
  * Tipos de toast disponiveis
  */
-export type ToastType = 'damage' | 'heal' | 'collapse' | 'safe' | 'fatal' | 'item' | 'quest'
+export type ToastType = 'damage' | 'heal' | 'collapse' | 'safe' | 'fatal' | 'item' | 'quest' | 'info'
 
 /**
  * Estrutura de um toast

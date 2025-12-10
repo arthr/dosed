@@ -389,7 +389,7 @@ case 'item_used': {
 case 'selection_confirmed': {
   // ... logica existente ...
   
-  // Toast informativo
+  // Toast informativo (tipo 'info' adicionado ao ToastType para mensagens de sistema)
   const opponentName = state.players[event.playerId]?.name ?? 'Oponente'
   useToastStore.getState().show({
     type: 'info',
@@ -399,6 +399,8 @@ case 'selection_confirmed': {
   break
 }
 ```
+
+**Nota:** O tipo `info` foi adicionado ao `ToastType` para mensagens informativas do sistema/multiplayer, mantendo a semantica correta (o tipo `safe` e exclusivo para pilulas placebo).
 
 ### 3. Feedback Visual no Card do Oponente
 

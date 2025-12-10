@@ -107,6 +107,18 @@ export function useToast() {
     [show]
   )
 
+  /**
+   * Helper para toast informativo (sistema/multiplayer)
+   * @param message - Mensagem informativa
+   * @param duration - Duracao opcional (default: 3000ms)
+   */
+  const info = useCallback(
+    (message: string, duration?: number) => {
+      show({ type: 'info', message, duration })
+    },
+    [show]
+  )
+
   // Adiciona helpers como propriedades da funcao toast
   const toastWithHelpers = Object.assign(toast, {
     damage,
@@ -115,6 +127,7 @@ export function useToast() {
     safe,
     fatal,
     item,
+    info,
   })
 
   return {

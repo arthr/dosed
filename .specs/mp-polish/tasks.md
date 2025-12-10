@@ -39,7 +39,7 @@ Polimento completo do modo multiplayer em tres frentes:
   - Arquivo: `src/stores/multiplayerStore.ts`
   - Incluir `state.localRole` no payload do evento `player_left`
 
-- [ ] TASK-MPP-004: Refatorar handler `player_left` com logica diferenciada
+- [x] TASK-MPP-004: Refatorar handler `player_left` com logica diferenciada
   - Arquivo: `src/stores/multiplayerStore.ts`
   - Importar `useToastStore` (se ainda nao importado)
   - Tratar `role === 'host'`: status 'abandoned', setar `hostLeftVoluntarily: true`
@@ -63,6 +63,10 @@ Polimento completo do modo multiplayer em tres frentes:
 ---
 
 ### PARTE 2: Visual Sync
+
+#### Pre-requisito: ToastType `info`
+
+> **Nota:** Foi adicionado o tipo `info` ao `ToastType` para mensagens informativas do sistema/multiplayer, mantendo a semantica correta (o tipo `safe` e exclusivo para pilulas placebo).
 
 #### Store - Visual Feedback (3 tasks)
 

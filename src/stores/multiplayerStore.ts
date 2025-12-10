@@ -11,6 +11,7 @@ import type {
 } from '@/types'
 import { realtimeService } from '@/services'
 import { useGameStore } from '@/stores/gameStore'
+import { useToastStore } from '@/stores/toastStore'
 
 /**
  * Interface do Store com estado e actions
@@ -383,13 +384,41 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
       }
 
       case 'player_left': {
-        // Jogador saiu - atualiza status
-        if (state.room) {
+        // Jogador saiu - tratamento diferenciado por role
+        const leftPayload = payload.payload as { 
+          role?: 'host' | 'guest'
+          reason?: string 
+        }
+        const whoLeft = leftPayload?.role
+
+        if (whoLeft === 'host') {
+          // Host saiu voluntariamente - guest ve overlay especifico
           set({
-            room: {
-              ...state.room,
-              status: 'abandoned',
-            },
+            room: state.room ? { ...state.room, status: 'abandoned' } : null,
+            hostLeftVoluntarily: true,
+          })
+        } else if (whoLeft === 'guest' && state.localRole === 'host') {
+          // Guest saiu - host volta para WaitingRoom
+          if (state.room) {
+            set({
+              room: {
+                ...state.room,
+                status: 'waiting',
+                guestId: null,
+                guestName: null,
+              },
+            })
+            useGameStore.getState().resetGame()
+            useToastStore.getState().show({
+              type: 'info',
+              message: 'Jogador saiu da sala',
+              duration: 3000,
+            })
+          }
+        } else {
+          // Fallback para eventos legados (sem role)
+          set({
+            room: state.room ? { ...state.room, status: 'abandoned' } : null,
             error: 'Oponente saiu da partida',
           })
         }

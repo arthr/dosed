@@ -306,7 +306,17 @@ function selectSmartPill(ctx: AIDecisionContext): string | null {
           return questPillId // Pilula revelada nao-perigosa
         }
       } else {
-        return questPillId // Pilula nao revelada - risco aceitavel para quest
+        // Pilula nao revelada - verificar se risco do pool e aceitavel
+        // Se risco critico/alto, nao vale arriscar pelo quest
+        if (riskAnalysis.level === 'critical') {
+          // Risco critico: FATAL presente em pool pequeno - nao arriscar
+          // Cai para proxima prioridade
+        } else if (riskAnalysis.level === 'high' && ctx.aiPlayer.lives <= 1) {
+          // Risco alto + ultima vida - nao vale arriscar pelo quest
+          // Cai para proxima prioridade
+        } else {
+          return questPillId // Risco aceitavel para quest
+        }
       }
     }
   }
@@ -645,18 +655,27 @@ function evaluateItem(item: InventoryItem, ctx: AIDecisionContext): ItemEvaluati
       break
     }
 
-    case 'inverter':
-      // Insane: inverter HEAL revelada para dano
+    case 'inverter': {
+      // Inverter HEAL revelada para dano - MAS so se conseguir forcar oponente a comer
+      // Sem Force Feed ou Handcuffs, a IA pode acabar comendo a pill invertida
       if (config.usesRevealedPills) {
         const hasRevealedHeal = pillPool.some(
           (p) => ctx.revealedPills.includes(p.id) && p.type === 'HEAL'
         )
-        if (hasRevealedHeal) {
+        const hasForceFeed = aiPlayer.inventory.items.some((i) => i.type === 'force_feed')
+        const hasHandcuffs = aiPlayer.inventory.items.some((i) => i.type === 'handcuffs')
+
+        if (hasRevealedHeal && (hasForceFeed || hasHandcuffs)) {
           contextBonus = 12
-          reason = 'inverter cura revelada'
+          reason = 'combo: inverter cura + forcar/algemar'
+        } else if (hasRevealedHeal) {
+          // Tem HEAL revelada mas nao tem como forcar - arriscado
+          contextBonus = -10
+          reason = 'inverter sem garantia de forcar - arriscado'
         }
       }
       break
+    }
 
     case 'double':
       // Insane: dobrar FATAL revelada + Force Feed
@@ -817,10 +836,19 @@ export function selectAIItemTarget(
       return selectRandomPill(pillPool) ?? undefined
 
     case 'inverter':
-      // Insane: inverter pilula HEAL revelada (transforma em dano)
+      // Inverter: prioriza HEAL revelada (transforma em dano para forcar oponente)
+      // Se nao tem HEAL, pode inverter DMG revelada (transforma em cura para si)
       if (config.usesRevealedPills) {
+        // Prioridade 1: HEAL revelada -> dano (se tem como forcar oponente)
         const healPill = pillPool.find((p) => revealedPills.includes(p.id) && p.type === 'HEAL')
         if (healPill) return healPill.id
+
+        // Prioridade 2: DMG revelada -> cura (para consumir depois)
+        const dmgPill = pillPool.find(
+          (p) =>
+            revealedPills.includes(p.id) && (p.type === 'DMG_LOW' || p.type === 'DMG_HIGH')
+        )
+        if (dmgPill) return dmgPill.id
       }
       return selectRandomPill(pillPool) ?? undefined
 

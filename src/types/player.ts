@@ -25,8 +25,15 @@ export interface PlayerEffect {
  * Representa um jogador no jogo
  */
 export interface Player {
-  /** ID unico do jogador */
+  /** ID unico do jogador (session-based, ex: 'player1') */
   id: PlayerId
+  /**
+   * ID do usuario autenticado (Supabase Auth UUID)
+   * - null = Guest ou Bot (sem persistencia de stats)
+   * - string = Usuario autenticado (com persistencia)
+   * @see architecture.md#PlayerId-vs-UserId
+   */
+  userId: string | null
   /** Nome de exibicao */
   name: string
   /** Vidas atuais (0 = eliminado) */

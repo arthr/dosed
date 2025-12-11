@@ -254,16 +254,24 @@ export function applyHeal(player: Player, amount: number): PlayerEffectResult {
 
 /**
  * Cria um jogador com configuracao inicial
+ * @param id - ID do jogador (session-based)
+ * @param name - Nome de exibicao
+ * @param lives - Vidas iniciais
+ * @param resistance - Resistencia inicial
+ * @param isAI - Se e controlado por IA
+ * @param userId - ID do usuario autenticado (null para guest/bot)
  */
 export function createPlayer(
-  id: 'player1' | 'player2',
+  id: string,
   name: string,
   lives: number,
   resistance: number,
-  isAI: boolean = false
+  isAI: boolean = false,
+  userId: string | null = null
 ): Player {
   return {
     id,
+    userId,
     name,
     lives,
     maxLives: lives,

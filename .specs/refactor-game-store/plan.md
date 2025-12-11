@@ -157,13 +157,14 @@ confirmed: { player1: false, player2: false }
   - Nota: Inventario permanece no Player (playerStore)
   - Criar testes unitarios (36 testes passando)
 
-- [ ] **3.5** Extrair `playerStore.ts`:
-  - Estado: `players` (vidas, resistencia, maxResistance)
-  - **IMPORTANTE:** Adicionar campo `userId: string | null` ao tipo `Player`
+- [x] **3.5** Extrair `playerStore.ts`:
+  - Estado: `players`, `playerOrder` (N jogadores)
+  - **FEITO:** Adicionado campo `userId: string | null` ao tipo `Player`
     - `null` = Guest ou Bot (sem persistencia)
     - `string` = UUID do Supabase Auth (com persistencia)
-  - Actions: `applyDamage`, `heal`, `loseLife`, `gainLife`, `resetResistance`
-  - Criar testes unitarios
+  - Actions: `applyDamageToPlayer`, `applyHealToPlayer`, `loseLife`, `gainLife`, `resetResistance`
+  - Inclui: inventario, pillCoins, wantsStore
+  - Criar testes unitarios (49 testes passando)
 
 - [ ] **3.6** Extrair `gameFlowStore.ts`:
   - Estado: `phase`, `round`, `currentTurn`, `playerOrder`, `winner`

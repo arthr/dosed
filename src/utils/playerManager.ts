@@ -35,16 +35,19 @@ export function createInitialPlayersState(
 /**
  * Cria um Player a partir de PlayerConfig
  *
- * @param id - ID do jogador
+ * @param id - ID do jogador (session-based)
  * @param config - Configuracao do jogador
+ * @param userId - ID do usuario autenticado (null para guest/bot)
  * @returns Player inicializado
  */
 export function createPlayerFromConfig(
     id: PlayerId,
-    config: PlayerConfig
+    config: PlayerConfig,
+    userId: string | null = null
 ): Player {
     return {
         id,
+        userId,
         name: config.name,
         lives: config.lives,
         maxLives: config.lives,

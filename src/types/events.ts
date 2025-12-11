@@ -24,6 +24,9 @@ export type GameEventType =
   | 'player_reconnected'
   | 'state_sync'
   | 'heartbeat'
+  | 'rematch_requested'
+  | 'rematch_accepted'
+  | 'rematch_declined'
 
 /**
  * Evento base com metadados comuns
@@ -282,6 +285,34 @@ export interface StateSyncEvent extends GameEventBase {
 }
 
 // ============================================
+// Eventos de Rematch (Jogar Novamente)
+// ============================================
+
+/**
+ * Evento: jogador solicitou rematch
+ */
+export interface RematchRequestedEvent extends GameEventBase {
+  type: 'rematch_requested'
+}
+
+/**
+ * Evento: jogador aceitou rematch
+ */
+export interface RematchAcceptedEvent extends GameEventBase {
+  type: 'rematch_accepted'
+}
+
+/**
+ * Evento: jogador recusou rematch
+ */
+export interface RematchDeclinedEvent extends GameEventBase {
+  type: 'rematch_declined'
+  payload: {
+    reason: 'manual' | 'timeout'
+  }
+}
+
+// ============================================
 // Union de Todos os Eventos
 // ============================================
 
@@ -307,4 +338,7 @@ export type GameEvent =
   | PlayerDisconnectedEvent
   | PlayerReconnectedEvent
   | StateSyncEvent
+  | RematchRequestedEvent
+  | RematchAcceptedEvent
+  | RematchDeclinedEvent
 

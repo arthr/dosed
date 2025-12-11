@@ -53,6 +53,16 @@ interface GameOverDialogProps {
   onRestart: () => void
   /** Callback para fechar o dialog */
   onClose: () => void
+  /** Se esta em modo multiplayer */
+  isMultiplayer?: boolean
+  /** Estado de rematch (apenas multiplayer) */
+  rematchState?: import('@/types').RematchState
+  /** Callback para solicitar rematch */
+  onRequestRematch?: () => void
+  /** Callback para aceitar rematch */
+  onAcceptRematch?: () => void
+  /** Callback para recusar rematch */
+  onDeclineRematch?: () => void
 }
 
 /**
@@ -98,19 +108,35 @@ export function GameOverDialog({
   stats,
   onRestart,
   onClose,
+  isMultiplayer = false,
+  rematchState,
+  onRequestRematch,
+  onAcceptRematch,
+  onDeclineRematch,
 }: GameOverDialogProps) {
-  const winnerPlayer = winner ? players[winner] : null
+  const winnerPlayer = winner && (winner === 'player1' || winner === 'player2') ? players[winner] : null
   const isHumanWinner = winnerPlayer !== null && !winnerPlayer.isAI
   const isAiPlayer = players.player2.isAI;
   const theme = getThemeConfig(winnerPlayer, isHumanWinner)
+
+  // Determina qual UI mostrar baseado no estado de rematch
+  const showRematchUI = isMultiplayer && rematchState
+  const isWaitingForOpponent = showRematchUI && rematchState.status === 'waiting'
+  const opponentRequested = isWaitingForOpponent && rematchState.requestedBy !== null
 
   return (
     <Dialog
       open={true}
       onOpenChange={(isOpen) => {
         if (!isOpen) {
+          if (isMultiplayer && onDeclineRematch) {
+            // Em multiplayer, fechar dialog = declinar rematch
+            onDeclineRematch()
+          } else {
+            // Single player: comportamento normal
+            onRestart()
+          }
           onClose()
-          onRestart()
         }
       }}
     >
@@ -254,25 +280,110 @@ export function GameOverDialog({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="w-full"
+            className="w-full space-y-2"
           >
-            <Button
-              onClick={() => {
-                onRestart()
-                onClose()
-              }}
-              size="lg"
-              className={cn(
-                'w-full font-mono uppercase tracking-widest gap-2 transition-all active:scale-[0.98]',
-                'h-10 sm:h-12 text-sm sm:text-base',
-                isHumanWinner
-                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                  : 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
-              )}
-            >
-              <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              Jogar Novamente
-            </Button>
+            {/* Variante 1: Single Player ou Inicial (Multiplayer sem rematch) */}
+            {(!isMultiplayer || rematchState?.status === 'idle') && (
+              <div className="flex flex-col gap-2">
+                <Button
+                  onClick={() => {
+                    if (isMultiplayer && onRequestRematch) {
+                      onRequestRematch()
+                    } else {
+                      onRestart()
+                      onClose()
+                    }
+                  }}
+                  size="lg"
+                  className={cn(
+                    'w-full font-mono uppercase tracking-widest gap-2 transition-all active:scale-[0.98]',
+                    'h-10 sm:h-12 text-sm sm:text-base',
+                    isHumanWinner
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      : 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                  )}
+                >
+                  <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  Jogar Novamente
+                </Button>
+                
+                {isMultiplayer && onDeclineRematch && (
+                  <Button
+                    onClick={() => {
+                      onDeclineRematch()
+                      onClose()
+                    }}
+                    variant="outline"
+                    size="lg"
+                    className="w-full font-mono uppercase tracking-widest h-10 sm:h-12 text-sm sm:text-base"
+                  >
+                    Sair
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {/* Variante 2: Aguardando oponente (você solicitou rematch) */}
+            {isWaitingForOpponent && !opponentRequested && (
+              <div className="text-center space-y-3">
+                <p className="text-sm sm:text-base font-mono text-muted-foreground animate-pulse">
+                  Aguardando oponente...
+                </p>
+                <Button
+                  onClick={() => {
+                    if (onDeclineRematch) {
+                      onDeclineRematch()
+                      onClose()
+                    }
+                  }}
+                  variant="outline"
+                  size="lg"
+                  className="w-full font-mono uppercase tracking-widest h-10 sm:h-12 text-sm sm:text-base"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            )}
+
+            {/* Variante 3: Oponente aguardando você */}
+            {isWaitingForOpponent && opponentRequested && (
+              <div className="text-center space-y-3">
+                <p className="text-sm sm:text-base font-mono text-primary font-bold">
+                  Oponente quer jogar novamente!
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      if (onAcceptRematch) {
+                        onAcceptRematch()
+                        onClose()
+                      }
+                    }}
+                    size="lg"
+                    className={cn(
+                      'flex-1 font-mono uppercase tracking-widest gap-2 transition-all active:scale-[0.98]',
+                      'h-10 sm:h-12 text-sm sm:text-base',
+                      'bg-primary text-primary-foreground hover:bg-primary/90'
+                    )}
+                  >
+                    Aceitar
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (onDeclineRematch) {
+                        onDeclineRematch()
+                        onClose()
+                      }
+                    }}
+                    variant="outline"
+                    size="lg"
+                    className="flex-1 font-mono uppercase tracking-widest h-10 sm:h-12 text-sm sm:text-base"
+                  >
+                    Recusar
+                  </Button>
+                </div>
+              </div>
+            )}
           </motion.div>
         </DialogFooter>
       </DialogContent>

@@ -66,6 +66,8 @@ export type {
   GameMode,
   LocalRole,
   MultiplayerContext,
+  RematchState,
+  RematchStatus,
   Room,
   RoomStatus,
 } from './multiplayer'
@@ -86,6 +88,9 @@ export type {
   PlayerJoinedEvent,
   PlayerLeftEvent,
   PlayerReconnectedEvent,
+  RematchAcceptedEvent,
+  RematchDeclinedEvent,
+  RematchRequestedEvent,
   RoomCreatedEvent,
   RoundResetEvent,
   SelectionConfirmedEvent,

@@ -1,6 +1,7 @@
 import { AnimatePresence } from 'framer-motion'
 import { useOverlayStore } from '@/stores/overlayStore'
 import { useGameStore } from '@/stores/gameStore'
+import { useMultiplayerStore } from '@/stores/multiplayerStore'
 import { useMultiplayer } from '@/hooks'
 import { PillReveal } from './PillReveal'
 import { GameOverDialog } from './GameOverDialog'
@@ -33,6 +34,12 @@ export function OverlayManager() {
 
   // Contexto multiplayer
   const { isMultiplayer, localPlayerId } = useMultiplayer()
+  
+  // Estado e actions de rematch
+  const rematchState = useMultiplayerStore((s) => s.rematchState)
+  const requestRematch = useMultiplayerStore((s) => s.requestRematch)
+  const acceptRematch = useMultiplayerStore((s) => s.acceptRematch)
+  const declineRematch = useMultiplayerStore((s) => s.declineRematch)
 
   // Determina qual jogador local esta na fase shopping
   // Em multiplayer: usa localPlayerId
@@ -43,10 +50,14 @@ export function OverlayManager() {
   const localPlayerData = players[localPlayer]
   const isShoppingPhase = gamePhase === 'shopping'
 
-  // Handler para restart que fecha o overlay e reinicia o jogo
+  // Handler para restart
+  // Em single player: fecha overlay e reseta jogo
+  // Em multiplayer: apenas fecha overlay (rematch é tratado pelos callbacks)
   const handleRestart = () => {
     close()
-    resetGame()
+    if (!isMultiplayer) {
+      resetGame()
+    }
   }
 
   return (
@@ -68,6 +79,11 @@ export function OverlayManager() {
           stats={gameOverData.stats}
           onRestart={handleRestart}
           onClose={close}
+          isMultiplayer={isMultiplayer}
+          rematchState={rematchState}
+          onRequestRematch={requestRematch}
+          onAcceptRematch={acceptRematch}
+          onDeclineRematch={declineRematch}
         />
       )}
 

@@ -47,6 +47,23 @@ export interface Room {
 }
 
 /**
+ * Status do rematch (jogar novamente)
+ */
+export type RematchStatus = 'idle' | 'waiting' | 'accepted' | 'declined'
+
+/**
+ * Estado de rematch apos fim de partida
+ */
+export interface RematchState {
+  /** Status atual do rematch */
+  status: RematchStatus
+  /** ID do jogador que solicitou rematch primeiro */
+  requestedBy: PlayerId | null
+  /** Timestamp de expiracao do timeout (30s) */
+  timeoutAt: number | null
+}
+
+/**
  * Contexto multiplayer local
  */
 export interface MultiplayerContext {

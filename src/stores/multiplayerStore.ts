@@ -56,6 +56,14 @@ interface MultiplayerStore extends MultiplayerContext {
   _heartbeatCheckInterval: ReturnType<typeof setInterval> | null
   startHeartbeat: () => void
   stopHeartbeat: () => void
+
+  // Rematch system
+  rematchState: import('@/types').RematchState
+  requestRematch: () => void
+  acceptRematch: () => void
+  declineRematch: () => void
+  resetRematchState: () => void
+  _rematchTimeoutId: ReturnType<typeof setTimeout> | null
 }
 
 /**
@@ -77,6 +85,8 @@ const initialState: MultiplayerContext & {
   _heartbeatInterval: ReturnType<typeof setInterval> | null
   _lastOpponentHeartbeat: number
   _heartbeatCheckInterval: ReturnType<typeof setInterval> | null
+  rematchState: import('@/types').RematchState
+  _rematchTimeoutId: ReturnType<typeof setTimeout> | null
 } = {
   mode: 'single_player',
   room: null,
@@ -93,6 +103,12 @@ const initialState: MultiplayerContext & {
   _heartbeatInterval: null,
   _lastOpponentHeartbeat: 0,
   _heartbeatCheckInterval: null,
+  rematchState: {
+    status: 'idle',
+    requestedBy: null,
+    timeoutAt: null,
+  },
+  _rematchTimeoutId: null,
 }
 
 /**
@@ -662,6 +678,66 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
         break
       }
 
+      case 'rematch_requested': {
+        // Oponente solicitou rematch
+        const requesterId = payload.playerId as import('@/types').PlayerId
+        console.log('[MultiplayerStore] Oponente solicitou rematch:', requesterId)
+
+        // Se local ja estava em waiting, ambos clicaram ao mesmo tempo
+        // Interpreta como "ambos aceitaram" e inicia partida
+        if (state.rematchState.status === 'waiting') {
+          console.log('[MultiplayerStore] Ambos solicitaram rematch - aceitando automaticamente')
+          get().acceptRematch()
+          return
+        }
+
+        // Atualiza estado para mostrar UI de "oponente aguardando"
+        set({
+          rematchState: {
+            status: 'waiting',
+            requestedBy: requesterId,
+            timeoutAt: Date.now() + 30000, // 30s
+          },
+        })
+        break
+      }
+
+      case 'rematch_accepted': {
+        // Oponente aceitou rematch
+        console.log('[MultiplayerStore] Oponente aceitou rematch - iniciando nova partida')
+
+        // Reseta estado de rematch
+        get().resetRematchState()
+
+        // Inicia nova partida (mesma sala)
+        const gameStore = useGameStore.getState()
+        gameStore.initGame({ mode: 'multiplayer' })
+        break
+      }
+
+      case 'rematch_declined': {
+        // Oponente recusou rematch
+        const reason = (payload.payload as { reason?: string })?.reason ?? 'manual'
+        console.log('[MultiplayerStore] Oponente recusou rematch:', reason)
+
+        // Toast informativo
+        const message = reason === 'timeout' 
+          ? 'Tempo esgotado para rematch'
+          : 'Oponente saiu da partida'
+        
+        useToastStore.getState().show({
+          type: 'info',
+          message,
+        })
+
+        // Reseta estado de rematch
+        get().resetRematchState()
+
+        // Encerra sala e volta ao menu
+        get().reset()
+        break
+      }
+
       case 'round_reset': {
         // Nova rodada iniciada pelo host - guest sincroniza
         if (state.localRole === 'guest') {
@@ -829,10 +905,150 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
   },
 
   /**
+   * Solicita rematch (jogar novamente)
+   * Envia evento e inicia timeout de 30s
+   */
+  requestRematch: () => {
+    const state = get()
+
+    // Valida que esta em multiplayer e jogo terminou
+    if (state.mode !== 'multiplayer' || !state.room) {
+      console.warn('[MultiplayerStore] requestRematch: nao esta em multiplayer')
+      return
+    }
+
+    const gamePhase = useGameStore.getState().phase
+    if (gamePhase !== 'ended') {
+      console.warn('[MultiplayerStore] requestRematch: jogo nao terminou')
+      return
+    }
+
+    console.log('[MultiplayerStore] Solicitando rematch')
+
+    // Envia evento
+    get().sendEvent({
+      type: 'rematch_requested',
+    })
+
+    // Atualiza estado local
+    const timeoutAt = Date.now() + 30000 // 30s
+    set({
+      rematchState: {
+        status: 'waiting',
+        requestedBy: state.localPlayerId,
+        timeoutAt,
+      },
+    })
+
+    // Inicia timeout
+    const timeoutId = setTimeout(() => {
+      const currentState = get()
+      if (currentState.rematchState.status === 'waiting') {
+        console.log('[MultiplayerStore] Rematch timeout - auto-declining')
+        get().declineRematch()
+        
+        // Toast informativo
+        useToastStore.getState().show({
+          type: 'info',
+          message: 'Tempo esgotado para rematch',
+        })
+      }
+    }, 30000)
+
+    set({ _rematchTimeoutId: timeoutId })
+  },
+
+  /**
+   * Aceita rematch
+   * Inicia nova partida na mesma sala
+   */
+  acceptRematch: () => {
+    const state = get()
+
+    if (state.mode !== 'multiplayer' || !state.room) {
+      console.warn('[MultiplayerStore] acceptRematch: nao esta em multiplayer')
+      return
+    }
+
+    console.log('[MultiplayerStore] Aceitando rematch - iniciando nova partida')
+
+    // Envia evento
+    get().sendEvent({
+      type: 'rematch_accepted',
+    })
+
+    // Reseta estado de rematch
+    get().resetRematchState()
+
+    // Inicia nova partida (mesma sala)
+    useGameStore.getState().initGame({ mode: 'multiplayer' })
+  },
+
+  /**
+   * Recusa rematch
+   * Encerra sala e volta ao menu
+   */
+  declineRematch: () => {
+    const state = get()
+
+    if (state.mode !== 'multiplayer' || !state.room) {
+      console.warn('[MultiplayerStore] declineRematch: nao esta em multiplayer')
+      return
+    }
+
+    console.log('[MultiplayerStore] Recusando rematch - encerrando sala')
+
+    // Envia evento (timeout = auto-decline)
+    const isTimeout = state.rematchState.status === 'waiting' && 
+                     state.rematchState.timeoutAt && 
+                     Date.now() >= state.rematchState.timeoutAt
+
+    get().sendEvent({
+      type: 'rematch_declined',
+      payload: {
+        reason: isTimeout ? 'timeout' : 'manual',
+      },
+    })
+
+    // Reseta estado de rematch
+    get().resetRematchState()
+
+    // Reseta multiplayer (desconecta sala)
+    get().reset()
+  },
+
+  /**
+   * Reseta estado de rematch
+   * Limpa timeout se existir
+   */
+  resetRematchState: () => {
+    const state = get()
+
+    // Limpa timeout se existir
+    if (state._rematchTimeoutId) {
+      clearTimeout(state._rematchTimeoutId)
+    }
+
+    set({
+      rematchState: {
+        status: 'idle',
+        requestedBy: null,
+        timeoutAt: null,
+      },
+      _rematchTimeoutId: null,
+    })
+  },
+
+  /**
    * Reseta para estado inicial
    */
   reset: () => {
     const state = get()
+
+    // Limpa timeout de rematch
+    if (state._rematchTimeoutId) {
+      clearTimeout(state._rematchTimeoutId)
+    }
 
     // Para heartbeat
     get().stopHeartbeat()

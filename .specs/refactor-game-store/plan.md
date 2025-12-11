@@ -146,10 +146,10 @@ confirmed: { player1: false, player2: false }
   - Mudar `confirmed`, `pendingBoosts`, `cart` para dinamicos
   - Atualizar testes (39 testes passando)
 
-- [ ] **3.3** Extrair `pillPoolStore.ts`:
+- [x] **3.3** Extrair `pillPoolStore.ts`:
   - Estado: `pillPool`, `revealedPills`, `typeCounts`, `shapeCounts`
-  - Actions: `generatePool`, `consumePill`, `revealPill`, `shuffle`, `discard`
-  - Criar testes unitarios
+  - Actions: `generatePool`, `setPool`, `consumePill`, `revealPillById`, `invertPill`, `doublePill`, `clearPillModifiers`
+  - Criar testes unitarios (35 testes passando)
 
 - [ ] **3.4** Extrair `inventoryStore.ts`:
   - Estado: `inventory` (por jogador), `selectedItems`, `targetSelection`

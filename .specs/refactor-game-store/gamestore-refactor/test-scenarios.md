@@ -135,16 +135,16 @@ Executar apos cada batch de migracao e no final.
 **Pre-condicao:** Partida em andamento
 
 ### Nova Rodada
-1. [ ] Completar rodada (esvaziar pool)
-2. [ ] Verificar overlay de nova rodada
-3. [ ] Verificar que novo pool foi gerado
-4. [ ] Verificar que contador de rodada incrementou
-5. [ ] Verificar que contagens de tipos atualizaram
+1. [x] Completar rodada (esvaziar pool)
+2. [x] Verificar overlay de nova rodada
+3. [x] Verificar que novo pool foi gerado
+4. [x] Verificar que contador de rodada incrementou
+5. [x] Verificar que contagens de tipos atualizaram
 
 ### Progressao de Dificuldade
-1. [ ] Jogar ate rodada 3+
-2. [ ] Verificar que pool tem mais pilulas
-3. [ ] Verificar que novos tipos/shapes aparecem
+1. [x] Jogar ate rodada 3+
+2. [x] Verificar que pool tem mais pilulas
+3. [x] Verificar que novos tipos/shapes aparecem
 
 ---
 
@@ -153,14 +153,14 @@ Executar apos cada batch de migracao e no final.
 **Pre-condicao:** Partida em andamento
 
 ### Vitoria
-1. [ ] Eliminar oponente
-2. [ ] Verificar tela de vitoria
-3. [ ] Verificar estatisticas (rodadas, pilulas, etc)
+1. [x] Eliminar oponente
+2. [x] Verificar tela de vitoria
+3. [x] Verificar estatisticas (rodadas, pilulas, etc)
 
 ### Derrota
-1. [ ] Ser eliminado
-2. [ ] Verificar tela de derrota
-3. [ ] Verificar que pode iniciar nova partida
+1. [x] Ser eliminado
+2. [x] Verificar tela de derrota
+3. [ ] Verificar que pode iniciar nova partida -> precisa de ajustes (`.specs/refactor-game-store/NEED-FIX.md`)
 
 ---
 
@@ -169,22 +169,22 @@ Executar apos cada batch de migracao e no final.
 **Pre-condicao:** Dois dispositivos/abas
 
 ### Criar Sala
-1. [ ] Host cria sala
-2. [ ] Guest entra com codigo
-3. [ ] Verificar que ambos veem a sala
+1. [x] Host cria sala
+2. [x] Guest entra com codigo
+3. [x] Verificar que ambos veem a sala
 
 ### Sincronizacao
-1. [ ] Host inicia partida
-2. [ ] Verificar que Guest ve mesma fase
-3. [ ] Host consome pilula
-4. [ ] Verificar que Guest ve resultado
-5. [ ] Guest usa item
-6. [ ] Verificar que Host ve efeito
+1. [x] Host inicia partida
+2. [x] Verificar que Guest ve mesma fase
+3. [x] Host consome pilula
+4. [x] Verificar que Guest ve resultado
+5. [x] Guest usa item
+6. [x] Verificar que Host ve efeito
 
 ### Reconexao
-1. [ ] Guest fecha aba
-2. [ ] Guest reabre e entra na sala
-3. [ ] Verificar que estado foi recuperado
+1. [x] Guest fecha aba
+2. [ ] Guest reabre e entra na sala -> precisa de ajustes (`.specs/refactor-game-store/NEED-FIX.md`)
+3. [ ] Verificar que estado foi recuperado -> precisa de ajustes (`.specs/refactor-game-store/NEED-FIX.md`)
 
 ---
 
@@ -192,11 +192,11 @@ Executar apos cada batch de migracao e no final.
 
 Executar apos cada mudanca significativa:
 
-- [ ] Iniciar partida
-- [ ] Consumir 3 pilulas
-- [ ] Usar 1 item
-- [ ] Verificar que IA joga
-- [ ] Verificar que nao ha erros no console
+- [x] Iniciar partida
+- [x] Consumir 3 pilulas
+- [x] Usar 1 item
+- [x] Verificar que IA joga
+- [x] Verificar que nao ha erros no console
 
 ---
 

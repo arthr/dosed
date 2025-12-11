@@ -413,7 +413,7 @@ Duration: 620ms
 
 ### Curto Prazo (Imediato)
 
-- [ ] **Teste manual completo** do fluxo do jogo
+- [x] **Teste manual completo** do fluxo do jogo
   - Iniciar jogo single player
   - Consumir pílulas
   - Usar todos os tipos de itens
@@ -421,12 +421,13 @@ Duration: 620ms
   - Completar rodada
   - Validar Game Over
 
-- [ ] **Validação multiplayer** com 2 jogadores
+- [x] **Validação multiplayer** com 2 jogadores
   - Criar sala
   - Conectar 2 players
   - Sincronizar ações
   - Validar turnos
   - Testar loja compartilhada
+  - Validar Jogar Novamente (GameOver) -> Validado mas precisa de ajustes (`.specs/refactor-game-store/NEED-FIX.md`)
 
 ### Médio Prazo (1-2 semanas)
 

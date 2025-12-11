@@ -89,17 +89,17 @@ Este checklist deve ser seguido na ordem. Apos cada item, rodar testes.
 
 ### 2.3 Shopping Flow
 
-- [ ] `checkAndStartShopping` (linha 1500)
-  - Verificar wantsStore de playerStore
-  - Abrir shopStore se alguem quer
-  - Ou iniciar proxima rodada
-- [ ] `processCart` (linha 1704)
-  - Ler carrinho de shopStore
-  - Aplicar compras em playerStore
-- [ ] `confirmStorePurchases` (linha 1807)
-- [ ] `checkShoppingComplete` (linha 1882)
-- [ ] `applyPendingBoosts` (linha 1923)
-- [ ] **TESTE:** `pnpm tsc --noEmit && pnpm test`
+- [x] `checkAndStartShopping` (linha 1532) - delegado com DUAL-WRITE
+  - shopStore.openShop() para iniciar loja
+- [x] `processCart` (linha 1736) - NAO DELEGAR (orquestracao)
+  - Le carrinho de shopStore, aplica em players
+- [x] `confirmStorePurchases` (linha 1838) - delegado com DUAL-WRITE
+  - shopStore.confirmPlayer() + shopStore.isConfirmed()
+- [x] `checkShoppingComplete` (linha 1917) - delegado com DUAL-WRITE
+  - shopStore.isConfirmed() para verificar confirmacoes
+- [x] `applyPendingBoosts` (linha 1958) - delegado com DUAL-WRITE
+  - shopStore.getPendingBoosts() + shopStore.closeShop()
+- [x] **TESTE:** 224 testes passando
 
 ### 2.4 Round Management
 

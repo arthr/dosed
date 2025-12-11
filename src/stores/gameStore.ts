@@ -1528,6 +1528,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Verifica se deve abrir loja ao fim da rodada
    * Chamado quando pool esvazia (apos verificar Game Over)
    * Em multiplayer, apenas host inicia nova rodada - guest aguarda evento
+   * @delegate shopStore.openShop
    */
   checkAndStartShopping: () => {
     const state = get()
@@ -1538,16 +1539,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const p2Wants = players.player2.wantsStore && players.player2.pillCoins > 0
 
     if (p1Wants || p2Wants) {
-      // Inicia fase de shopping com carrinhos vazios
+      // Delega para shopStore (suporta N jogadores)
+      const playerIds = Object.keys(players) as PlayerId[]
+      useShopStore.getState().openShop(DEFAULT_STORE_CONFIG.shoppingTime, playerIds)
+
+      // DUAL-WRITE: Sync local state + change phase
       set({
         phase: 'shopping',
-        storeState: {
-          confirmed: { player1: false, player2: false },
-          timerStartedAt: Date.now(),
-          timerDuration: DEFAULT_STORE_CONFIG.shoppingTime,
-          pendingBoosts: { player1: [], player2: [] },
-          cart: { player1: [], player2: [] },
-        },
+        storeState: useShopStore.getState().storeState,
       })
     } else {
       // Ninguem quer ir a loja, proxima rodada direto
@@ -1835,6 +1834,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
    * Processa o carrinho (debita coins e aplica itens) antes de confirmar
    * @param playerId - ID do jogador confirmando
    * @param itemIds - IDs opcionais para power-ups (usado em multiplayer para sincronizar)
+   * @delegate shopStore.confirmPlayer
    */
   confirmStorePurchases: (playerId: PlayerId, itemIds?: string[]) => {
     const state = get()
@@ -1845,8 +1845,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return
     }
 
-    // Ja confirmou
-    if (storeState.confirmed[playerId]) {
+    // Ja confirmou - verifica via shopStore
+    if (useShopStore.getState().isConfirmed(playerId)) {
       return
     }
 
@@ -1877,7 +1877,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     let newTimerDuration = updatedStoreState.timerDuration
 
     // Se outro ainda comprando e nao confirmou, reduz timer
-    if (otherIsShopping && !updatedStoreState.confirmed[otherPlayerId]) {
+    if (otherIsShopping && !useShopStore.getState().isConfirmed(otherPlayerId)) {
       const elapsed = Date.now() - (updatedStoreState.timerStartedAt ?? 0)
       const remaining = updatedStoreState.timerDuration - elapsed
       newTimerDuration = elapsed + (remaining * DEFAULT_STORE_CONFIG.reduceMultiplier)
@@ -1891,7 +1891,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       })
     }
 
-    // Atualiza estado
+    // Delega para shopStore
+    useShopStore.getState().confirmPlayer(playerId)
+
+    // DUAL-WRITE: Sync local state
     set({
       storeState: {
         ...updatedStoreState,
@@ -1910,12 +1913,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   /**
    * Verifica se a fase de shopping terminou
    * Chamado apos confirmacao ou timeout
+   * @delegate shopStore.isConfirmed
    */
   checkShoppingComplete: () => {
     const state = get()
-    const { storeState, players } = state
+    const { players } = state
+    const shopState = useShopStore.getState()
 
-    if (state.phase !== 'shopping' || !storeState) {
+    if (state.phase !== 'shopping' || !shopState.storeState) {
       return
     }
 
@@ -1923,9 +1928,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const p1NeedsConfirm = players.player1.wantsStore
     const p2NeedsConfirm = players.player2.wantsStore
 
-    // Verifica se todos que precisam ja confirmaram
-    const p1Done = !p1NeedsConfirm || storeState.confirmed.player1
-    const p2Done = !p2NeedsConfirm || storeState.confirmed.player2
+    // Verifica se todos que precisam ja confirmaram (usando shopStore)
+    const p1Done = !p1NeedsConfirm || shopState.isConfirmed('player1')
+    const p2Done = !p2NeedsConfirm || shopState.isConfirmed('player2')
 
     if (p1Done && p2Done) {
       // Todos confirmaram - aplica boosts e inicia nova rodada
@@ -1951,21 +1956,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
   /**
    * Aplica os boosts pendentes comprados na loja
    * Chamado antes de resetRound quando shopping termina
+   * @delegate shopStore.getPendingBoosts + shopStore.closeShop
    */
   applyPendingBoosts: () => {
     const state = get()
-    const { storeState, players, revealAtStart } = state
+    const { players, revealAtStart } = state
+    const shopState = useShopStore.getState()
 
-    if (!storeState) {
+    // Verifica se loja esta aberta
+    if (!shopState.storeState) {
       return
     }
 
     const newPlayers = { ...players }
     const newRevealAtStart = { ...revealAtStart }
 
-    // Aplica boosts para cada jogador
-    for (const playerId of ['player1', 'player2'] as PlayerId[]) {
-      const boosts = storeState.pendingBoosts[playerId]
+    // Aplica boosts para cada jogador (usando shopStore)
+    const playerIds = Object.keys(players) as PlayerId[]
+    for (const playerId of playerIds) {
+      // Delega para shopStore.getPendingBoosts
+      const boosts = shopState.getPendingBoosts(playerId)
       let player = newPlayers[playerId]
 
       for (const boost of boosts) {
@@ -2003,7 +2013,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       newPlayers[playerId] = player
     }
 
-    // Atualiza jogadores, revealAtStart e limpa storeState
+    // Delega para shopStore
+    shopState.closeShop()
+
+    // DUAL-WRITE: Sync local state
     set({
       players: newPlayers,
       storeState: null,

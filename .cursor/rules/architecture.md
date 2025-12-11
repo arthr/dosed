@@ -48,6 +48,10 @@
 
 ## Stores (Zustand)
 
+### ⚠️ Estado: Local vs Sincronizado (Multiplayer)
+- **GameState (Sincronizado):** Vidas, Resistência, Turno Atual, PillPool. Este estado vem do Supabase (A verdade absoluta).
+- **UIState (Local):** Hover, Seleção de Item, Animações, Toasts. Este estado NUNCA trafega pelo WebSocket.
+
 ### gameStore
 Estado central do jogo:
 - `players` - Dados dos jogadores (vidas, resistencia, inventario, efeitos, pillCoins, wantsStore)
@@ -332,3 +336,12 @@ Loja:
 ### storeConfig.ts
 - `STORE_ITEMS` - Array de itens disponiveis na Pill Store
 - `DEFAULT_STORE_CONFIG` - Configuracao da loja (shoppingTime, reduceMultiplier)
+
+## Arquitetura Multiplayer (Transition Guide)
+
+Ao refatorar para suportar multiplayer, siga o padrão **Optimistic UI + Authority**:
+
+1. **Ações:** O jogador clica -> UI atualiza imediatamente (Optimistic) -> Envia evento ao Supabase.
+2. **Reconciliação:** Se o Supabase rejeitar (ex: lag, cheat), o cliente faz rollback do estado.
+3. **Generalização:** O `playerId` não é mais fixo ('player1'). Use `auth.user.id` ou IDs de sessão gerados.
+4. **Bots:** Em Multiplayer, Bots devem rodar no lado do HOST (Dono da sala) ou via Edge Function, nunca em ambos os clientes ao mesmo tempo.

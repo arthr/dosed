@@ -18,6 +18,13 @@
 - **Componentes Retro:** 8bit/ui (visual pixelado)
 - **Animacoes:** Framer Motion
 
+## Backend & Multiplayer (NOVO)
+- **BaaS:** Supabase (Auth, Database, Realtime)
+- **Multiplayer:** Supabase Realtime (Channels) para sincronizacao de estado.
+- **Padrão de Sincronizacao:**
+  - O "Dono da Sala" (Host) ou o Servidor (Edge Function) detém a verdade do GameState.
+  - Clientes apenas enviam "Intenções" (Actions) e recebem "Estado Atualizado" (Patch).
+
 ## Estado e Logica
 - **State Management:** Zustand (stores modulares)
 - **Game Logic:** Funcoes puras em `src/utils/`

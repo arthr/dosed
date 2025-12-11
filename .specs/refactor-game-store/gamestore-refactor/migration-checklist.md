@@ -81,11 +81,11 @@ Este checklist deve ser seguido na ordem. Apos cada item, rodar testes.
 
 ### 2.2 Item Selection Confirm -> itemUsageStore + gameFlowStore
 
-- [ ] `confirmItemSelection` (linha 859)
-  - Delegar confirmacao para itemUsageStore
-  - Verificar isAllConfirmed
-  - Chamar gameFlowStore.startGame se todos confirmaram
-- [ ] **TESTE:** `pnpm tsc --noEmit && pnpm test`
+- [x] `confirmItemSelection` (linha 881) - delegado com DUAL-WRITE
+  - itemUsageStore.confirmSelection() para marcar jogador
+  - gameFlowStore.startGame() quando todos confirmam
+  - TODO: Usar isAllConfirmed() quando initializeForPlayers integrado (Batch 3.1)
+- [x] **TESTE:** 224 testes passando
 
 ### 2.3 Shopping Flow
 

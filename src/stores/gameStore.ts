@@ -877,6 +877,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   /**
    * Confirma a selecao de itens de um jogador
    * Quando ambos confirmarem, inicia o jogo
+   * @delegate itemUsageStore.confirmSelection + gameFlowStore.startGame
    */
   confirmItemSelection: (playerId: PlayerId) => {
     const state = get()
@@ -889,23 +890,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
       type: 'selection_confirmed',
     })
 
-    // Marca este jogador como confirmado
+    // Delega para itemUsageStore
+    useItemUsageStore.getState().confirmSelection(playerId)
+
+    // DUAL-WRITE: Sync local state
     const newConfirmed = {
       ...state.itemSelectionConfirmed,
       [playerId]: true,
     }
 
     // Se apenas este jogador confirmou, aguarda o outro
+    // TODO: Usar itemUsageStore.isAllConfirmed() quando initializeForPlayers for integrado (Batch 3.1)
     if (!newConfirmed.player1 || !newConfirmed.player2) {
       set({ itemSelectionConfirmed: newConfirmed })
       return
     }
 
-    // Ambos confirmaram - inicia o jogo (rodada 1)
-    // Em multiplayer, o pool e quests ja foram sincronizados via initGame/syncData
-    // Em single player, tambem ja foram gerados no initGame
-    // Apenas reutiliza os dados existentes!
+    // Ambos confirmaram - delega para gameFlowStore
+    useGameFlowStore.getState().startGame()
 
+    // DUAL-WRITE: Sync local state
     const startAction: GameAction = {
       type: 'GAME_START',
       playerId,

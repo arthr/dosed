@@ -172,7 +172,7 @@ services/
 - [x] **1.1** Criar pasta `stores/game/` e `stores/multiplayer/`
 - [x] **1.2** Criar pasta `services/sync/` e `services/realtime/`
 - [x] **1.3** Extrair tipos/interfaces duplicados para arquivos dedicados
-- [ ] **1.4** Adicionar testes unitarios para `pillGenerator.ts` e `questGenerator.ts`
+- [x] **1.4** Adicionar testes unitarios para `pillGenerator.ts` e `questGenerator.ts`
 
 ### Fase 2: Extracao de Stores (Medio Risco)
 

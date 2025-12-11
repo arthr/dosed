@@ -20,6 +20,11 @@ import type {
 } from '@/types'
 import { DEFAULT_GAME_CONFIG, ROUND_TRANSITION_DELAY } from '@/utils/constants'
 import { useEffectsStore } from '@/stores/game/effectsStore'
+import { usePillPoolStore } from '@/stores/game/pillPoolStore'
+import { usePlayerStore } from '@/stores/game/playerStore'
+import { useItemUsageStore } from '@/stores/game/itemUsageStore'
+import { useShopStore } from '@/stores/game/shopStore'
+import { useGameFlowStore } from '@/stores/game/gameFlowStore'
 import { applyPillEffect, applyHeal, createPlayer, hasPlayerEffect } from '@/utils/gameLogic'
 import {
   countPillTypes,
@@ -798,11 +803,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Usa itemId fornecido (evento remoto) ou gera novo (local)
     const newItemId = itemId ?? uuidv4()
 
+    // Delega para playerStore
+    const addedId = usePlayerStore.getState().addItemToInventory(playerId, itemType, newItemId)
+    if (!addedId) return // Falhou (limite atingido)
+
+    // Sync local state para retrocompatibilidade
     const newItem: InventoryItem = {
       id: newItemId,
       type: itemType,
     }
-
     set({
       players: {
         ...state.players,
@@ -827,11 +836,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   /**
    * Remove um item do inventario do jogador
+   * @delegate playerStore.removeItemFromInventory
    */
   deselectItem: (playerId: PlayerId, itemId: string) => {
+    // Delega para playerStore
+    usePlayerStore.getState().removeItemFromInventory(playerId, itemId)
+
+    // Sync local state para retrocompatibilidade
     const state = get()
     const player = state.players[playerId]
-
+    if (!player) return
+    
     set({
       players: {
         ...state.players,
@@ -899,9 +914,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   // ============ ITEM USAGE ACTIONS ============
+  // Gradualmente delegando para itemUsageStore
 
   /**
    * Inicia o uso de um item (ativa modo de selecao de alvo se necessario)
+   * @delegate itemUsageStore.startItemUsage (parcial)
    */
   startItemUsage: (itemId: string) => {
     const state = get()
@@ -915,14 +932,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const itemDef = ITEM_CATALOG[item.type]
     if (!itemDef) return
 
-    // Define os alvos validos baseado no tipo de item
-    let validTargets: 'pills' | 'opponent' | null = null
-    if (itemDef.targetType === 'pill' || itemDef.targetType === 'pill_to_opponent') {
-      validTargets = 'pills'
-    } else if (itemDef.targetType === 'opponent') {
-      validTargets = 'opponent'
-    }
-
     // Se item nao requer alvo (self, table, ou opponent que e automatico), executa imediatamente
     if (
       itemDef.targetType === 'self' ||
@@ -933,7 +942,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return
     }
 
-    // Ativa modo de selecao de alvo (apenas para pill e pill_to_opponent)
+    // Delega para itemUsageStore (para itens que requerem alvo)
+    useItemUsageStore.getState().startItemUsage(itemId, item.type, itemDef.targetType)
+
+    // Sync local state para retrocompatibilidade
+    let validTargets: 'pills' | 'opponent' | null = null
+    if (itemDef.targetType === 'pill' || itemDef.targetType === 'pill_to_opponent') {
+      validTargets = 'pills'
+    } else if (itemDef.targetType === 'opponent') {
+      validTargets = 'opponent'
+    }
     set({
       targetSelection: {
         active: true,
@@ -946,8 +964,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   /**
    * Cancela o uso de um item (reseta targetSelection)
+   * @delegate itemUsageStore.cancelItemUsage
    */
   cancelItemUsage: () => {
+    // Delega para itemUsageStore
+    useItemUsageStore.getState().cancelItemUsage()
+    
+    // Sync local state para retrocompatibilidade
     set({
       targetSelection: {
         active: false,
@@ -1244,11 +1267,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   /**
    * Remove um item do inventario do jogador
+   * @delegate playerStore.removeItemFromInventory
    */
   removeItemFromInventory: (playerId: PlayerId, itemId: string) => {
+    // Delega para playerStore
+    usePlayerStore.getState().removeItemFromInventory(playerId, itemId)
+    
+    // Sync local state para retrocompatibilidade
     const state = get()
     const player = state.players[playerId]
-
+    if (!player) return
+    
     set({
       players: {
         ...state.players,
@@ -1354,92 +1383,88 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   // ============ REVEALED PILLS ACTIONS ============
+  // DELEGADO para pillPoolStore
 
   /**
    * Adiciona uma pilula a lista de reveladas (usado pelo Scanner)
+   * @delegate pillPoolStore.addRevealedPill
    */
   addRevealedPill: (pillId: string) => {
+    usePillPoolStore.getState().addRevealedPill(pillId)
+    // Sync local state para retrocompatibilidade
     const state = get()
-
-    // Evita duplicatas
-    if (state.revealedPills.includes(pillId)) return
-
-    set({
-      revealedPills: [...state.revealedPills, pillId],
-    })
+    if (!state.revealedPills.includes(pillId)) {
+      set({ revealedPills: [...state.revealedPills, pillId] })
+    }
   },
 
   /**
    * Remove uma pilula da lista de reveladas
+   * @delegate pillPoolStore.removeRevealedPill
    */
   removeRevealedPill: (pillId: string) => {
-    const state = get()
-
-    set({
-      revealedPills: state.revealedPills.filter((id) => id !== pillId),
-    })
+    usePillPoolStore.getState().removeRevealedPill(pillId)
+    // Sync local state para retrocompatibilidade
+    set({ revealedPills: get().revealedPills.filter((id) => id !== pillId) })
   },
 
   /**
    * Limpa todas as pilulas reveladas (usado ao iniciar nova rodada)
+   * @delegate pillPoolStore.clearRevealedPills
    */
   clearRevealedPills: () => {
+    usePillPoolStore.getState().clearRevealedPills()
+    // Sync local state para retrocompatibilidade
     set({ revealedPills: [] })
   },
 
   // ============ PILL MODIFIERS ACTIONS ============
+  // DELEGADO para pillPoolStore
 
   /**
    * Marca uma pilula como invertida (dano vira cura, cura vira dano)
    * Usado pelo item Inverter
+   * @delegate pillPoolStore.invertPill
    */
   invertPill: (pillId: string) => {
+    usePillPoolStore.getState().invertPill(pillId)
+    // Sync local state para retrocompatibilidade
     const state = get()
     const pillIndex = state.pillPool.findIndex((p) => p.id === pillId)
     if (pillIndex === -1) return
-
     const newPillPool = [...state.pillPool]
-    newPillPool[pillIndex] = {
-      ...newPillPool[pillIndex],
-      inverted: true,
-    }
-
+    newPillPool[pillIndex] = { ...newPillPool[pillIndex], inverted: !newPillPool[pillIndex].inverted }
     set({ pillPool: newPillPool })
   },
 
   /**
    * Marca uma pilula como dobrada (efeito x2)
    * Usado pelo item Double
+   * @delegate pillPoolStore.doublePill
    */
   doublePill: (pillId: string) => {
+    usePillPoolStore.getState().doublePill(pillId)
+    // Sync local state para retrocompatibilidade
     const state = get()
     const pillIndex = state.pillPool.findIndex((p) => p.id === pillId)
     if (pillIndex === -1) return
-
     const newPillPool = [...state.pillPool]
-    newPillPool[pillIndex] = {
-      ...newPillPool[pillIndex],
-      doubled: true,
-    }
-
+    newPillPool[pillIndex] = { ...newPillPool[pillIndex], doubled: true }
     set({ pillPool: newPillPool })
   },
 
   /**
    * Remove todos os modificadores de uma pilula
+   * @delegate pillPoolStore.clearPillModifiers
    */
   clearPillModifiers: (pillId: string) => {
+    usePillPoolStore.getState().clearPillModifiers(pillId)
+    // Sync local state para retrocompatibilidade
     const state = get()
     const pillIndex = state.pillPool.findIndex((p) => p.id === pillId)
     if (pillIndex === -1) return
-
     const newPillPool = [...state.pillPool]
-    newPillPool[pillIndex] = {
-      ...newPillPool[pillIndex],
-      inverted: false,
-      doubled: false,
-    }
-
+    newPillPool[pillIndex] = { ...newPillPool[pillIndex], inverted: undefined, doubled: undefined }
     set({ pillPool: newPillPool })
   },
 
@@ -2238,17 +2263,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   // ============ SELECTORS ============
+  // Gradualmente delegando para stores modulares
 
   /**
    * Retorna o jogador do turno atual
+   * @delegate playerStore.getPlayer
    */
   getCurrentPlayer: () => {
     const state = get()
+    // Tenta playerStore primeiro
+    const player = usePlayerStore.getState().getPlayer(state.currentTurn)
+    if (player) return player
+    // Fallback para estado local
     return state.players[state.currentTurn]
   },
 
   /**
    * Retorna o oponente do turno atual
+   * @deprecated Use useTargetablePlayers() para suporte N-player
    */
   getOpponent: () => {
     const state = get()
@@ -2259,18 +2291,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   /**
    * Busca uma pilula pelo ID
+   * @delegate pillPoolStore.getPill
    */
   getPillById: (pillId: string) => {
-    const state = get()
-    return state.pillPool.find((p) => p.id === pillId)
+    // Delega para pillPoolStore (fonte da verdade)
+    const pill = usePillPoolStore.getState().getPill(pillId)
+    if (pill) return pill
+    // Fallback para estado local (retrocompatibilidade)
+    return get().pillPool.find((p) => p.id === pillId)
   },
 
   /**
    * Verifica se o pool de pilulas esta vazio
+   * @delegate pillPoolStore.isEmpty
    */
   isPillPoolEmpty: () => {
-    const state = get()
-    return state.pillPool.length === 0
+    // Delega para pillPoolStore
+    return usePillPoolStore.getState().isEmpty()
   },
 
   /**

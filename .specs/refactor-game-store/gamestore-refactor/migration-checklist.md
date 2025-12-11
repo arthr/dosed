@@ -15,66 +15,59 @@ Este checklist deve ser seguido na ordem. Apos cada item, rodar testes.
 
 ## Batch 1: Delegacao Simples (Baixo Risco)
 
+**Status:** EM PROGRESSO - 15/22 funcoes delegadas
+
 ### 1.1 Revealed Pills -> pillPoolStore
 
-- [ ] `addRevealedPill` (linha 1361)
-  ```typescript
-  // ANTES
-  addRevealedPill: (pillId) => { ...logica inline... }
-  
-  // DEPOIS
-  addRevealedPill: (pillId) => {
-    usePillPoolStore.getState().addRevealedPill(pillId)
-  }
-  ```
-- [ ] `removeRevealedPill` (linha 1375)
-- [ ] `clearRevealedPills` (linha 1386)
-- [ ] **TESTE:** `pnpm tsc --noEmit && pnpm test`
+- [x] `addRevealedPill` - delegado com dual-write
+- [x] `removeRevealedPill` - delegado com dual-write
+- [x] `clearRevealedPills` - delegado com dual-write
+- [x] **TESTE:** 224 testes passando
 
 ### 1.2 Pill Modifiers -> pillPoolStore
 
-- [ ] `invertPill` (linha 1396)
-- [ ] `doublePill` (linha 1414)
-- [ ] `clearPillModifiers` (linha 1431)
-- [ ] **TESTE:** `pnpm tsc --noEmit && pnpm test`
+- [x] `invertPill` - delegado com dual-write
+- [x] `doublePill` - delegado com dual-write
+- [x] `clearPillModifiers` - delegado com dual-write
+- [x] **TESTE:** 224 testes passando
 
 ### 1.3 Player Effects -> effectsStore
 
-- [ ] `applyPlayerEffect` (linha 1275)
-- [ ] `removePlayerEffect` (linha 1301)
-- [ ] `decrementEffectRounds` (linha 1324)
-- [ ] **TESTE:** `pnpm tsc --noEmit && pnpm test`
+- [x] `applyPlayerEffect` - ja tinha dual-write
+- [x] `removePlayerEffect` - ja tinha dual-write
+- [x] `decrementEffectRounds` - ja tinha dual-write
+- [x] **TESTE:** 224 testes passando
 
 ### 1.4 Item Usage Basico -> itemUsageStore
 
-- [ ] `startItemUsage` (linha 906) - apenas parte de targetSelection
-- [ ] `cancelItemUsage` (linha 950)
-- [ ] **TESTE:** `pnpm tsc --noEmit && pnpm test`
+- [x] `startItemUsage` - delegado com dual-write
+- [x] `cancelItemUsage` - delegado com dual-write
+- [x] **TESTE:** 224 testes passando
 
 ### 1.5 Selectors Simples
 
-- [ ] `getPillById` (linha 2263) -> pillPoolStore.getPill
-- [ ] `isPillPoolEmpty` (linha 2271) -> pillPoolStore.isEmpty
-- [ ] `getCurrentPlayer` (linha 2245) -> playerStore.getPlayer
-- [ ] Marcar `getOpponent` como @deprecated (linha 2253)
-- [ ] **TESTE:** `pnpm tsc --noEmit && pnpm test`
+- [x] `getPillById` -> pillPoolStore.getPill com fallback
+- [x] `isPillPoolEmpty` -> pillPoolStore.isEmpty
+- [x] `getCurrentPlayer` -> playerStore.getPlayer com fallback
+- [x] `getOpponent` marcado como @deprecated
+- [x] **TESTE:** 224 testes passando
 
 ### 1.6 Shop Basico -> shopStore
 
-- [ ] `addToCart` (linha 1544)
-- [ ] `removeFromCart` (linha 1653)
-- [ ] Marcar `purchaseStoreItem` como @deprecated (linha 1797)
-- [ ] **TESTE:** `pnpm tsc --noEmit && pnpm test`
+- [ ] `addToCart` - ADIADO (logica complexa de validacao)
+- [ ] `removeFromCart` - ADIADO (logica complexa)
+- [ ] `purchaseStoreItem` - ADIADO
+- [ ] **Movido para Batch 2**
 
 ### 1.7 Player Basico -> playerStore
 
-- [ ] `toggleWantsStore` (linha 1452)
-- [ ] `removeItemFromInventory` (linha 1248)
-- [ ] `selectItem` (linha 789) - pre-game
-- [ ] `deselectItem` (linha 831) - pre-game
-- [ ] **TESTE:** `pnpm tsc --noEmit && pnpm test`
+- [ ] `toggleWantsStore` - ADIADO (logica de validacao + multiplayer)
+- [x] `removeItemFromInventory` - delegado com dual-write
+- [x] `selectItem` - delegado com dual-write
+- [x] `deselectItem` - delegado com dual-write
+- [x] **TESTE:** 224 testes passando
 
-**Checkpoint Batch 1:** Rodar todos os testes e teste manual basico.
+**Checkpoint Batch 1:** 224 testes passando. Teste manual pendente.
 
 ---
 

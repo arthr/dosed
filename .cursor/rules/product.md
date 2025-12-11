@@ -138,18 +138,28 @@ Cada jogador seleciona 5 itens antes da partida (inventario fixo de 5 slots). It
 
 ## Backlog de Funcionalidades
 
-### Prioridade Alta
-- [ ] Ativar mais shapes SAZONAIS (eventos tematicos)
+### Prioridade Alta (Pre-Producao)
+- [ ] Sistema de Autenticacao (Supabase Auth)
+  - Login social (Google, Discord, Twitch)
+  - Guest-First: jogar sem cadastro
+  - `Player.userId` para persistencia
+- [ ] Multiplayer Online (Supabase Realtime)
+  - Salas de 2-4 jogadores
+  - Matchmaking basico
+- [ ] Leaderboard/Ranking (requer auth)
 - [ ] Sistema de sons
 
 ### Prioridade Media
+- [ ] Conquistas e badges (requer auth)
+- [ ] Estatisticas globais do jogo
+- [ ] Ativar mais shapes SAZONAIS (eventos tematicos)
 - [ ] Item "Give Me" (troca de itens entre jogadores)
 - [ ] Item "Shape Shift" (muda forma de pilula)
-- [ ] Expansao de slots de inventario (4-8 configuraveis)
 
 ### Prioridade Baixa
-- [ ] Modo PvP (multiplayer)
-- [ ] Leaderboard/ranking
+- [ ] Expansao de slots de inventario (4-8 configuraveis)
+- [ ] Temporadas competitivas
+- [ ] Sistema de referral/convites
 
 ### Sistema de Dificuldade da IA
 - 4 niveis: `easy` (Paciente), `normal` (Cobaia), `hard` (Sobrevivente), `insane` (Hofmann)

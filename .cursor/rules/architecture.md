@@ -15,8 +15,21 @@ Ao refatorar para suportar multiplayer, siga o padrão **Optimistic UI + Authori
 
 1. **Ações:** O jogador clica -> UI atualiza imediatamente (Optimistic) -> Envia evento ao Supabase.
 2. **Reconciliação:** Se o Supabase rejeitar (ex: lag, cheat), o cliente faz rollback do estado.
-3. **Generalização:** O `playerId` não é mais fixo ('player1'). Use `auth.user.id` ou IDs de sessão gerados.
+3. **Generalização:** O `playerId` não é mais fixo ('player1'). Use IDs de sessão gerados (`player1`, `player2`, ...).
 4. **Bots:** Em Multiplayer, Bots devem rodar no lado do HOST (Dono da sala) ou via Edge Function, nunca em ambos os clientes ao mesmo tempo.
+
+### Separacao: PlayerId vs UserId
+
+| Conceito | Tipo | Persistente | Uso |
+|----------|------|-------------|-----|
+| **PlayerId** | `string` (`player1`, `player2`) | Nao | Posicao na partida, turnos, logica de jogo |
+| **UserId** | UUID do Supabase Auth | Sim | Identidade, perfil, ranking, conquistas |
+
+- `Player.userId: string | null` - Link para usuario autenticado
+- `null` = Guest ou Bot (sem persistencia, sem ranking)
+- `string` = Usuario autenticado (stats persistem)
+
+> **Guest-First:** Jogadores podem jogar sem cadastro. Auth e necessario apenas para ranking, conquistas e partidas "ranked".
 
 ### Estado: Local vs Sincronizado
 - **GameState (Sincronizado):** Vidas, Resistência, Turno Atual, PillPool. Este estado vem do Supabase (A verdade absoluta).

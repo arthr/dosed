@@ -7,6 +7,14 @@ Exemplo:
 - [Data] **Risco de Render:** Ao refatorar `GameBoard`, descobrimos que o timer dispara re-renders no componente pai. Solucao: O timer foi isolado em um componente filho `TurnTimer`.
 - [Data] **Zustand:** Nao desestruture stores dentro de loops ou callbacks. Use seletores granulares (`useStore(s => s.item)`) para evitar renders desnecessarios.
 
+### Decisoes Arquiteturais
+
+- [2024-12-11] **PlayerId vs UserId:** Decidimos separar dois conceitos:
+  - `PlayerId` = posicao na partida (`player1`, `player2`), gerado por indice, nao persistente
+  - `UserId` = UUID do Supabase Auth, identidade do usuario, persistente
+  - Motivo: Permite "Guest-First" (jogar sem cadastro) e simplifica logica de turnos
+  - Campo `Player.userId: string | null` sera adicionado na Fase 3.5 do refactor
+
 ## Diretrizes para o Agente
 
 ### Antes de Qualquer Alteracao

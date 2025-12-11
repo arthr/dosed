@@ -136,10 +136,10 @@ confirmed: { player1: false, player2: false }
 
 **Estrategia DUAL-WRITE:** gameStore continua sendo fonte da verdade durante migracao.
 
-- [ ] **3.1** Generalizar `effectsStore.ts` para N jogadores:
+- [x] **3.1** Generalizar `effectsStore.ts` para N jogadores:
   - Mudar `activeEffects` para `Record<string, PlayerEffect[]>`
   - Adicionar `initializeForPlayers(playerIds: PlayerId[])`
-  - Atualizar testes
+  - Atualizar testes (28 testes passando)
 
 - [ ] **3.2** Generalizar `shopStore.ts` para N jogadores:
   - Parametrizar `openShop(timerDuration, playerIds: PlayerId[])`

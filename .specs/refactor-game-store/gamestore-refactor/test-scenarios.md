@@ -29,45 +29,61 @@ Executar apos cada batch de migracao e no final.
 **Pre-condicao:** Partida em andamento, jogador tem itens
 
 ### Scanner
-1. [ ] Usar Scanner
-2. [ ] Selecionar pilula
-3. [ ] Verificar que pilula mostra tipo (revelada)
-4. [ ] Verificar que item foi consumido do inventario
+1. [x] Usar Scanner
+2. [x] Selecionar pilula
+3. [x] Verificar que pilula mostra tipo (revelada)
+4. [x] Verificar que item foi consumido do inventario
 
 ### Inverter
-1. [ ] Usar Inverter
-2. [ ] Selecionar pilula
-3. [ ] Consumir a pilula
-4. [ ] Verificar que efeito foi invertido (dano virou cura ou vice-versa)
+1. [x] Usar Inverter
+2. [x] Selecionar pilula
+3. [x] Consumir a pilula
+4. [x] Verificar que efeito foi invertido (dano virou cura ou vice-versa)
 
 ### Shield
-1. [ ] Usar Shield
-2. [ ] Verificar icone de shield no jogador
-3. [ ] Consumir pilula de dano
-4. [ ] Verificar que dano foi bloqueado
+1. [x] Usar Shield
+2. [x] Verificar icone de shield no jogador
+3. [x] Consumir pilula de dano
+4. [x] Verificar que dano foi bloqueado
 
 ### Handcuffs
-1. [ ] Usar Handcuffs no oponente
-2. [ ] Verificar que oponente pula proximo turno
-3. [ ] Verificar que efeito expira
+1. [x] Usar Handcuffs no oponente
+2. [x] Verificar que oponente pula proximo turno
+3. [x] Verificar que efeito expira
 
 ### Pocket Pill
-1. [ ] Usar Pocket Pill
-2. [ ] Verificar que resistencia aumentou
+1. [x] Usar Pocket Pill
+2. [x] Verificar que resistencia aumentou
 
 ### Force Feed
-1. [ ] Usar Force Feed
-2. [ ] Selecionar pilula
-3. [ ] Verificar que oponente consumiu a pilula
+1. [x] Usar Force Feed
+2. [x] Selecionar pilula
+3. [x] Verificar que oponente consumiu a pilula
 
 ### Shuffle
-1. [ ] Usar Shuffle
-2. [ ] Verificar que pool foi re-embaralhado (posicoes mudaram)
+1. [x] Usar Shuffle
+2. [x] Verificar que pool foi re-embaralhado (posicoes mudaram)
 
 ### Discard
-1. [ ] Usar Discard
-2. [ ] Selecionar pilula
-3. [ ] Verificar que pilula foi removida do pool
+1. [x] Usar Discard
+2. [x] Selecionar pilula
+3. [x] Verificar que pilula foi removida do pool
+
+### Double
+1. [x] Usar Double
+2. [x] Selecionar pilula
+3. [x] Consumir a pilula
+4. [x] Verificar que efeito foi dobrado (dano ou cura x2)
+
+### Shape Scanner
+1. [x] Usar Shape Scanner
+2. [x] Selecionar pilula
+3. [x] Verificar que todas pilulas da mesma shape foram reveladas
+
+### Shape Bomb
+1. [x] Usar Shape Bomb
+2. [x] Selecionar pilula
+3. [x] Verificar que todas pilulas da mesma shape foram removidas
 
 ---
 
@@ -93,20 +109,24 @@ Executar apos cada batch de migracao e no final.
 **Pre-condicao:** Fim de rodada, pelo menos 1 jogador com pillCoins
 
 ### Acessar Loja
-1. [ ] Marcar "Ir para loja" antes do fim da rodada
-2. [ ] Verificar que loja abre apos pool esvaziar
-3. [ ] Verificar timer da loja
+1. [x] Marcar "Ir para loja" antes do fim da rodada
+2. [x] Verificar que loja abre apos pool esvaziar
+3. [x] Verificar timer da loja
 
 ### Comprar Item
-1. [ ] Adicionar item ao carrinho
-2. [ ] Verificar que pillCoins sao suficientes
-3. [ ] Confirmar compra
-4. [ ] Verificar que item aparece no inventario
-5. [ ] Verificar que pillCoins foram debitados
+1. [x] Adicionar item ao carrinho
+2. [x] Verificar que pillCoins sao suficientes
+3. [x] Confirmar compra
+4. [x] Verificar que item aparece no inventario
+5. [x] Verificar que pillCoins foram debitados
 
 ### Comprar Boost
-1. [ ] Comprar "Life Up" (se disponivel)
-2. [ ] Verificar que vida aumentou na proxima rodada
+1. [x] Comprar "Life Up" (se disponivel)
+2. [x] Verificar que vida aumentou na proxima rodada
+
+### Scanner X2 (Boost)
+1. [x] Comprar Scanner X2
+2. [x] Verificar que 2 pills sao reveladas no inicio da proxima rodada
 
 ---
 

@@ -1791,7 +1791,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
           },
         }
       } else if (item.type === 'boost' && item.boostType) {
-        // Adiciona boost aos pendentes
+        // Delega para shopStore
+        useShopStore.getState().addPendingBoost(playerId, item.boostType)
+
+        // DUAL-WRITE: Sync local state
         newStoreState = {
           ...newStoreState,
           pendingBoosts: {
@@ -1808,7 +1811,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       pillCoins: updatedPlayer.pillCoins - totalCost,
     }
 
-    // Limpa carrinho
+    // Delega limpeza do carrinho para shopStore
+    useShopStore.getState().clearCart(playerId)
+
+    // DUAL-WRITE: Sync local state
     newStoreState = {
       ...newStoreState,
       cart: {

@@ -110,7 +110,14 @@ Este checklist deve ser seguido na ordem. Apos cada item, rodar testes.
   - Chama reset() de todos os stores modulares
 - [x] **TESTE:** 224 testes passando
 
-**Checkpoint Batch 2:** CONCLUIDO - Teste manual pendente.
+**Checkpoint Batch 2:** CONCLUIDO - Teste manual OK!
+
+### Bug Fix: processCart (descoberto em teste manual)
+
+- [x] `processCart` nao delegava para shopStore ao adicionar boosts
+  - Causa: `applyPendingBoosts` usava `shopStore.getPendingBoosts()` que retornava vazio
+  - Fix: Adicionado `shopStore.addPendingBoost()` e `shopStore.clearCart()` no processCart
+  - **Teste manual:** 100% OK (Scanner X2, Life Up funcionando)
 
 ---
 

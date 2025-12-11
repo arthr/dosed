@@ -92,15 +92,15 @@ Executar apos cada batch de migracao e no final.
 **Pre-condicao:** Partida em andamento
 
 ### Colapso
-1. [ ] Tomar dano suficiente para resistencia chegar a 0
-2. [ ] Verificar animacao de colapso
-3. [ ] Verificar que perdeu 1 vida
-4. [ ] Verificar que resistencia resetou para maximo
+1. [x] Tomar dano suficiente para resistencia chegar a 0
+2. [x] Verificar animacao de colapso
+3. [x] Verificar que perdeu 1 vida
+4. [x] Verificar que resistencia resetou para maximo
 
 ### Eliminacao
-1. [ ] Repetir colapsos ate vidas chegarem a 0
-2. [ ] Verificar tela de fim de jogo
-3. [ ] Verificar que oponente e declarado vencedor
+1. [x] Repetir colapsos ate vidas chegarem a 0
+2. [x] Verificar tela de fim de jogo
+3. [x] Verificar que oponente e declarado vencedor
 
 ---
 

@@ -123,69 +123,49 @@ Este checklist deve ser seguido na ordem. Apos cada item, rodar testes.
 
 ## Batch 3: Orquestracao Alta (Fazer com Cuidado)
 
-### 3.1 initGame (linha 269)
+### 3.1 initGame (linha 274)
 
 Esta e a funcao mais critica. Inicializa todo o estado.
 
-- [ ] Extrair inicializacao de players -> playerStore.initializePlayers
-- [ ] Extrair geracao de pool -> pillPoolStore.generatePool
-- [ ] Extrair estado de flow -> gameFlowStore.initialize
-- [ ] Extrair estado de shop -> shopStore (nao aberto ainda)
-- [ ] Extrair estado de effects -> effectsStore.initializeForPlayers
-- [ ] Extrair estado de itemUsage -> itemUsageStore.initializeForPlayers
-- [ ] Manter: shapeQuests, actionHistory inicial
-- [ ] **TESTE:** `pnpm tsc --noEmit && pnpm test`
-- [ ] **TESTE MANUAL:** Iniciar nova partida, verificar todos os estados
+- [x] effectsStore.initializeForPlayers(playerIds)
+- [x] itemUsageStore.initializeForPlayers(playerIds)
+- [x] pillPoolStore.setPool(pillPool)
+- [x] gameFlowStore.initialize(playerIds, config)
+- [x] Manter: players, shapeQuests, actionHistory (DUAL-WRITE)
+- [x] **TESTE:** 224 testes passando
 
-### 3.2 consumePill (linha 346)
+### 3.2 consumePill (linha 365)
 
-Funcao mais complexa (~250 linhas). Orquestra:
-- Consumo da pilula (pillPoolStore)
-- Aplicacao de efeito (playerStore)
-- Verificacao de efeitos ativos (effectsStore)
-- Progressao de turno (gameFlowStore)
-- Verificacao de fim de rodada
-- Eventos multiplayer
+Funcao mais complexa (~250 linhas). Orquestra multiplos stores.
 
-- [ ] Extrair consumo -> pillPoolStore.consumePill
-- [ ] Extrair aplicacao de efeito -> usar applyPillEffect puro
-- [ ] Extrair update de player -> playerStore
-- [ ] Extrair update de quests (manter inline)
-- [ ] Extrair progressao de turno -> gameFlowStore.nextTurn
-- [ ] Manter orquestracao e eventos multiplayer
-- [ ] **TESTE:** `pnpm tsc --noEmit && pnpm test`
-- [ ] **TESTE MANUAL:** Consumir pilulas, verificar dano/cura/colapso
+- [x] pillPoolStore.consumePill() para remover pill (DUAL-WRITE)
+- [x] effectsStore.decrementEffects() (ja tinha)
+- [x] effectsStore.removeEffect() para handcuffs (ja tinha)
+- [x] Manter: applyPillEffect, quests, turnos, multiplayer (orquestracao)
+- [x] **TESTE:** 224 testes passando
 
-### 3.3 executeItem (linha 966)
+### 3.3 executeItem (linha 1032)
 
 Switch com 10+ tipos de itens. Cada tipo tem logica diferente.
 
-- [ ] Extrair logica comum (remover item, registrar acao)
-- [ ] Manter switch de tipos (cada tipo orquestra stores diferentes)
-- [ ] Scanner -> pillPoolStore.addRevealedPill
-- [ ] Inverter/Double -> pillPoolStore
-- [ ] Shield/Handcuffs -> effectsStore
-- [ ] Pocket Pill -> playerStore
-- [ ] Force Feed -> consumePill com forcedTarget
-- [ ] Shuffle/Discard -> pillPoolStore
-- [ ] Shape items -> manter inline (quests)
-- [ ] **TESTE:** `pnpm tsc --noEmit && pnpm test`
-- [ ] **TESTE MANUAL:** Usar cada tipo de item
+- [x] Scanner -> pillPoolStore.addRevealedPill (DUAL-WRITE)
+- [x] Inverter -> pillPoolStore.invertPill (DUAL-WRITE)
+- [x] Double -> pillPoolStore.doublePill (DUAL-WRITE)
+- [x] Shield -> effectsStore.applyEffect (ja tinha)
+- [x] Handcuffs -> effectsStore.applyEffect (ja tinha)
+- [x] Shape Scanner -> pillPoolStore.addRevealedPill (DUAL-WRITE)
+- [x] Manter: Pocket Pill, Force Feed, Shuffle, Discard, Shape Bomb (orquestracao)
+- [x] **TESTE:** 224 testes passando
 
-### 3.4 applyRemoteEvent (linha 1989)
+### 3.4 applyRemoteEvent (linha 2090)
 
-Handler de eventos multiplayer. Deve chamar os stores apropriados.
+Handler de eventos multiplayer - PURA ORQUESTRACAO.
 
-- [ ] Mapear cada tipo de evento para stores
-- [ ] pill_consumed -> pillPoolStore + playerStore
-- [ ] item_used -> delegar para executeItem
-- [ ] player_confirmed -> itemUsageStore
-- [ ] round_reset -> pillPoolStore + gameFlowStore
-- [ ] Etc.
-- [ ] **TESTE:** `pnpm tsc --noEmit && pnpm test`
-- [ ] **TESTE MANUAL:** Partida multiplayer
+- [x] Manter orquestracao (roteia para funcoes ja delegadas)
+- [x] Usar pillPoolStore.getPill() em validatePill (fallback)
+- [x] **TESTE:** 224 testes passando
 
-**Checkpoint Batch 3:** Teste manual completo (single + multiplayer).
+**Checkpoint Batch 3:** CONCLUIDO - Teste manual OK (Cenario 3 validado).
 
 ---
 

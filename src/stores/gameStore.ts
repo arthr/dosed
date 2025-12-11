@@ -270,6 +270,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   /**
    * Inicializa um novo jogo com configuracao
    * Em multiplayer, o guest recebe syncData do host para garantir estado identico
+   * @delegate Inicializa todos os stores modulares
    */
   initGame: (config?: Partial<GameConfig>) => {
     const finalConfig = { ...DEFAULT_GAME_CONFIG, ...config }
@@ -313,6 +314,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const typeCounts = countPillTypes(pillPool)
     const shapeCounts = countPillShapes(pillPool)
 
+    // Inicializa stores modulares
+    const playerIds: PlayerId[] = ['player1', 'player2']
+
+    useEffectsStore.getState().initializeForPlayers(playerIds)
+    useItemUsageStore.getState().initializeForPlayers(playerIds)
+    usePillPoolStore.getState().setPool(pillPool)
+    useGameFlowStore.getState().initialize(playerIds, {
+      difficulty: finalConfig.difficulty,
+      mode: finalConfig.mode,
+      roomId: finalConfig.roomId ?? null,
+    })
+
     const startAction: GameAction = {
       type: 'GAME_START',
       playerId: 'player1',
@@ -320,6 +333,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       payload: { config: finalConfig },
     }
 
+    // DUAL-WRITE: Sync local state
     set({
       phase: 'itemSelection',
       turnPhase: 'consume',
@@ -400,7 +414,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       },
     })
 
-    // Remove pilula do pool
+    // Delega para pillPoolStore
+    usePillPoolStore.getState().consumePill(pillId)
+
+    // DUAL-WRITE: Sync local state
     const newPillPool = state.pillPool.filter((p) => p.id !== pillId)
     const newTypeCounts = countPillTypes(newPillPool)
     const newShapeCounts = countPillShapes(newPillPool)
@@ -1079,6 +1096,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       case 'scanner': {
         // Revela o tipo da pilula temporariamente (adiciona a revealedPills)
         if (targetId && !state.revealedPills.includes(targetId)) {
+          // Delega para pillPoolStore
+          usePillPoolStore.getState().addRevealedPill(targetId)
+          // DUAL-WRITE: Sync local state
           newState.revealedPills = [...state.revealedPills, targetId]
         }
         break
@@ -1087,6 +1107,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       case 'inverter': {
         // Marca a pilula como invertida
         if (targetId) {
+          // Delega para pillPoolStore
+          usePillPoolStore.getState().invertPill(targetId)
+          // DUAL-WRITE: Sync local state
           const pillIndex = state.pillPool.findIndex((p) => p.id === targetId)
           if (pillIndex !== -1) {
             const newPillPool = [...state.pillPool]
@@ -1103,6 +1126,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       case 'double': {
         // Marca a pilula como dobrada
         if (targetId) {
+          // Delega para pillPoolStore
+          usePillPoolStore.getState().doublePill(targetId)
+          // DUAL-WRITE: Sync local state
           const pillIndex = state.pillPool.findIndex((p) => p.id === targetId)
           if (pillIndex !== -1) {
             const newPillPool = [...state.pillPool]
@@ -1276,6 +1302,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
             .map((p) => p.id)
             .filter((id) => !state.revealedPills.includes(id)) // Evita duplicatas
 
+          // Delega para pillPoolStore
+          pillsToReveal.forEach((pillId) => {
+            usePillPoolStore.getState().addRevealedPill(pillId)
+          })
+
+          // DUAL-WRITE: Sync local state
           const revealedCount = pillsToReveal.length
           newState.revealedPills = [...state.revealedPills, ...pillsToReveal]
 
@@ -2080,9 +2112,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
-    // Helper: valida se pillId existe no pool
+    // Helper: valida se pillId existe no pool (usa pillPoolStore)
     const validatePill = (pillId: string): boolean => {
-      const pill = state.pillPool.find((p) => p.id === pillId)
+      const pill = usePillPoolStore.getState().getPill(pillId) ?? state.pillPool.find((p) => p.id === pillId)
       if (!pill) {
         logInvalid(`Pilula nao encontrada: ${pillId}`)
         return false

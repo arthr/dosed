@@ -185,17 +185,27 @@ confirmed: { player1: false, player2: false }
   - Abordagem: Facade pattern - gameStore orquestra stores modulares
   - Meta: < 350 linhas (atual: 2359 linhas)
 
-- [ ] **4.2** Atualizar `useItemUsage.ts`:
-  - Usar `getTargetablePlayers()` para validTargets
-  - Retornar array de alvos (nao apenas 1)
+- [x] **4.2** Atualizar `useItemUsage.ts`:
+  - Usar `getTargetablePlayers()` para alvos
+  - Retornar `targetablePlayers: PlayerId[]`
 
-- [ ] **4.3** Atualizar `usePillConsumption.ts`:
-  - Usar `getNextTurn()` para rotacao
-  - Suportar N jogadores
+- [x] **4.3** Atualizar `usePillConsumption.ts`:
+  - Tipo `targetPlayer` mudado de `'player1' | 'player2'` para `PlayerId`
+  - Suporta N jogadores no Force Feed
 
-- [ ] **4.4** Criar hook `useTargetablePlayers()`:
-  - Substituir `useOpponent()` (deprecar, nao remover)
-  - Retornar `PlayerId[]`
+- [x] **4.4** Criar hook `useTargetablePlayers()`:
+  - `useTargetablePlayers()` - retorna `PlayerId[]`
+  - `useFirstTargetablePlayer()` - primeiro alvo
+  - `useIsTargetable(playerId)` - verifica se pode ser alvo
+  - `useOpponent()` marcado como `@deprecated`
+
+- [x] **4.5** Atualizar `useGameState.ts`:
+  - `usePlayerIds()` - todos os IDs
+  - `useAlivePlayerIds()` - IDs dos vivos
+  - `usePlayersArray()` - players como array
+  - `useAlivePlayers()` - players vivos como array
+  - `useAliveCount()` - contagem de vivos
+  - `usePlayers()` e `useOpponent()` marcados como `@deprecated`
 
 ### Fase 5: Limpeza
 

@@ -1,6 +1,8 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useGameStore } from '@/stores/gameStore'
-import type { ItemType } from '@/types'
+import { getTargetablePlayers } from '@/utils/turnManager'
+import { getAlivePlayers, getPlayerIds } from '@/utils/playerManager'
+import type { ItemType, PlayerId } from '@/types'
 
 /**
  * Hook para gerenciar o uso de itens durante o jogo
@@ -11,14 +13,22 @@ export function useItemUsage() {
   const targetSelection = useGameStore((state) => state.targetSelection)
   const phase = useGameStore((state) => state.phase)
   const currentTurn = useGameStore((state) => state.currentTurn)
+  const players = useGameStore((state) => state.players)
   const currentPlayerInventory = useGameStore(
-    (state) => state.players[state.currentTurn].inventory
+    (state) => state.players[state.currentTurn]?.inventory ?? { items: [], maxItems: 5 }
   )
 
   // Actions da store
   const storeStartItemUsage = useGameStore((state) => state.startItemUsage)
   const storeCancelItemUsage = useGameStore((state) => state.cancelItemUsage)
   const storeExecuteItem = useGameStore((state) => state.executeItem)
+
+  // Jogadores alvo disponiveis (N-player support)
+  const targetablePlayers: PlayerId[] = useMemo(() => {
+    const allPlayerIds = getPlayerIds(players)
+    const alivePlayerIds = getAlivePlayers(players)
+    return getTargetablePlayers(currentTurn, allPlayerIds, alivePlayerIds)
+  }, [currentTurn, players])
 
   // Computed values
   const isSelectingTarget = targetSelection.active
@@ -91,6 +101,10 @@ export function useItemUsage() {
     canUseItems,
     hasItems,
     currentTurn,
+
+    // N-player support
+    /** Jogadores que podem ser alvos (exclui atual e eliminados) */
+    targetablePlayers,
 
     // Actions
     startUsage,

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import type { Pill, PillType, PlayerEffectResult } from '@/types'
+import type { Pill, PillType, PlayerEffectResult, PlayerId } from '@/types'
 import { useGameStore } from '@/stores/gameStore'
 import { useOverlayStore } from '@/stores/overlayStore'
 import { useToastStore, type ToastType } from '@/stores/toastStore'
@@ -13,7 +13,8 @@ interface ConsumptionState {
   revealedPill: Pill | null
   effect: PlayerEffectResult | null
   feedbackType: ToastType | null
-  targetPlayer: 'player1' | 'player2' | null
+  /** ID do jogador que consome (suporta N jogadores) */
+  targetPlayer: PlayerId | null
   /** Se consumo foi forcado (Force Feed) */
   isForced: boolean
 }
@@ -108,10 +109,10 @@ export function usePillConsumption() {
    * Inicia o fluxo de consumo
    * Abre o overlay de revelacao
    * @param pillId - ID da pilula
-   * @param forcedTarget - Se passado, aplica efeito nesse jogador (Force Feed)
+   * @param forcedTarget - Se passado, aplica efeito nesse jogador (Force Feed - suporta N jogadores)
    */
   const startConsumption = useCallback(
-    (pillId: string, forcedTarget?: 'player1' | 'player2') => {
+    (pillId: string, forcedTarget?: PlayerId) => {
       const pill = getPillById(pillId)
       if (!pill) return
 

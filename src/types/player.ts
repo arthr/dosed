@@ -7,21 +7,6 @@ import type { PlayerInventory } from './item'
 export type PlayerId = string
 
 /**
- * Valida se string e um PlayerId valido
- */
-export function isValidPlayerId(id: string): id is PlayerId {
-  return typeof id === 'string' && id.length > 0
-}
-
-/**
- * Gera PlayerId baseado em indice (player1, player2, ...)
- * @param index - Indice base 0
- */
-export function generatePlayerId(index: number): PlayerId {
-  return `player${index + 1}`
-}
-
-/**
  * Tipo de efeito ativo no jogador
  */
 export type PlayerEffectType = 'shield' | 'handcuffed'

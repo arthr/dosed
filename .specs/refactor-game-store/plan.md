@@ -93,7 +93,7 @@ confirmed: { player1: false, player2: false }
   export const MIN_PLAYERS = 2
   export const MAX_ROOM_PLAYERS = 4  // Limite razoavel para UX
   ```
-- [x] **1.6** Atualizar `types/player.ts`:
+- [x] **1.6** Atualizar `types/player.ts`, depois migrar para `utils/playerManager.ts` (local correto):
   ```typescript
   // DE: export type PlayerId = 'player1' | 'player2'
   // PARA:
@@ -119,7 +119,7 @@ confirmed: { player1: false, player2: false }
     allPlayers: PlayerId[]
   ): PlayerId[]
   ```
-- [ ] **2.2** Criar `utils/playerManager.ts` (funcoes puras):
+- [x] **2.2** Criar `utils/playerManager.ts` (funcoes puras):
   ```typescript
   /** Gera ID unico para jogador */
   export function generatePlayerId(index: number): PlayerId

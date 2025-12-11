@@ -166,11 +166,11 @@ confirmed: { player1: false, player2: false }
   - Inclui: inventario, pillCoins, wantsStore
   - Criar testes unitarios (49 testes passando)
 
-- [ ] **3.6** Extrair `gameFlowStore.ts`:
-  - Estado: `phase`, `round`, `currentTurn`, `playerOrder`, `winner`
-  - Actions: `startGame`, `endGame`, `nextTurn`, `nextRound`
-  - Usar `turnManager.getNextTurn()` internamente
-  - Criar testes unitarios
+- [x] **3.6** Extrair `gameFlowStore.ts`:
+  - Estado: `phase`, `turnPhase`, `round`, `currentTurn`, `playerOrder`, `winner`, `difficulty`, `mode`, `roomId`
+  - Actions: `startGame`, `endGame`, `nextTurn`, `startRound`, `checkWinner`
+  - Usa `turnManager.getNextTurn()` internamente
+  - Criar testes unitarios (37 testes passando)
 
 ### Fase 4: Integracao (Conectar via Hooks)
 

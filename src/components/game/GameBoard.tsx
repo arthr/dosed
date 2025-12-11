@@ -46,7 +46,12 @@ export function GameBoard() {
   // Determina perspectiva: jogador local sempre e exibido como "meu" card
   // Em single player: player1 e sempre o jogador local (humano)
   // Em multiplayer: localPlayerId determina quem e o jogador local
-  const { localPlayer, remotePlayer, localId, remoteId } = useMemo(() => {
+  const { localPlayer, remotePlayer, localId, remoteId } = useMemo((): {
+    localPlayer: typeof players.player1
+    remotePlayer: typeof players.player2
+    localId: PlayerId
+    remoteId: PlayerId
+  } => {
     const localPid: PlayerId = isMultiplayer && localPlayerId ? localPlayerId : 'player1'
     const remotePid: PlayerId = localPid === 'player1' ? 'player2' : 'player1'
     return {
@@ -229,7 +234,7 @@ export function GameBoard() {
   }
 
   // Determina animacao do jogador baseado no efeito
-  const getPlayerAnimation = (playerId: 'player1' | 'player2') => {
+  const getPlayerAnimation = (playerId: PlayerId) => {
     if (phase !== 'feedback' || targetPlayer !== playerId) return null
 
     if (feedbackType === 'collapse') return 'collapse'
@@ -239,7 +244,7 @@ export function GameBoard() {
   }
 
   // Calcula o valor do efeito para FloatingNumber (negativo para dano, positivo para cura/vida)
-  const getEffectValue = (playerId: 'player1' | 'player2'): number | null => {
+  const getEffectValue = (playerId: PlayerId): number | null => {
     if (phase !== 'feedback' || targetPlayer !== playerId) return null
     if (!effect) return null
 
@@ -250,7 +255,7 @@ export function GameBoard() {
   }
 
   // Determina o tipo de efeito para FloatingNumber (resistance ou life)
-  const getEffectType = (playerId: 'player1' | 'player2'): 'resistance' | 'life' => {
+  const getEffectType = (playerId: PlayerId): 'resistance' | 'life' => {
     if (phase !== 'feedback' || targetPlayer !== playerId) return 'resistance'
     if (!effect) return 'resistance'
 
@@ -338,7 +343,7 @@ export function GameBoard() {
           effectType={getEffectType(remoteId)}
           quest={shapeQuests[remoteId]}
           questJustReset={isQuestResetRecent(remoteId)}
-          onToggleStore={() => toggleWantsStore(remoteId)}
+          onToggleStore={undefined}
         />
       </div>
 

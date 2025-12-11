@@ -62,10 +62,10 @@ Este checklist deve ser seguido na ordem. Apos cada item, rodar testes.
 ### 1.7 Player Basico -> playerStore
 
 - [ ] `toggleWantsStore` - ADIADO (logica de validacao + multiplayer)
-- [x] `removeItemFromInventory` - delegado com dual-write
-- [x] `selectItem` - delegado com dual-write
-- [x] `deselectItem` - delegado com dual-write
-- [x] **TESTE:** 224 testes passando
+- [ ] `removeItemFromInventory` - NAO DELEGAR (playerStore nao inicializado durante jogo)
+- [ ] `selectItem` - NAO DELEGAR (playerStore nao inicializado durante itemSelection)
+- [ ] `deselectItem` - NAO DELEGAR (playerStore nao inicializado durante itemSelection)
+- [x] **CORRECAO:** Removida delegacao prematura que quebrava selecao de itens
 
 **Checkpoint Batch 1:** 224 testes passando. Teste manual pendente.
 

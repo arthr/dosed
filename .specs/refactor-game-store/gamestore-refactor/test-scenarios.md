@@ -10,15 +10,15 @@ Executar apos cada batch de migracao e no final.
 
 ### Passos
 
-1. [ ] Iniciar nova partida vs IA
-2. [ ] Verificar que ambos jogadores tem 3 vidas e 6 resistencia
-3. [ ] Selecionar 2 itens na fase de selecao
-4. [ ] Confirmar selecao
-5. [ ] Verificar que jogo iniciou (fase "playing")
-6. [ ] Consumir uma pilula
-7. [ ] Verificar que turno passou para IA
-8. [ ] Aguardar IA jogar
-9. [ ] Repetir ate fim da rodada
+1. [x] Iniciar nova partida vs IA
+2. [x] Verificar que ambos jogadores tem 3 vidas e 6 resistencia
+3. [x] Selecionar 2 itens na fase de selecao
+4. [x] Confirmar selecao
+5. [x] Verificar que jogo iniciou (fase "playing")
+6. [x] Consumir uma pilula
+7. [x] Verificar que turno passou para IA
+8. [x] Aguardar IA jogar
+9. [x] Repetir ate fim da rodada
 
 **Resultado esperado:** Pool esvazia, nova rodada inicia ou shopping abre.
 

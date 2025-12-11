@@ -803,11 +803,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Usa itemId fornecido (evento remoto) ou gera novo (local)
     const newItemId = itemId ?? uuidv4()
 
-    // Delega para playerStore
-    const addedId = usePlayerStore.getState().addItemToInventory(playerId, itemType, newItemId)
-    if (!addedId) return // Falhou (limite atingido)
-
-    // Sync local state para retrocompatibilidade
+    // NOTA: NAO delegar para playerStore aqui - ele nao esta inicializado
+    // durante a fase itemSelection (antes do jogo comecar)
     const newItem: InventoryItem = {
       id: newItemId,
       type: itemType,
@@ -835,14 +832,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   /**
-   * Remove um item do inventario do jogador
-   * @delegate playerStore.removeItemFromInventory
+   * Remove um item do inventario do jogador (pre-game)
+   * NOTA: NAO delega para playerStore - ele nao esta inicializado durante itemSelection
    */
   deselectItem: (playerId: PlayerId, itemId: string) => {
-    // Delega para playerStore
-    usePlayerStore.getState().removeItemFromInventory(playerId, itemId)
-
-    // Sync local state para retrocompatibilidade
     const state = get()
     const player = state.players[playerId]
     if (!player) return
@@ -1266,18 +1259,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   /**
-   * Remove um item do inventario do jogador
-   * @delegate playerStore.removeItemFromInventory
+   * Remove um item do inventario do jogador (durante o jogo)
+   * NOTA: playerStore pode nao estar inicializado, entao nao delegamos
    */
   removeItemFromInventory: (playerId: PlayerId, itemId: string) => {
-    // Delega para playerStore
-    usePlayerStore.getState().removeItemFromInventory(playerId, itemId)
-    
-    // Sync local state para retrocompatibilidade
     const state = get()
     const player = state.players[playerId]
     if (!player) return
-    
+
     set({
       players: {
         ...state.players,

@@ -141,10 +141,10 @@ confirmed: { player1: false, player2: false }
   - Adicionar `initializeForPlayers(playerIds: PlayerId[])`
   - Atualizar testes (28 testes passando)
 
-- [ ] **3.2** Generalizar `shopStore.ts` para N jogadores:
+- [x] **3.2** Generalizar `shopStore.ts` para N jogadores:
   - Parametrizar `openShop(timerDuration, playerIds: PlayerId[])`
   - Mudar `confirmed`, `pendingBoosts`, `cart` para dinamicos
-  - Atualizar testes
+  - Atualizar testes (39 testes passando)
 
 - [ ] **3.3** Extrair `pillPoolStore.ts`:
   - Estado: `pillPool`, `revealedPills`, `typeCounts`, `shapeCounts`

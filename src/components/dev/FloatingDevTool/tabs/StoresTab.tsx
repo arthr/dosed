@@ -1,36 +1,25 @@
-import { usePillPoolStore } from '@/stores/game/pillPoolStore'
-import { useEffectsStore } from '@/stores/game/effectsStore'
-import { useOverlayStore } from '@/stores/overlayStore'
-import { useToastStore } from '@/stores/toastStore'
-import { useGameFlowStore } from '@/stores/game/gameFlowStore'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/8bit/card'
 import { Badge } from '@/components/ui/8bit/badge'
 import { Separator } from '@/components/ui/8bit/separator'
 import { ScrollArea } from '@/components/ui/8bit/scroll-area'
+import { useDevToolStoresSnapshot } from '@/hooks'
 
 /**
  * Aba de visualização de outros stores
  * Exibe informações em tempo real de stores auxiliares
  */
 export function StoresTab() {
-  // Pill Pool Store
-  const revealedPills = usePillPoolStore((s) => s.revealedPills)
-
-  // Effects Store
-  const effectsPlayer1 = useEffectsStore((s) => s.activeEffects.player1 || [])
-  const effectsPlayer2 = useEffectsStore((s) => s.activeEffects.player2 || [])
-
-  // Overlay Store
-  const currentOverlay = useOverlayStore((s) => s.current)
-  const pillRevealData = useOverlayStore((s) => s.pillRevealData)
-  const gameOverData = useOverlayStore((s) => s.gameOverData)
-
-  // Toast Store
-  const toasts = useToastStore((s) => s.toasts)
-
-  // Game Flow Store
-  const playerOrder = useGameFlowStore((s) => s.playerOrder)
-  const currentTurn = useGameFlowStore((s) => s.currentTurn)
+  const {
+    revealedPills,
+    activeEffects,
+    currentOverlay,
+    pillRevealData,
+    gameOverData,
+    toasts,
+    playerOrder,
+    currentTurn,
+    playerIds,
+  } = useDevToolStoresSnapshot()
 
   return (
     <ScrollArea className="h-[450px]">
@@ -72,49 +61,35 @@ export function StoresTab() {
           <CardTitle className="text-[10px] font-normal">Effects Store</CardTitle>
         </CardHeader>
         <CardContent className="space-y-1.5 px-3 pb-2">
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-mono text-primary">Player1:</span>
-              <Badge variant="outline" className="text-xs">
-                {effectsPlayer1.length} efeitos
-              </Badge>
-            </div>
-            {effectsPlayer1.length === 0 ? (
-              <p className="text-xs text-muted-foreground italic">Nenhum efeito ativo</p>
-            ) : (
-              <div className="space-y-1">
-                {effectsPlayer1.map((effect, idx) => (
-                  <div key={idx} className="text-xs bg-primary/10 p-1 rounded flex items-center justify-between">
-                    <span className="font-mono">{effect.type}</span>
-                    <span className="text-muted-foreground">{effect.roundsRemaining}r</span>
+          {playerIds.map((playerId, idx) => {
+            const effects = activeEffects[playerId] ?? []
+            return (
+              <div key={playerId}>
+                {idx !== 0 && <Separator />}
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-mono">{playerId}:</span>
+                  <Badge variant="outline" className="text-xs">
+                    {effects.length} efeitos
+                  </Badge>
+                </div>
+                {effects.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic">Nenhum efeito ativo</p>
+                ) : (
+                  <div className="space-y-1">
+                    {effects.map((effect, eIdx) => (
+                      <div
+                        key={`${playerId}-${eIdx}`}
+                        className="text-xs bg-muted/20 p-1 rounded flex items-center justify-between"
+                      >
+                        <span className="font-mono">{effect.type}</span>
+                        <span className="text-muted-foreground">{effect.roundsRemaining}r</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </div>
-
-          <Separator />
-
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-mono text-destructive">Player2:</span>
-              <Badge variant="outline" className="text-xs">
-                {effectsPlayer2.length} efeitos
-              </Badge>
-            </div>
-            {effectsPlayer2.length === 0 ? (
-              <p className="text-xs text-muted-foreground italic">Nenhum efeito ativo</p>
-            ) : (
-              <div className="space-y-1">
-                {effectsPlayer2.map((effect, idx) => (
-                  <div key={idx} className="text-xs bg-destructive/10 p-1 rounded flex items-center justify-between">
-                    <span className="font-mono">{effect.type}</span>
-                    <span className="text-muted-foreground">{effect.roundsRemaining}r</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+            )
+          })}
         </CardContent>
       </Card>
 

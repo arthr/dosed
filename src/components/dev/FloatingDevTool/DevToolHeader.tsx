@@ -17,7 +17,7 @@ export function DevToolHeader({ onMinimize, onClose, onDragStart }: DevToolHeade
       onMouseDown={onDragStart}
     >
       <div className="flex items-center gap-2">
-        <span className="text-xs font-mono font-normal tracking-wider">🛠️ DEV TOOL</span>
+        <span className="text-xs font-mono font-normal tracking-wider">DEV TOOL</span>
         <span className="text-[10px] opacity-70">(CTRL+SHIFT+D)</span>
       </div>
 

@@ -54,7 +54,7 @@
 - **Critério de pronto:** game over continua ok em 1v1; não depende de `players.player2`.
 
 ### Tarefa 8 — DevTool: remover suposições `player1/player2`
-- **Status:** TODO
+- **Status:** DONE
 - **Objetivo:** tabs do devtool iterarem por `playerIds` em vez de hardcode.
 - **Critério de pronto:** devtool não quebra em N jogadores.
 

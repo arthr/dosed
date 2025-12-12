@@ -1,25 +1,28 @@
-import { useGameStore } from '@/stores/gameStore'
 import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/8bit/card'
 import { Badge } from '@/components/ui/8bit/badge'
 import { Separator } from '@/components/ui/8bit/separator'
 import { ScrollArea } from '@/components/ui/8bit/scroll-area'
 import { cn } from '@/lib/utils'
+import { useDevToolGameSnapshot } from '@/hooks'
 
 /**
  * Aba de estado do Game Store
  * Exibe informações em tempo real do gameStore
  */
 export function GameStateTab() {
-  const phase = useGameStore((s) => s.phase)
-  const round = useGameStore((s) => s.round)
-  const currentTurn = useGameStore((s) => s.currentTurn)
-  const players = useGameStore((s) => s.players)
-  const pillPool = useGameStore((s) => s.pillPool)
-  const typeCounts = useGameStore((s) => s.typeCounts)
-  const shapeQuests = useGameStore((s) => s.shapeQuests)
-  const actionHistory = useGameStore((s) => s.actionHistory)
-  const mode = useGameStore((s) => s.mode)
+  const {
+    phase,
+    round,
+    currentTurn,
+    players,
+    playerIds,
+    pillPool,
+    typeCounts,
+    shapeQuests,
+    actionHistory,
+    mode,
+  } = useDevToolGameSnapshot()
 
   const lastActions = useMemo(() => {
     return actionHistory.slice(-5).reverse()
@@ -82,47 +85,41 @@ export function GameStateTab() {
           <CardTitle className="text-[10px] font-normal">Jogadores</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 px-3 pb-2">
-          {/* Player 1 */}
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-mono font-normal text-primary">{players.player1.name}</span>
-              <Badge variant={players.player1.isAI ? 'secondary' : 'default'} className="text-xs">
-                {players.player1.isAI ? 'AI' : 'Human'}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-muted-foreground">Vidas:</span>
-              <span className="font-mono">{players.player1.lives}❤️</span>
-              <Separator orientation="vertical" className="h-3" />
-              <span className="text-muted-foreground">Moedas:</span>
-              <span className="font-mono">{players.player1.pillCoins}💰</span>
-              <Separator orientation="vertical" className="h-3" />
-              <span className="text-muted-foreground">Itens:</span>
-              <span className="font-mono">{players.player1.inventory.items.length}</span>
-            </div>
-          </div>
+          {playerIds.map((playerId, idx) => {
+            const p = players[playerId]
+            if (!p) return null
+            const isCurrent = currentTurn === playerId
+            const nameClass = idx === 0 ? 'text-primary' : 'text-foreground'
 
-          <Separator />
-
-          {/* Player 2 */}
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-mono font-normal text-destructive">{players.player2.name}</span>
-              <Badge variant={players.player2.isAI ? 'secondary' : 'default'} className="text-xs">
-                {players.player2.isAI ? 'AI' : 'Human'}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-muted-foreground">Vidas:</span>
-              <span className="font-mono">{players.player2.lives}❤️</span>
-              <Separator orientation="vertical" className="h-3" />
-              <span className="text-muted-foreground">Moedas:</span>
-              <span className="font-mono">{players.player2.pillCoins}💰</span>
-              <Separator orientation="vertical" className="h-3" />
-              <span className="text-muted-foreground">Itens:</span>
-              <span className="font-mono">{players.player2.inventory.items.length}</span>
-            </div>
-          </div>
+            return (
+              <div key={playerId}>
+                {idx !== 0 && <Separator />}
+                <div className="flex items-center justify-between mb-1 pt-1">
+                  <span className={cn('text-xs font-mono font-normal', nameClass)}>{p.name}</span>
+                  <div className="flex items-center gap-2">
+                    {isCurrent && (
+                      <Badge variant="outline" className="text-[9px] font-mono">
+                        turno
+                      </Badge>
+                    )}
+                    <Badge variant={p.isAI ? 'secondary' : 'default'} className="text-xs">
+                      {p.isAI ? 'AI' : 'Human'}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-muted-foreground">Vidas:</span>
+                  <span className="font-mono">{p.lives}</span>
+                  <Separator orientation="vertical" className="h-3" />
+                  <span className="text-muted-foreground">Moedas:</span>
+                  <span className="font-mono">{p.pillCoins}</span>
+                  <Separator orientation="vertical" className="h-3" />
+                  <span className="text-muted-foreground">Itens:</span>
+                  <span className="font-mono">{p.inventory.items.length}</span>
+                </div>
+              </div>
+            )
+          })}
         </CardContent>
       </Card>
 
@@ -159,28 +156,24 @@ export function GameStateTab() {
       </Card>
 
       {/* Shape Quests */}
-      {(shapeQuests.player1 || shapeQuests.player2) && (
+      {playerIds.some((id) => Boolean(shapeQuests[id])) && (
         <Card className="border">
           <CardHeader className="pb-1 pt-2 px-3">
             <CardTitle className="text-[10px] font-normal">Shape Quests</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1.5 text-xs px-3 pb-2">
-            {shapeQuests.player1 && (
-              <div>
-                <span className="font-mono text-primary">P1:</span>
-                <span className="ml-2">
-                  {shapeQuests.player1.sequence.join(' → ')} ({shapeQuests.player1.progress}/{shapeQuests.player1.sequence.length})
-                </span>
-              </div>
-            )}
-            {shapeQuests.player2 && (
-              <div>
-                <span className="font-mono text-destructive">P2:</span>
-                <span className="ml-2">
-                  {shapeQuests.player2.sequence.join(' → ')} ({shapeQuests.player2.progress}/{shapeQuests.player2.sequence.length})
-                </span>
-              </div>
-            )}
+            {playerIds.map((id) => {
+              const quest = shapeQuests[id]
+              if (!quest) return null
+              return (
+                <div key={id}>
+                  <span className="font-mono font-normal">{id}:</span>
+                  <span className="ml-2">
+                    {quest.sequence.join(' -> ')} ({quest.progress}/{quest.sequence.length})
+                  </span>
+                </div>
+              )
+            })}
           </CardContent>
         </Card>
       )}

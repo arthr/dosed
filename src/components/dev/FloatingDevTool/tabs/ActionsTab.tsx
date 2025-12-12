@@ -1,36 +1,11 @@
-import { useMemo, useState } from 'react'
-import { useGameStore } from '@/stores/gameStore'
-import { useToastStore } from '@/stores/toastStore'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/8bit/card'
 import { Button } from '@/components/ui/8bit/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/8bit/select'
 import { ScrollArea } from '@/components/ui/8bit/scroll-area'
 import { AlertTriangle } from 'lucide-react'
-import type { GamePhase, Player, PlayerId } from '@/types'
-
-const MAX_PLAYERS_FOR_LAYOUT_TEST: number = 4
-
-function getPlayerIndex(id: string): number {
-  const n = Number(id.replace('player', ''))
-  return Number.isFinite(n) ? n : 0
-}
-
-function createBotPlayer(id: PlayerId, template: { lives: number; resistance: number }): Player {
-  return {
-    id,
-    userId: null,
-    name: `Bot ${getPlayerIndex(id)}`,
-    lives: template.lives,
-    maxLives: template.lives,
-    resistance: template.resistance,
-    maxResistance: template.resistance,
-    isAI: true,
-    inventory: { items: [], maxItems: 5 },
-    effects: [],
-    pillCoins: 0,
-    wantsStore: false,
-  }
-}
+import type { GamePhase, PlayerId } from '@/types'
+import { useDevToolActions } from '@/hooks'
 
 /**
  * Aba de ações rápidas para debug
@@ -38,30 +13,34 @@ function createBotPlayer(id: PlayerId, template: { lives: number; resistance: nu
  */
 export function ActionsTab() {
   const [selectedPhase, setSelectedPhase] = useState<GamePhase>('playing')
-  const [selectedPlayer, setSelectedPlayer] = useState<'player1' | 'player2'>('player1')
 
-  // Game Store actions and state
-  const resetGame = useGameStore((s) => s.resetGame)
-  const setPhase = useGameStore((s) => s.setPhase)
-  const addLivesToPlayer = useGameStore((s) => s.addLivesToPlayer)
-  const forceEndRound = useGameStore((s) => s.forceEndRound)
-  const currentPhase = useGameStore((s) => s.phase)
-  const players = useGameStore((s) => s.players)
+  const {
+    currentPhase,
+    players,
+    playerIds,
+    extraBotIds,
+    resetGame,
+    setPhase,
+    addLivesToPlayer,
+    forceEndRound,
+    clearToasts,
+    showToast,
+    addBot,
+    removeBot,
+    MAX_PLAYERS_FOR_LAYOUT_TEST,
+  } = useDevToolActions()
 
-  // Toast Store actions
-  const clearToasts = useToastStore((s) => s.clear)
-  const showToast = useToastStore((s) => s.show)
+  const [selectedPlayer, setSelectedPlayer] = useState<PlayerId>('player1')
 
-  const playerIds = useMemo(() => {
-    return (Object.keys(players).sort((a, b) => getPlayerIndex(a) - getPlayerIndex(b)) as PlayerId[])
-  }, [players])
-
-  const extraBotIds = useMemo(() => {
-    return playerIds.filter((id) => getPlayerIndex(id) >= 3 && players[id]?.isAI)
-  }, [playerIds, players])
+  useEffect(() => {
+    if (playerIds.length === 0) return
+    if (!players[selectedPlayer]) {
+      setSelectedPlayer(playerIds[0])
+    }
+  }, [playerIds, players, selectedPlayer])
 
   const handleResetGame = () => {
-    if (window.confirm('⚠️ Tem certeza que deseja resetar o jogo? Esta ação não pode ser desfeita.')) {
+    if (window.confirm('Tem certeza que deseja resetar o jogo? Esta ação não pode ser desfeita.')) {
       resetGame()
       showToast({
         type: 'info',
@@ -112,117 +91,11 @@ export function ActionsTab() {
 
   const handleClearToasts = () => {
     clearToasts()
-    // Não mostra toast aqui pois acabamos de limpar todos :)
+    // Não mostra toast aqui pois acabamos de limpar todos
   }
 
-  const handleAddBot = () => {
-    const state = useGameStore.getState()
-    const ids = (Object.keys(state.players).sort((a, b) => getPlayerIndex(a) - getPlayerIndex(b)) as PlayerId[])
-
-    if (ids.length >= MAX_PLAYERS_FOR_LAYOUT_TEST) {
-      showToast({ type: 'info', message: `Limite atingido (${MAX_PLAYERS_FOR_LAYOUT_TEST} jogadores)` })
-      return
-    }
-
-    const maxIndex = ids.reduce((acc, id) => Math.max(acc, getPlayerIndex(id)), 2)
-    const nextId = `player${maxIndex + 1}` as PlayerId
-
-    const template = {
-      lives: state.players.player1?.maxLives ?? 3,
-      resistance: state.players.player1?.maxResistance ?? 6,
-    }
-
-    const bot = createBotPlayer(nextId, template)
-
-    useGameStore.setState((prev) => {
-      const nextPlayers = { ...prev.players, [nextId]: bot }
-      const nextShapeQuests = { ...prev.shapeQuests, [nextId]: null }
-      const nextItemSelectionConfirmed = { ...prev.itemSelectionConfirmed, [nextId]: false }
-      const nextRevealAtStart = { ...prev.revealAtStart, [nextId]: 0 }
-
-      const nextStoreState = prev.storeState
-        ? {
-            ...prev.storeState,
-            confirmed: { ...prev.storeState.confirmed, [nextId]: false },
-            cart: { ...prev.storeState.cart, [nextId]: [] },
-            pendingBoosts: { ...prev.storeState.pendingBoosts, [nextId]: [] },
-          }
-        : prev.storeState
-
-      return {
-        players: nextPlayers,
-        shapeQuests: nextShapeQuests,
-        itemSelectionConfirmed: nextItemSelectionConfirmed,
-        revealAtStart: nextRevealAtStart,
-        storeState: nextStoreState,
-      }
-    })
-
-    showToast({ type: 'info', message: `Bot adicionado: ${nextId}` })
-  }
-
-  const handleRemoveBot = () => {
-    const state = useGameStore.getState()
-    const ids = (Object.keys(state.players).sort((a, b) => getPlayerIndex(a) - getPlayerIndex(b)) as PlayerId[])
-
-    const removable = ids
-      .filter((id) => getPlayerIndex(id) >= 3 && state.players[id]?.isAI)
-      .sort((a, b) => getPlayerIndex(b) - getPlayerIndex(a))
-
-    const removeId = removable[0]
-    if (!removeId) {
-      showToast({ type: 'info', message: 'Nenhum bot extra para remover (apenas player1/player2)' })
-      return
-    }
-
-    useGameStore.setState((prev) => {
-      const restPlayers = { ...prev.players }
-      delete restPlayers[removeId]
-
-      const restQuests = { ...prev.shapeQuests }
-      delete restQuests[removeId]
-
-      const restConfirmed = { ...prev.itemSelectionConfirmed }
-      delete restConfirmed[removeId]
-
-      const restRevealAtStart = { ...prev.revealAtStart }
-      delete restRevealAtStart[removeId]
-
-      const nextStoreState = prev.storeState
-        ? {
-            ...prev.storeState,
-            confirmed: (() => {
-              const next = { ...prev.storeState!.confirmed }
-              delete next[removeId]
-              return next
-            })(),
-            cart: (() => {
-              const next = { ...prev.storeState!.cart }
-              delete next[removeId]
-              return next
-            })(),
-            pendingBoosts: (() => {
-              const next = { ...prev.storeState!.pendingBoosts }
-              delete next[removeId]
-              return next
-            })(),
-          }
-        : prev.storeState
-
-      const nextCurrentTurn = prev.currentTurn === removeId ? 'player1' : prev.currentTurn
-
-      return {
-        players: restPlayers,
-        shapeQuests: restQuests,
-        itemSelectionConfirmed: restConfirmed,
-        revealAtStart: restRevealAtStart,
-        storeState: nextStoreState,
-        currentTurn: nextCurrentTurn,
-      }
-    })
-
-    showToast({ type: 'info', message: `Bot removido: ${removeId}` })
-  }
+  const handleAddBot = () => addBot()
+  const handleRemoveBot = () => removeBot()
 
   return (
     <ScrollArea className="h-[450px]">
@@ -335,13 +208,16 @@ export function ActionsTab() {
           <CardTitle className="text-[10px] font-normal">Adicionar Vidas</CardTitle>
         </CardHeader>
         <CardContent className="space-y-1.5 px-3 pb-2">
-          <Select value={selectedPlayer} onValueChange={(v) => setSelectedPlayer(v as 'player1' | 'player2')}>
+          <Select value={selectedPlayer} onValueChange={(v) => setSelectedPlayer(v as PlayerId)}>
             <SelectTrigger className="w-full text-[10px]">
               <SelectValue placeholder="Selecione um jogador" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="player1">Player 1</SelectItem>
-              <SelectItem value="player2">Player 2</SelectItem>
+              {playerIds.map((id) => (
+                <SelectItem key={id} value={id}>
+                  {players[id]?.name ?? id}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Button

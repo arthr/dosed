@@ -1,13 +1,13 @@
 # Implementar Refatoracao
 
 ## Descricao
-Executa o plano de refatoracao definido em `.specs/refactor-[nome]/plan.md`, garantindo estabilidade, localizacao correta de arquivos e atualizacao da base de conhecimento.
+Executa o plano de refatoracao definido em `.specs/[nome]/plan.md`, garantindo estabilidade, localizacao correta de arquivos e atualizacao da base de conhecimento.
 
 ## Instrucoes
 
 ### 1. Contexto de Execucao
 Antes de iniciar, carregue na memoria:
-- O plano: `.specs/refactor-[nome]/plan.md`
+- O plano: `.specs/[nome]/plan.md`
 - O mapa do projeto: `@.cursor/rules/structure.md` (CRITICO: Nao crie arquivos fora das pastas permitidas).
 - As restricoes: `@.cursor/rules/tech-stack.md` (Nao instale pacotes nao planejados).
 - O historico: `@.cursor/rules/observation-log.md`.
@@ -40,7 +40,7 @@ Apos cada passo:
 
 ### 7. Finalizacao e Aprendizado
 Quando todo o plano estiver `[x]`:
-1. Delete a pasta `.specs/refactor-[nome]/`.
+1. Delete a pasta `.specs/[nome]/`.
 2. IMPORTANTE: Se voce aprendeu algo novo sobre o sistema (ex: "O store X reseta quando Y acontece"), sugira adicionar ao `@.cursor/rules/observation-log.md`.
 3. Atualize `@.cursor/rules/architecture.md` se a estrutura mudou.
 4. Sugira o commit final.

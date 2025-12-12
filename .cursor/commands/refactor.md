@@ -19,7 +19,7 @@ Analise o codigo alvo buscando problemas que aumentam a Carga Cognitiva:
 - **Complexidade Desnecessaria:** Abstracoes que nao trazem valor claro.
 
 ### 3. Definir Estrategia (Strategy)
-Crie o arquivo `.specs/refactor-[nome]/plan.md`.
+Crie o arquivo `.specs/[nome]/plan.md`.
 **IMPORTANTE:** Para um dev solo, a melhor refatoracao e aquela que torna o codigo obvio.
 
 O plano deve conter:
@@ -40,4 +40,4 @@ Antes de pedir aprovacao, verifique se o plano:
 
 ### 5. Solicitar Aprovacao
 Apresente o resumo:
-> "Plano de refatoracao validado contra as Regras de Ouro criado em `.specs/refactor-[nome]/plan.md`. Podemos prosseguir?"
+> "Plano de refatoracao validado contra as Regras de Ouro criado em `.specs/[nome]/plan.md`. Podemos prosseguir?"

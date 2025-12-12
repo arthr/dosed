@@ -46,6 +46,28 @@ export function GameBoard() {
   // Multiplayer - verifica se pode interagir
   const { isMultiplayer, isLocalTurn, canInteract, localPlayerId } = useMultiplayer()
 
+  // Preparacao para UI N-jogadores:
+  // - playerIds: ordem estavel para renderizacao (player1, player2, ...)
+  // - playerCount: quantidade de jogadores
+  // - localPid: perspectiva do jogador local (multiplayer) ou player1 (single)
+  const playerIds = useMemo(() => {
+    const toIndex = (id: string) => {
+      const n = Number(id.replace('player', ''))
+      return Number.isFinite(n) ? n : 0
+    }
+
+    return Object.keys(players)
+      .sort((a, b) => toIndex(a) - toIndex(b)) as PlayerId[]
+  }, [players])
+
+  const playerCount = playerIds.length
+  const localPid: PlayerId = isMultiplayer && localPlayerId ? localPlayerId : 'player1'
+  const remotePid = useMemo((): PlayerId => {
+    const candidate = playerIds.find((id) => id !== localPid)
+    return candidate ?? (localPid === 'player1' ? 'player2' : 'player1')
+  }, [playerIds, localPid])
+  void playerCount
+
   // Determina perspectiva: jogador local sempre e exibido como "meu" card
   // Em single player: player1 e sempre o jogador local (humano)
   // Em multiplayer: localPlayerId determina quem e o jogador local
@@ -55,15 +77,13 @@ export function GameBoard() {
     localId: PlayerId
     remoteId: PlayerId
   } => {
-    const localPid: PlayerId = isMultiplayer && localPlayerId ? localPlayerId : 'player1'
-    const remotePid: PlayerId = localPid === 'player1' ? 'player2' : 'player1'
     return {
       localPlayer: players[localPid],
       remotePlayer: players[remotePid],
       localId: localPid,
       remoteId: remotePid,
     }
-  }, [players, isMultiplayer, localPlayerId])
+  }, [players, localPid, remotePid])
 
   // Aliases para compatibilidade com o restante do codigo
   const player1 = players.player1
@@ -265,6 +285,7 @@ export function GameBoard() {
   const isQuestResetRecent = (playerId: PlayerId): boolean => {
     if (!lastQuestReset) return false
     if (lastQuestReset.playerId !== playerId) return false
+    // eslint-disable-next-line react-hooks/purity
     return Date.now() - lastQuestReset.timestamp < QUEST_RESET_ANIMATION_DURATION
   }
 

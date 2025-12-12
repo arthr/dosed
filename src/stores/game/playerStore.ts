@@ -10,9 +10,9 @@ import type {
 } from '@/types'
 import {
     createPlayerFromConfig,
-    getAlivePlayers,
     countAlivePlayers,
     isPlayerAlive,
+    getAlivePlayersUnordered,
 } from '@/utils/playerManager'
 import { applyDamage, applyHeal } from '@/utils/gameLogic'
 
@@ -473,7 +473,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     },
 
     getAlivePlayerIds: () => {
-        return getAlivePlayers(get().players)
+        return getAlivePlayersUnordered(get().players)
     },
 
     countAlive: () => {
@@ -507,7 +507,7 @@ export const usePlayer = (playerId: PlayerId) =>
  * Hook para obter IDs de jogadores vivos
  */
 export const useAlivePlayerIds = () =>
-    usePlayerStore((state) => getAlivePlayers(state.players))
+    usePlayerStore((state) => getAlivePlayersUnordered(state.players))
 
 /**
  * Hook para obter contagem de jogadores vivos

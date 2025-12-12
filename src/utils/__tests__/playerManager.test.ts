@@ -5,6 +5,7 @@ import {
     generatePlayerId,
     isValidPlayerId,
     getPlayerIds,
+    getPlayerIdsUnordered,
     getAlivePlayers,
     countAlivePlayers,
     isPlayerAlive,
@@ -124,7 +125,7 @@ describe('playerManager', () => {
         })
     })
 
-    describe('getPlayerIds', () => {
+    describe('getPlayerIdsUnordered', () => {
         const createMockPlayers = (ids: string[]): Record<string, Player> => {
             const players: Record<string, Player> = {}
             ids.forEach((id) => {
@@ -146,13 +147,47 @@ describe('playerManager', () => {
             return players
         }
 
-        it('deve retornar array ordenado de IDs', () => {
+        it('deve retornar IDs sem ordenar', () => {
+            const players = createMockPlayers(['player2', 'player1', 'player3'])
+            const ids = getPlayerIdsUnordered(players)
+            expect(ids).toEqual(['player2', 'player1', 'player3'])
+        })
+
+        it('deve retornar array vazio para objeto vazio', () => {
+            const ids = getPlayerIdsUnordered({})
+            expect(ids).toEqual([])
+        })
+    })
+
+    describe('getPlayerIds (deprecated)', () => {
+        const createMockPlayers = (ids: string[]): Record<string, Player> => {
+            const players: Record<string, Player> = {}
+            ids.forEach((id) => {
+                players[id] = {
+                    id,
+                    userId: null,
+                    name: id,
+                    lives: 3,
+                    maxLives: 3,
+                    resistance: 6,
+                    maxResistance: 6,
+                    isAI: false,
+                    inventory: { items: [], maxItems: 5 },
+                    effects: [],
+                    pillCoins: 0,
+                    wantsStore: false,
+                }
+            })
+            return players
+        }
+
+        it('deve retornar array ordenado de IDs (legado)', () => {
             const players = createMockPlayers(['player2', 'player1', 'player3'])
             const ids = getPlayerIds(players)
             expect(ids).toEqual(['player1', 'player2', 'player3'])
         })
 
-        it('deve ordenar corretamente com numeros > 9', () => {
+        it('deve ordenar corretamente com numeros > 9 (legado)', () => {
             const players = createMockPlayers(['player10', 'player2', 'player1'])
             const ids = getPlayerIds(players)
             expect(ids).toEqual(['player1', 'player2', 'player10'])

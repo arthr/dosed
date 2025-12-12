@@ -80,6 +80,24 @@ export function generatePlayerId(index: number): PlayerId {
 }
 
 /**
+ * Extrai lista de playerIds sem impor semântica de ordem.
+ *
+ * Regra de Ouro: este helper NÃO deve ordenar por PlayerId.
+ *
+ * @param players - Record de jogadores
+ * @returns Array de PlayerIds na ordem natural das chaves (sem sort)
+ *
+ * @example
+ * getPlayerIdsUnordered({ player2: ..., player1: ... })
+ * // => ['player2', 'player1'] (depende da ordem de inserção)
+ */
+export function getPlayerIdsUnordered(
+    players: Record<PlayerId, Player>
+): PlayerId[] {
+    return Object.keys(players) as PlayerId[]
+}
+
+/**
  * Extrai lista ordenada de playerIds de um Record de players
  *
  * @param players - Record de jogadores
@@ -88,11 +106,13 @@ export function generatePlayerId(index: number): PlayerId {
  * @example
  * getPlayerIds({ player2: ..., player1: ... })
  * // => ['player1', 'player2']
+ *
+ * @deprecated NUNCA use isso como fonte de ordem de UI/turnos. Use `playerOrder`.
  */
 export function getPlayerIds(
     players: Record<PlayerId, Player>
 ): PlayerId[] {
-    return Object.keys(players).sort((a, b) => {
+    return getPlayerIdsUnordered(players).sort((a, b) => {
         // Extrai numero do playerId (player1 -> 1, player2 -> 2)
         const numA = parseInt(a.replace('player', ''), 10) || 0
         const numB = parseInt(b.replace('player', ''), 10) || 0
@@ -117,7 +137,19 @@ export function getPlayerIds(
 export function getAlivePlayers(
     players: Record<PlayerId, Player>
 ): PlayerId[] {
-    return getPlayerIds(players).filter((id) => players[id].lives > 0)
+    return getAlivePlayersUnordered(players)
+}
+
+/**
+ * Filtra e retorna apenas jogadores vivos (lives > 0) sem impor ordem por PlayerId.
+ *
+ * @param players - Record de jogadores
+ * @returns Array de PlayerIds dos jogadores vivos (ordem natural das chaves)
+ */
+export function getAlivePlayersUnordered(
+    players: Record<PlayerId, Player>
+): PlayerId[] {
+    return getPlayerIdsUnordered(players).filter((id) => players[id].lives > 0)
 }
 
 /**
@@ -129,7 +161,7 @@ export function getAlivePlayers(
 export function countAlivePlayers(
     players: Record<PlayerId, Player>
 ): number {
-    return getAlivePlayers(players).length
+    return getAlivePlayersUnordered(players).length
 }
 
 /**

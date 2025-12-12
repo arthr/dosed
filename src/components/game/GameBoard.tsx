@@ -68,22 +68,23 @@ export function GameBoard() {
   }, [playerIds, localPid])
   void playerCount
 
-  // Determina perspectiva: jogador local sempre e exibido como "meu" card
-  // Em single player: player1 e sempre o jogador local (humano)
-  // Em multiplayer: localPlayerId determina quem e o jogador local
-  const { localPlayer, remotePlayer, localId, remoteId } = useMemo((): {
-    localPlayer: typeof players.player1
-    remotePlayer: typeof players.player2
-    localId: PlayerId
-    remoteId: PlayerId
-  } => {
-    return {
-      localPlayer: players[localPid],
-      remotePlayer: players[remotePid],
-      localId: localPid,
-      remoteId: remotePid,
-    }
-  }, [players, localPid, remotePid])
+  // Lista de jogadores para renderizacao (suporta 2-4)
+  const playersForRender = useMemo(() => {
+    return playerIds.map((id) => ({
+      id,
+      player: players[id],
+      isLocal: id === localPid,
+    }))
+  }, [playerIds, players, localPid])
+
+  const localPlayerData = playersForRender.find((p) => p.isLocal) ?? playersForRender[0]
+  const remotePlayers = playersForRender.filter((p) => !p.isLocal)
+
+  // Aliases temporarios (ainda usados pelo layout atual; serao removidos no Passo 4)
+  const localPlayer = localPlayerData?.player
+  const remotePlayer = remotePlayers[0]?.player ?? players[remotePid]
+  const localId: PlayerId = localPlayerData?.id ?? localPid
+  const remoteId: PlayerId = remotePlayers[0]?.id ?? remotePid
 
   // Aliases para compatibilidade com o restante do codigo
   const player1 = players.player1

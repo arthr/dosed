@@ -41,7 +41,7 @@ Adaptar a UI do `GameBoard.tsx` para suportar **2 a 4 jogadores** com a menor ca
 
 - [x] **0** Sincronizar este `plan.md` com `PLANO-REVISADO.md` (remover plano antigo)
 - [x] **1** Preparacao: extrair `playerOrder` / `playerCount` e derivar `localPid` (perspectiva do jogador local)
-- [ ] **2** Substituir logica hardcoded local/remote por lista dinamica baseada em `playerOrder`
+- [x] **2** Substituir logica hardcoded local/remote por lista dinamica baseada em `playerOrder`
 - [ ] **3** Atualizar logica de `opponentId` para N jogadores (usar `useTargetablePlayers()` + fallback seguro)
 - [ ] **4** Refatorar JSX para grid N-jogadores (Tailwind + CSS Grid), mantendo `PillPool` no centro
 - [ ] **5** Limpeza: remover codigo morto/guardas hardcoded e garantir imports consistentes

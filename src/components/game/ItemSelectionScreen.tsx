@@ -3,7 +3,7 @@ import { Check, Loader2 } from 'lucide-react'
 import type { ItemCategory, ItemType, PlayerId } from '@/types'
 import { useItemSelection, useMultiplayer } from '@/hooks'
 import { useAIItemSelection } from '@/hooks/useAIItemSelection'
-import { useGameStore } from '@/stores/gameStore'
+import { useItemSelectionState } from '@/hooks/useItemSelectionState'
 import { ItemCard } from './ItemCard'
 import {
   CATEGORY_LABELS,
@@ -45,9 +45,11 @@ export function ItemSelectionScreen() {
     inventory,
   } = useItemSelection(myPlayerId)
 
-  // Status de confirmacao (dinamico baseado nos IDs corretos)
-  const myConfirmed = useGameStore((s) => s.itemSelectionConfirmed[myPlayerId])
-  const opponentConfirmed = useGameStore((s) => s.itemSelectionConfirmed[opponentId])
+  // Estado encapsulado via hook (Regra de Ouro #2)
+  const { myConfirmed, opponentConfirmed } = useItemSelectionState(
+    myPlayerId,
+    opponentId
+  )
 
   // Ativa selecao automatica da IA (apenas em single player - hook ja tem early return)
   useAIItemSelection()

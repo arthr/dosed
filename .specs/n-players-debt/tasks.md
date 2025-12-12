@@ -31,12 +31,12 @@
 - **Critério de pronto:** `GameBoard.tsx` não usa `Object.keys(players)` para ordenar; usa um hook (`usePlayerIds()` ou `usePlayerOrderForUI()`).
 
 ### Tarefa 4 — Remover hardcodes 1v1: timer da loja
-- **Status:** PENDING
+- **Status:** DONE
 - **Objetivo:** `useStoreTimer.ts` confirmar compras no timeout para N jogadores (iterar por `playerIds`).
 - **Critério de pronto:** nenhuma referência direta a `players.player1/player2` dentro de `useStoreTimer.ts`.
 
 ### Tarefa 5 — Remover hardcodes 1v1: IA (loja + seleção inicial + contexto)
-- **Status:** TODO
+- **Status:** PENDING
 - **Objetivo:** IA não assumir `player2` como único bot.
 - **Escopo mínimo:**
   - `useAIStore.ts` e `useAIItemSelection.ts`: derivar `aiPlayerId` (primeiro `Player.isAI` em single);

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useGameStore } from '@/stores/gameStore'
+import { usePlayerIds } from '@/hooks/useGameState'
 
 interface UseStoreTimerReturn {
   /** Tempo restante em milissegundos */
@@ -21,6 +22,7 @@ export function useStoreTimer(): UseStoreTimerReturn {
   const storeState = useGameStore((s) => s.storeState)
   const confirmStorePurchases = useGameStore((s) => s.confirmStorePurchases)
   const players = useGameStore((s) => s.players)
+  const playerIds = usePlayerIds()
 
   const [remainingTime, setRemainingTime] = useState(0)
 
@@ -57,20 +59,19 @@ export function useStoreTimer(): UseStoreTimerReturn {
       if (remaining <= 0) {
         clearInterval(interval)
 
-        // Confirma para player1 se wantsStore e nao confirmou
-        if (players.player1.wantsStore && !storeState.confirmed.player1) {
-          confirmStorePurchases('player1')
-        }
-
-        // Confirma para player2 se wantsStore e nao confirmou
-        if (players.player2.wantsStore && !storeState.confirmed.player2) {
-          confirmStorePurchases('player2')
+        // Confirma automaticamente para quem ainda nao confirmou (N jogadores)
+        for (const playerId of playerIds) {
+          const wantsStore = players[playerId]?.wantsStore ?? false
+          const confirmed = storeState.confirmed[playerId] ?? false
+          if (wantsStore && !confirmed) {
+            confirmStorePurchases(playerId)
+          }
         }
       }
     }, 100)
 
     return () => clearInterval(interval)
-  }, [phase, storeState, calculateRemaining, confirmStorePurchases, players])
+  }, [phase, storeState, calculateRemaining, confirmStorePurchases, players, playerIds])
 
   // Formata tempo para exibicao (M:SS)
   const formatTime = (ms: number): string => {

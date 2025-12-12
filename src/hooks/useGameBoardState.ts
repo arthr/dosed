@@ -4,9 +4,6 @@ import { useOverlayStore } from '@/stores/overlayStore'
 /**
  * Hook para encapsular estado do GameBoard
  * 
- * Centraliza acesso aos stores conforme Regra de Ouro #2 (architecture.md):
- * "UI (Components) SÓ podem chamar Hooks. NUNCA chamam Stores diretamente."
- * 
  * Este hook agrega todos os selectors necessários para o componente GameBoard,
  * mantendo o componente desacoplado dos stores.
  * 

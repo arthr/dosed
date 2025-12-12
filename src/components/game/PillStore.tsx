@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Clock, AlertTriangle, ShoppingCart, X } from 'lucide-react'
 import type { PlayerId } from '@/types'
-import { useGameStore } from '@/stores/gameStore'
+import { usePillStoreState } from '@/hooks/usePillStoreState'
 import { useStoreTimer } from '@/hooks/useStoreTimer'
 import { STORE_ITEMS, getStoreItemById } from '@/utils/storeConfig'
 import { StoreItemCard } from './StoreItemCard'
@@ -25,11 +25,14 @@ interface PillStoreProps {
  * 3. Clica "Confirmar Compras" para processar carrinho
  */
 export function PillStore({ playerId }: PillStoreProps) {
-  const player = useGameStore((s) => s.players[playerId])
-  const storeState = useGameStore((s) => s.storeState)
-  const addToCart = useGameStore((s) => s.addToCart)
-  const removeFromCart = useGameStore((s) => s.removeFromCart)
-  const confirmStorePurchases = useGameStore((s) => s.confirmStorePurchases)
+  // Estado encapsulado via hook (Regra de Ouro #2)
+  const {
+    player,
+    storeState,
+    addToCart,
+    removeFromCart,
+    confirmStorePurchases,
+  } = usePillStoreState(playerId)
 
   const { formattedTime, progress, isActive } = useStoreTimer()
 

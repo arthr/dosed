@@ -72,7 +72,7 @@ export function GameStateTab() {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Turno:</span>
-            <Badge variant={currentTurn === 'player1' ? 'default' : 'secondary'} className="text-xs font-mono">
+            <Badge variant="outline" className="text-xs font-mono">
               {currentTurn}
             </Badge>
           </div>

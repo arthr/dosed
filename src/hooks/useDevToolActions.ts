@@ -57,10 +57,12 @@ export function useDevToolActions() {
       return
     }
 
-    const nextId = generatePlayerId(ids.length) as PlayerId
+    // Gera próximo id baseado no maior índice existente (evita colisão se ids não forem contíguos)
+    const maxIndex = ids.reduce((acc, id) => Math.max(acc, getPlayerIndex(id)), 0)
+    const nextId = generatePlayerId(maxIndex) as PlayerId
     const template = {
-      lives: state.players[ids[0] ?? 'player1']?.maxLives ?? 3,
-      resistance: state.players[ids[0] ?? 'player1']?.maxResistance ?? 6,
+      lives: state.players[ids[0] ?? generatePlayerId(0)]?.maxLives ?? 3,
+      resistance: state.players[ids[0] ?? generatePlayerId(0)]?.maxResistance ?? 6,
     }
 
     const bot = createBotPlayer(nextId, template)
@@ -139,8 +141,9 @@ export function useDevToolActions() {
           }
         : prev.storeState
 
-      const fallbackTurn = ids[0] ?? 'player1'
-      const nextCurrentTurn = prev.currentTurn === removeId ? (fallbackTurn as PlayerId) : prev.currentTurn
+      const nextIds = getPlayerIds(restPlayers)
+      const fallbackTurn = (nextIds[0] ?? generatePlayerId(0)) as PlayerId
+      const nextCurrentTurn = prev.currentTurn === removeId ? fallbackTurn : prev.currentTurn
 
       return {
         players: restPlayers,

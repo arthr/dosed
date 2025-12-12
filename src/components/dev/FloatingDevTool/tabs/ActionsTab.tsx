@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/8bit/scroll-area'
 import { AlertTriangle } from 'lucide-react'
 import type { GamePhase, PlayerId } from '@/types'
 import { useDevToolActions } from '@/hooks'
+import { generatePlayerId } from '@/utils/playerManager'
 
 /**
  * Aba de ações rápidas para debug
@@ -30,7 +31,10 @@ export function ActionsTab() {
     MAX_PLAYERS_FOR_LAYOUT_TEST,
   } = useDevToolActions()
 
-  const [selectedPlayer, setSelectedPlayer] = useState<PlayerId>('player1')
+  const [selectedPlayer, setSelectedPlayer] = useState<PlayerId>(() => {
+    // Fallback inicial (ajustado via useEffect assim que playerIds estiver disponível)
+    return generatePlayerId(0) as PlayerId
+  })
 
   useEffect(() => {
     if (playerIds.length === 0) return

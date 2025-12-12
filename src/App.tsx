@@ -3,7 +3,8 @@ import { HashRouter, Routes, Route } from 'react-router-dom'
 import { TooltipProvider } from '@/components/ui/8bit/tooltip'
 import { Button } from '@/components/ui/8bit/button'
 import { GameLayout } from '@/components/layout/GameLayout'
-import { useGameActions, useGamePhase, useGameStats, useWinner, usePlayers, useMultiplayer, useDevTool } from '@/hooks'
+import { useGameActions, useGamePhase, useGameStats, useWinner, useMultiplayer, useDevTool } from '@/hooks'
+import { useGameStore } from '@/stores/gameStore'
 import { InfoPanel } from '@/components/game/InfoPanel'
 import { GameBoard } from '@/components/game/GameBoard'
 import { ItemSelectionScreen } from '@/components/game/ItemSelectionScreen'
@@ -21,7 +22,7 @@ function GameContent() {
   const phase = useGamePhase()
   const winner = useWinner()
   const stats = useGameStats()
-  const { player1, player2 } = usePlayers()
+  const players = useGameStore((state) => state.players)
 
   // Multiplayer state
   const { isMultiplayer, room, reset: resetMultiplayer } = useMultiplayer()
@@ -39,9 +40,9 @@ function GameContent() {
   // Abre overlay de GameOver quando jogo termina
   useEffect(() => {
     if (phase === 'ended' && winner !== null) {
-      openGameOver(winner, { player1, player2 }, stats)
+      openGameOver(winner, players, stats)
     }
-  }, [phase, winner, player1, player2, stats, openGameOver])
+  }, [phase, winner, players, stats, openGameOver])
 
   // Se multiplayer e sala esta em waiting (host aguardando guest)
   if (isMultiplayer && room?.status === 'waiting') {

@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useGameStore } from '@/stores/gameStore'
-import type { GameConfig } from '@/types'
+import type { GameConfig, PlayerId } from '@/types'
 
 /**
  * Hook que encapsula todas as actions do jogo
@@ -46,7 +46,7 @@ export function useGameActions() {
   }, [resetRound])
 
   const finishGame = useCallback(
-    (winnerId: 'player1' | 'player2') => {
+    (winnerId: PlayerId) => {
       endGame(winnerId)
     },
     [endGame]

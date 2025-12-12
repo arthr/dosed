@@ -206,14 +206,11 @@ function decrementPlayerEffects(player: Player): Player {
 const initialState: GameState = {
   phase: 'setup',
   turnPhase: 'consume',
-  currentTurn: 'player1',
+  currentTurn: '' as PlayerId, // Sera definido no initGame()
   difficulty: 'normal' as DifficultyLevel,
   mode: 'single_player',
   roomId: null,
-  players: {
-    player1: createPlayer('player1', 'Player 1', 3, 6, false),
-    player2: createPlayer('player2', 'Player 2', 3, 6, true),
-  },
+  players: {}, // Sera populado no initGame()
   pillPool: [],
   typeCounts: {
     SAFE: 0,
@@ -290,20 +287,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
       playerOrder = [player1Id, player2Id]
     }
 
+    // ✅ CORREÇÃO: Configuração flexível por índice, mantém retrocompatibilidade
+    const playerConfigs = [
+      finalConfig.player1 || { name: 'Player 1', isAI: false },
+      finalConfig.player2 || { name: 'Player 2', isAI: true }
+    ]
+
     const player1 = createPlayer(
       player1Id,
-      finalConfig.player1.name,
+      playerConfigs[0].name,
       finalConfig.startingLives,
       finalConfig.startingResistance,
-      finalConfig.player1.isAI
+      playerConfigs[0].isAI
     )
 
     const player2 = createPlayer(
       player2Id,
-      finalConfig.player2.name,
+      playerConfigs[1].name,
       finalConfig.startingLives,
       finalConfig.startingResistance,
-      finalConfig.player2.isAI
+      playerConfigs[1].isAI
     )
 
     // Em multiplayer com syncData (guest), usa dados do host
@@ -1008,8 +1011,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     // Se apenas este jogador confirmou, aguarda o outro
-    // TODO: Usar itemUsageStore.isAllConfirmed() quando initializeForPlayers for integrado (Batch 3.1)
-    if (!newConfirmed.player1 || !newConfirmed.player2) {
+    // CORREÇÃO: Usar playerOrder em vez de hardcode player1/player2
+    const playerOrder = useGameFlowStore.getState().playerOrder
+    const allConfirmed = playerOrder.every(playerId => newConfirmed[playerId])
+    
+    if (!allConfirmed) {
       set({ itemSelectionConfirmed: newConfirmed })
       return
     }
@@ -1570,11 +1576,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const state = get()
     const { players } = state
 
-    // Verifica se alguem quer ir a loja E tem coins
-    const p1Wants = players.player1.wantsStore && players.player1.pillCoins > 0
-    const p2Wants = players.player2.wantsStore && players.player2.pillCoins > 0
+    // CORREÇÃO: Usar playerOrder em vez de hardcode player1/player2
+    const playerOrder = useGameFlowStore.getState().playerOrder
+    const someoneWantsStore = playerOrder.some(playerId => {
+      const player = players[playerId]
+      return player && player.wantsStore && player.pillCoins > 0
+    })
 
-    if (p1Wants || p2Wants) {
+    if (someoneWantsStore) {
       const orderFromStore = useGameFlowStore.getState().playerOrder
       const fallbackIds = Object.keys(players) as PlayerId[]
       const playerIds = (orderFromStore.length > 0 ? orderFromStore : fallbackIds)

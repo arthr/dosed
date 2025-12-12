@@ -19,10 +19,7 @@ export interface PillRevealData {
  */
 export interface GameOverData {
   winner: PlayerId | null
-  players: {
-    player1: Player
-    player2: Player
-  }
+  players: Record<PlayerId, Player>
   stats: GameStats
 }
 
@@ -70,7 +67,7 @@ interface OverlayStore {
    */
   openGameOver: (
     winner: PlayerId | null,
-    players: { player1: Player; player2: Player },
+    players: Record<PlayerId, Player>,
     stats: GameStats
   ) => void
 

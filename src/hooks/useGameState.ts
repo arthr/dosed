@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useGameStore } from '@/stores/gameStore'
-import { useGameFlowStore } from '@/stores/game/gameFlowStore'
+import { useGameFlowStore, usePlayerOrder } from '@/stores/game/gameFlowStore'
 import { getTargetablePlayers } from '@/utils/turnManager'
 import type { Player, PlayerId } from '@/types'
 
@@ -139,12 +139,18 @@ export function useIsPlayerAlive(playerId: PlayerId): boolean {
 }
 
 /**
- * @deprecated Use usePlayersArray() para N-player support
- * Hook para obter ambos os jogadores (retrocompatibilidade 2 players)
+ * @deprecated Use usePlayersArray() para suporte dinâmico a N players
+ * Hook legado para obter jogadores por posição (assume 2 jogadores)
+ * Retorna primeiro e segundo jogador baseado em playerOrder
  */
 export function usePlayers() {
-    const player1 = useGameStore((state) => state.players.player1)
-    const player2 = useGameStore((state) => state.players.player2)
+    const players = useGameStore((state) => state.players)
+    const playerOrder = usePlayerOrder()
+    
+    // Retorna primeiro e segundo jogador baseado em playerOrder (não em chaves hardcoded)
+    const player1 = playerOrder[0] ? players[playerOrder[0]] : undefined
+    const player2 = playerOrder[1] ? players[playerOrder[1]] : undefined
+    
     return { player1, player2 }
 }
 

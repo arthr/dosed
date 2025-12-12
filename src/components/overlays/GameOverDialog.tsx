@@ -42,7 +42,7 @@ interface StatCardProps {
 interface GameOverDialogProps {
   /** ID do jogador vencedor */
   winner: PlayerId | null
-  /** Dados dos jogadores */
+  /** Dados dos jogadores (Record indexado por PlayerId UUID) */
   players: Record<PlayerId, Player>
   /** Estatisticas do jogo */
   stats: GameStats
@@ -249,7 +249,7 @@ export function GameOverDialog({
               <div className="flex items-center gap-1.5">
                 <div className="size-1.5 sm:size-2 bg-primary animate-pulse" />
                 <span className="text-primary font-normal truncate max-w-[80px] sm:max-w-none">
-                  {players.player1.name}
+                  {playerIds[0] ? players[playerIds[0]]?.name : 'Player 1'}
                 </span>
               </div>
 
@@ -267,7 +267,7 @@ export function GameOverDialog({
                     !isHumanWinner ? 'text-destructive' : isAiPlayer ? 'text-accent' : 'text-muted-foreground',
                   )}
                 >
-                  {players.player2.name}
+                  {playerIds[1] ? players[playerIds[1]]?.name : 'Player 2'}
                 </span>
                 <div
                   className={cn(

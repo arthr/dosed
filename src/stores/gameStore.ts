@@ -36,6 +36,7 @@ import { ITEM_CATALOG } from '@/utils/itemCatalog'
 import { POCKET_PILL_HEAL } from '@/utils/itemLogic'
 import { generateShapeQuest, checkQuestProgress } from '@/utils/questGenerator'
 import { DEFAULT_STORE_CONFIG, getStoreItemById } from '@/utils/storeConfig'
+import { getNextTurn, getTargetablePlayers } from '@/utils/turnManager'
 import { useToastStore } from '@/stores/toastStore'
 
 // ============ MULTIPLAYER SYNC ============
@@ -558,9 +559,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return
     }
 
-    // Fluxo normal: determina proximo jogador
-    const nextPlayerId: PlayerId =
-      state.currentTurn === 'player1' ? 'player2' : 'player1'
+    // Fluxo normal: determina proximo jogador usando turnManager
+    const allPlayerIds = Object.keys(state.players) as PlayerId[]
+    const alivePlayerIds = allPlayerIds.filter(id => state.players[id].lives > 0)
+    const nextPlayerId = getNextTurn(state.currentTurn, allPlayerIds, alivePlayerIds)
+    
     let nextPlayer = state.players[nextPlayerId]
     let actualNextTurn = nextPlayerId
 
@@ -2224,8 +2227,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
    */
   getOpponent: () => {
     const state = get()
-    const opponentId: PlayerId =
-      state.currentTurn === 'player1' ? 'player2' : 'player1'
+    const allPlayerIds = Object.keys(state.players) as PlayerId[]
+    const alivePlayerIds = allPlayerIds.filter(id => state.players[id].lives > 0)
+    const targetable = getTargetablePlayers(state.currentTurn, allPlayerIds, alivePlayerIds)
+    const opponentId = targetable[0] ?? allPlayerIds[0] // Primeiro alvo ou fallback
     return state.players[opponentId]
   },
 
@@ -2298,11 +2303,14 @@ export const useCurrentPlayer = () =>
 
 /**
  * Hook para selecionar o oponente
+ * @deprecated Use useTargetablePlayers() de '@/hooks/useTargetablePlayers' para N-player
  */
 export const useOpponent = () =>
   useGameStore((state) => {
-    const opponentId: PlayerId =
-      state.currentTurn === 'player1' ? 'player2' : 'player1'
+    const allPlayerIds = Object.keys(state.players) as PlayerId[]
+    const alivePlayerIds = allPlayerIds.filter(id => state.players[id].lives > 0)
+    const targetable = getTargetablePlayers(state.currentTurn, allPlayerIds, alivePlayerIds)
+    const opponentId = targetable[0] ?? allPlayerIds[0]
     return state.players[opponentId]
   })
 

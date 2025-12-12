@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useGameStore } from '@/stores/gameStore'
 import { getAlivePlayers, getPlayerIds } from '@/utils/playerManager'
+import { getTargetablePlayers } from '@/utils/turnManager'
 import type { Player, PlayerId } from '@/types'
 
 /**
@@ -85,11 +86,16 @@ export function useAliveCount(): number {
  * Hook para obter o oponente do turno atual (apenas 2 jogadores)
  */
 export function useOpponent(): Player {
-    return useGameStore((state) => {
-        const opponentId: PlayerId =
-            state.currentTurn === 'player1' ? 'player2' : 'player1'
-        return state.players[opponentId]
-    })
+    const currentTurn = useGameStore((state) => state.currentTurn)
+    const players = useGameStore((state) => state.players)
+    
+    return useMemo(() => {
+        const allPlayerIds = Object.keys(players) as PlayerId[]
+        const alivePlayerIds = allPlayerIds.filter(id => players[id].lives > 0)
+        const targetable = getTargetablePlayers(currentTurn, allPlayerIds, alivePlayerIds)
+        const opponentId = targetable[0] ?? allPlayerIds[0]
+        return players[opponentId]
+    }, [currentTurn, players])
 }
 
 /**

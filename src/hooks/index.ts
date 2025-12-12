@@ -11,6 +11,7 @@ export {
   useTypeCounts,
   usePlayer,
   useCurrentPlayer,
+  usePlayerIds,
   useOpponent,
   useIsHumanTurn,
   usePlayers,

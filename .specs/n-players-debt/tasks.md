@@ -26,12 +26,12 @@
 - **Critério de pronto:** nenhum import de `@/utils/itemCatalog`/`@/utils/storeConfig` em `src/components/`.
 
 ### Tarefa 3 — Ordenação de players na UI (fonte única)
-- **Status:** PENDING
+- **Status:** DONE
 - **Objetivo:** padronizar `playerIds` no `GameBoard` via hooks/`getPlayerIds`, removendo reimplementações locais.
 - **Critério de pronto:** `GameBoard.tsx` não usa `Object.keys(players)` para ordenar; usa um hook (`usePlayerIds()` ou `usePlayerOrderForUI()`).
 
 ### Tarefa 4 — Remover hardcodes 1v1: timer da loja
-- **Status:** TODO
+- **Status:** PENDING
 - **Objetivo:** `useStoreTimer.ts` confirmar compras no timeout para N jogadores (iterar por `playerIds`).
 - **Critério de pronto:** nenhuma referência direta a `players.player1/player2` dentro de `useStoreTimer.ts`.
 

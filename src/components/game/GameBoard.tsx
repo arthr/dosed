@@ -4,7 +4,7 @@ import { useGameBoardState } from '@/hooks/useGameBoardState'
 import { usePillConsumption } from '@/hooks/usePillConsumption'
 import { useAIPlayer } from '@/hooks/useAIPlayer'
 import { useAIStore } from '@/hooks/useAIStore'
-import { useItemUsage, useToast, useMultiplayer } from '@/hooks'
+import { useItemUsage, useToast, useMultiplayer, usePlayerIds } from '@/hooks'
 import { useTargetablePlayers } from '@/hooks/useTargetablePlayers'
 import { AnimatedPlayerArea } from './AnimatedPlayerArea'
 import { PillPool } from './PillPool'
@@ -53,15 +53,7 @@ export function GameBoard() {
   // - playerIds: ordem estavel para renderizacao (player1, player2, ...)
   // - playerCount: quantidade de jogadores
   // - localPid: perspectiva do jogador local (multiplayer) ou player1 (single)
-  const playerIds = useMemo(() => {
-    const toIndex = (id: string) => {
-      const n = Number(id.replace('player', ''))
-      return Number.isFinite(n) ? n : 0
-    }
-
-    return Object.keys(players)
-      .sort((a, b) => toIndex(a) - toIndex(b)) as PlayerId[]
-  }, [players])
+  const playerIds = usePlayerIds()
 
   const playerCount = playerIds.length
   const rawLocalPid: PlayerId = isMultiplayer && localPlayerId ? localPlayerId : 'player1'
@@ -70,7 +62,8 @@ export function GameBoard() {
     : (playerIds[0] ?? rawLocalPid)
   const remotePid = useMemo((): PlayerId => {
     const candidate = playerIds.find((id) => id !== localPid)
-    return candidate ?? (localPid === 'player1' ? 'player2' : 'player1')
+    // Evita "inventar" player2 quando não existir (ex.: estados incompletos/tests)
+    return candidate ?? (playerIds[0] ?? localPid)
   }, [playerIds, localPid])
 
   // Lista de jogadores para renderizacao (suporta 2-4)
@@ -131,7 +124,7 @@ export function GameBoard() {
 
   // Determina ID do oponente usando hook (suporta N-jogadores)
   const targetablePlayers = useTargetablePlayers()
-  const opponentId = targetablePlayers[0] ?? remotePlayers[0]?.id ?? 'player2' // Primeiro alvo ou fallback
+  const opponentId = targetablePlayers[0] ?? remotePlayers[0]?.id ?? remotePid // Primeiro alvo ou fallback
 
   /**
    * Wrapper para executar item com feedback visual

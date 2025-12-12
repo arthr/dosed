@@ -1,7 +1,6 @@
 import { AnimatePresence } from 'framer-motion'
 import { useOverlayStore } from '@/stores/overlayStore'
-import { useGameStore } from '@/stores/gameStore'
-import { useMultiplayerStore } from '@/stores/multiplayerStore'
+import { useOverlayState } from '@/hooks/useOverlayState'
 import { useMultiplayer } from '@/hooks'
 import { PillReveal } from './PillReveal'
 import { GameOverDialog } from './GameOverDialog'
@@ -25,21 +24,19 @@ export function OverlayManager() {
   const itemEffectData = useOverlayStore((s) => s.itemEffectData)
   const close = useOverlayStore((s) => s.close)
 
-  // Estado do jogo para fase shopping
-  const gamePhase = useGameStore((s) => s.phase)
-  const players = useGameStore((s) => s.players)
-
-  // Actions do game store para restart
-  const resetGame = useGameStore((s) => s.resetGame)
+  // Estado encapsulado via hook (Regra de Ouro #2)
+  const {
+    gamePhase,
+    players,
+    resetGame,
+    rematchState,
+    requestRematch,
+    acceptRematch,
+    declineRematch,
+  } = useOverlayState()
 
   // Contexto multiplayer
   const { isMultiplayer, localPlayerId } = useMultiplayer()
-  
-  // Estado e actions de rematch
-  const rematchState = useMultiplayerStore((s) => s.rematchState)
-  const requestRematch = useMultiplayerStore((s) => s.requestRematch)
-  const acceptRematch = useMultiplayerStore((s) => s.acceptRematch)
-  const declineRematch = useMultiplayerStore((s) => s.declineRematch)
 
   // Determina qual jogador local esta na fase shopping
   // Em multiplayer: usa localPlayerId

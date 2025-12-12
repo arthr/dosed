@@ -26,10 +26,17 @@ export const buttonVariants = cva("", {
       lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
       icon: "size-9",
     },
+    borderSize: {
+      sm: "",
+      md: "",
+      lg: "",
+      xl: "",
+    },
   },
   defaultVariants: {
     variant: "default",
     size: "default",
+    borderSize: "md",
   },
 });
 
@@ -40,8 +47,135 @@ export interface BitButtonProps
   ref?: React.Ref<HTMLButtonElement>;
 }
 
+const borderSizeMap = {
+  sm: {
+    pixel: 4,
+    cornerClass: "size-0.5",
+    heightClass: "h-0.5",
+    widthClass: "w-0.5",
+  },
+  md: {
+    pixel: 6,
+    cornerClass: "size-1.5",
+    heightClass: "h-1.5",
+    widthClass: "w-1.5",
+  },
+  lg: {
+    pixel: 8,
+    cornerClass: "size-2",
+    heightClass: "h-2",
+    widthClass: "w-2",
+  },
+  xl: {
+    pixel: 10,
+    cornerClass: "size-2.5",
+    heightClass: "h-2.5",
+    widthClass: "w-2.5",
+  },
+};
+
+interface PixelatedBorderProps {
+  variant: BitButtonProps["variant"];
+  borderSize: keyof typeof borderSizeMap;
+}
+
+function PixelatedBorder({ variant, borderSize }: PixelatedBorderProps) {
+  const border = borderSizeMap[borderSize];
+  const offset = border.pixel;
+  const heightCalc = `calc(100% - ${offset * 2}px)`;
+
+  return (
+    <>
+      {/* Top borders */}
+      <div
+        className={cn("absolute w-1/2 bg-foreground dark:bg-ring", border.heightClass)}
+        style={{ top: -offset, left: offset }}
+      />
+      <div
+        className={cn("absolute w-1/2 bg-foreground dark:bg-ring", border.heightClass)}
+        style={{ top: -offset, right: offset }}
+      />
+
+      {/* Bottom borders */}
+      <div
+        className={cn("absolute w-1/2 bg-foreground dark:bg-ring", border.heightClass)}
+        style={{ bottom: -offset, left: offset }}
+      />
+      <div
+        className={cn("absolute w-1/2 bg-foreground dark:bg-ring", border.heightClass)}
+        style={{ bottom: -offset, right: offset }}
+      />
+
+      {/* Corners */}
+      <div className={cn("absolute top-0 left-0 bg-foreground dark:bg-ring", border.cornerClass)} />
+      <div className={cn("absolute top-0 right-0 bg-foreground dark:bg-ring", border.cornerClass)} />
+      <div className={cn("absolute bottom-0 left-0 bg-foreground dark:bg-ring", border.cornerClass)} />
+      <div className={cn("absolute bottom-0 right-0 bg-foreground dark:bg-ring", border.cornerClass)} />
+
+      {/* Side borders */}
+      <div
+        className={cn("absolute bg-foreground dark:bg-ring", border.widthClass)}
+        style={{ top: offset, left: -offset, height: heightCalc }}
+      />
+      <div
+        className={cn("absolute bg-foreground dark:bg-ring", border.widthClass)}
+        style={{ top: offset, right: -offset, height: heightCalc }}
+      />
+
+      {/* Shadows */}
+      {variant !== "outline" && (
+        <>
+          <div className={cn("absolute top-0 left-0 w-full bg-foreground/20", border.heightClass)} />
+          <div className={cn("absolute left-0 w-3 bg-foreground/20", border.heightClass)} style={{ top: offset }} />
+          <div className={cn("absolute bottom-0 left-0 w-full bg-foreground/20", border.heightClass)} />
+          <div className={cn("absolute right-0 w-3 bg-foreground/20", border.heightClass)} style={{ bottom: offset }} />
+        </>
+      )}
+    </>
+  );
+}
+
+interface IconBorderProps {
+  borderSize: keyof typeof borderSizeMap;
+}
+
+function IconBorder({ borderSize }: IconBorderProps) {
+  const border = borderSizeMap[borderSize];
+  const offset = border.pixel / 2;
+
+  return (
+    <>
+      <div
+        className="absolute top-0 left-0 w-full bg-foreground dark:bg-ring pointer-events-none"
+        style={{ height: offset }}
+      />
+      <div
+        className="absolute bottom-0 w-full bg-foreground dark:bg-ring pointer-events-none"
+        style={{ height: offset }}
+      />
+      <div
+        className="absolute h-1/2 bg-foreground dark:bg-ring pointer-events-none"
+        style={{ top: offset, left: -offset, width: offset }}
+      />
+      <div
+        className="absolute h-1/2 bg-foreground dark:bg-ring pointer-events-none"
+        style={{ bottom: offset, left: -offset, width: offset }}
+      />
+      <div
+        className="absolute h-1/2 bg-foreground dark:bg-ring pointer-events-none"
+        style={{ top: offset, right: -offset, width: offset }}
+      />
+      <div
+        className="absolute h-1/2 bg-foreground dark:bg-ring pointer-events-none"
+        style={{ bottom: offset, right: -offset, width: offset }}
+      />
+    </>
+  );
+}
+
 function Button({ children, asChild, ...props }: BitButtonProps) {
-  const { variant, size, className, font } = props;
+  const { variant, size, className, font, borderSize } = props;
+  const finalBorderSize = (borderSize || "md") as keyof typeof borderSizeMap;
 
   return (
     <ShadcnButton
@@ -60,84 +194,20 @@ function Button({ children, asChild, ...props }: BitButtonProps) {
           {children}
 
           {variant !== "ghost" && variant !== "link" && size !== "icon" && (
-            <>
-              {/* Pixelated border */}
-              <div className="absolute -top-1.5 w-1/2 left-1.5 h-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute -top-1.5 w-1/2 right-1.5 h-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute -bottom-1.5 w-1/2 left-1.5 h-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute -bottom-1.5 w-1/2 right-1.5 h-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute top-0 left-0 size-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute top-0 right-0 size-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute bottom-0 left-0 size-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute bottom-0 right-0 size-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute top-1.5 -left-1.5 h-[calc(100%-12px)] w-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute top-1.5 -right-1.5 h-[calc(100%-12px)] w-1.5 bg-foreground dark:bg-ring" />
-              {variant !== "outline" && (
-                <>
-                  {/* Top shadow */}
-                  <div className="absolute top-0 left-0 w-full h-1.5 bg-foreground/20" />
-                  <div className="absolute top-1.5 left-0 w-3 h-1.5 bg-foreground/20" />
-
-                  {/* Bottom shadow */}
-                  <div className="absolute bottom-0 left-0 w-full h-1.5 bg-foreground/20" />
-                  <div className="absolute bottom-1.5 right-0 w-3 h-1.5 bg-foreground/20" />
-                </>
-              )}
-            </>
+            <PixelatedBorder variant={variant} borderSize={finalBorderSize} />
           )}
 
-          {size === "icon" && (
-            <>
-              <div className="absolute top-0 left-0 w-full h-[5px] md:h-1.5 bg-foreground dark:bg-ring pointer-events-none" />
-              <div className="absolute bottom-0 w-full h-[5px] md:h-1.5 bg-foreground dark:bg-ring pointer-events-none" />
-              <div className="absolute top-1 -left-1 w-[5px] md:w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none" />
-              <div className="absolute bottom-1 -left-1 w-[5px] md:w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none" />
-              <div className="absolute top-1 -right-1 w-[5px] md:w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none" />
-              <div className="absolute bottom-1 -right-1 w-[5px] md:w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none" />
-            </>
-          )}
+          {size === "icon" && <IconBorder borderSize={finalBorderSize} />}
         </span>
       ) : (
         <>
           {children}
 
           {variant !== "ghost" && variant !== "link" && size !== "icon" && (
-            <>
-              {/* Pixelated border */}
-              <div className="absolute -top-1.5 w-1/2 left-1.5 h-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute -top-1.5 w-1/2 right-1.5 h-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute -bottom-1.5 w-1/2 left-1.5 h-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute -bottom-1.5 w-1/2 right-1.5 h-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute top-0 left-0 size-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute top-0 right-0 size-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute bottom-0 left-0 size-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute bottom-0 right-0 size-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute top-1.5 -left-1.5 h-[calc(100%-12px)] w-1.5 bg-foreground dark:bg-ring" />
-              <div className="absolute top-1.5 -right-1.5 h-[calc(100%-12px)] w-1.5 bg-foreground dark:bg-ring" />
-              {variant !== "outline" && (
-                <>
-                  {/* Top shadow */}
-                  <div className="absolute top-0 left-0 w-full h-1.5 bg-foreground/20" />
-                  <div className="absolute top-1.5 left-0 w-3 h-1.5 bg-foreground/20" />
-
-                  {/* Bottom shadow */}
-                  <div className="absolute bottom-0 left-0 w-full h-1.5 bg-foreground/20" />
-                  <div className="absolute bottom-1.5 right-0 w-3 h-1.5 bg-foreground/20" />
-                </>
-              )}
-            </>
+            <PixelatedBorder variant={variant} borderSize={finalBorderSize} />
           )}
 
-          {size === "icon" && (
-            <>
-              <div className="absolute top-0 left-0 w-full h-[5px] md:h-1.5 bg-foreground dark:bg-ring pointer-events-none" />
-              <div className="absolute bottom-0 w-full h-[5px] md:h-1.5 bg-foreground dark:bg-ring pointer-events-none" />
-              <div className="absolute top-1 -left-1 w-[5px] md:w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none" />
-              <div className="absolute bottom-1 -left-1 w-[5px] md:w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none" />
-              <div className="absolute top-1 -right-1 w-[5px] md:w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none" />
-              <div className="absolute bottom-1 -right-1 w-[5px] md:w-1.5 h-1/2 bg-foreground dark:bg-ring pointer-events-none" />
-            </>
-          )}
+          {size === "icon" && <IconBorder borderSize={finalBorderSize} />}
         </>
       )}
     </ShadcnButton>

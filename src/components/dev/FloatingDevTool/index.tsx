@@ -4,6 +4,10 @@ import { useDevToolStore } from '@/stores/devToolStore'
 import { DevToolHeader } from './DevToolHeader'
 import { DevToolTabs } from './DevToolTabs'
 import { GameStateTab } from './tabs/GameStateTab'
+import { MultiplayerTab } from './tabs/MultiplayerTab'
+import { StoresTab } from './tabs/StoresTab'
+import { ActionsTab } from './tabs/ActionsTab'
+import { LogsTab } from './tabs/LogsTab'
 import { cn } from '@/lib/utils'
 
 /**
@@ -107,13 +111,13 @@ export function FloatingDevTool() {
           position: 'fixed',
           left: position.x,
           top: position.y,
-          zIndex: 9999,
+          zIndex: 50,
         }}
         className={cn(
-          'bg-background border-4 border-foreground shadow-2xl',
+          'bg-background border-2 border-border shadow-xl',
           'w-auto max-w-[460px]',
           isDragging && 'cursor-move',
-          isMinimized ? 'h-auto' : 'h-[500px]'
+          isMinimized ? 'h-auto' : 'h-[520px]'
         )}
       >
         {/* Header */}
@@ -128,18 +132,10 @@ export function FloatingDevTool() {
             {/* Tab Content */}
             <div className="bg-background">
               {activeTab === 'game' && <GameStateTab />}
-              {activeTab === 'multiplayer' && (
-                <div className="p-4 text-xs text-muted-foreground italic">Em desenvolvimento...</div>
-              )}
-              {activeTab === 'stores' && (
-                <div className="p-4 text-xs text-muted-foreground italic">Em desenvolvimento...</div>
-              )}
-              {activeTab === 'actions' && (
-                <div className="p-4 text-xs text-muted-foreground italic">Em desenvolvimento...</div>
-              )}
-              {activeTab === 'logs' && (
-                <div className="p-4 text-xs text-muted-foreground italic">Em desenvolvimento...</div>
-              )}
+              {activeTab === 'multiplayer' && <MultiplayerTab />}
+              {activeTab === 'stores' && <StoresTab />}
+              {activeTab === 'actions' && <ActionsTab />}
+              {activeTab === 'logs' && <LogsTab />}
             </div>
           </>
         )}

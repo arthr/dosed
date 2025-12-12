@@ -19,17 +19,17 @@ const TABS: { id: DevToolTab; label: string }[] = [
  */
 export function DevToolTabs({ activeTab, onTabChange }: DevToolTabsProps) {
   return (
-    <div className="flex border-b-2 border-foreground bg-muted/20">
+    <div className="flex border-b border-border bg-muted/20">
       {TABS.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
           className={cn(
-            'px-3 py-2 text-xs font-mono uppercase tracking-wider transition-colors',
+            'px-2.5 py-1.5 text-[8px] font-mono uppercase tracking-wider transition-colors',
             'hover:bg-muted/40',
-            'border-r-2 border-foreground last:border-r-0',
+            'border-r border-border last:border-r-0',
             activeTab === tab.id
-              ? 'bg-background text-foreground font-bold'
+              ? 'bg-background text-foreground font-normal'
               : 'bg-muted/10 text-muted-foreground'
           )}
         >

@@ -155,7 +155,7 @@ export function WaitingRoom({ onCancel }: WaitingRoomProps) {
                 <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
                   Codigo da Sala
                 </p>
-                <p className="text-4xl font-mono font-bold tracking-[0.3em] text-primary">
+                <p className="text-4xl font-mono font-normal tracking-[0.3em] text-primary">
                   {formattedCode}
                 </p>
               </div>

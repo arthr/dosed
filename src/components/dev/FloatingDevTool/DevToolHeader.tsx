@@ -13,12 +13,12 @@ interface DevToolHeaderProps {
 export function DevToolHeader({ onMinimize, onClose, onDragStart }: DevToolHeaderProps) {
   return (
     <div
-      className="flex items-center justify-between px-3 py-2 bg-primary text-primary-foreground border-b-2 border-foreground cursor-move select-none"
+      className="flex items-center justify-between px-3 py-2 bg-primary text-primary-foreground border-b border-border cursor-move select-none"
       onMouseDown={onDragStart}
     >
       <div className="flex items-center gap-2">
-        <span className="text-sm font-mono font-bold tracking-wider">🛠️ DEV TOOL</span>
-        <span className="text-xs opacity-70">(CTRL+SHIFT+D)</span>
+        <span className="text-xs font-mono font-normal tracking-wider">🛠️ DEV TOOL</span>
+        <span className="text-[10px] opacity-70">(CTRL+SHIFT+D)</span>
       </div>
 
       <div className="flex items-center gap-1">

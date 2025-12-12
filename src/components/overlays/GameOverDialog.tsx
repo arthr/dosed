@@ -357,7 +357,7 @@ export function GameOverDialog({
             {/* Variante 3: OPONENTE solicitou - posso aceitar/recusar */}
             {opponentRequested && (
               <div className="text-center space-y-3">
-                <p className="text-sm sm:text-base font-mono text-primary font-bold">
+                <p className="text-sm sm:text-base font-mono text-primary font-normal">
                   Oponente quer jogar novamente!
                 </p>
                 <div className="flex gap-2">

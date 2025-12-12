@@ -1,10 +1,20 @@
-# BUG's
+# ✅ BUG's CORRIGIDOS
 
-1. *Item* - **Scanner X2:** não revela as pilulas igualmente para os jogadores. Cada um vê pilulas reveladas diferentes.
-2. *UI/State* - **Wants Store Toggle:** jogador pode clicar em ambos toggles ativando indevidamente o Wants Store do adversário.
+1. ✅ *Item* - **Scanner X2:** não revela as pilulas igualmente para os jogadores. Cada um vê pilulas reveladas diferentes.
+   - **Solução:** Implementado sincronização via `pillsToReveal` no evento `round_reset`
+   - **Arquivos:** `gameStore.ts`, `multiplayerStore.ts`, `types/sync.ts`
+   - **Data:** 2024-12-11
 
+2. ✅ *UI/State* - **Wants Store Toggle:** jogador pode clicar em ambos toggles ativando indevidamente o Wants Store do adversário.
+   - **Solução:** Desabilitado `onToggleStore` para jogador remoto
+   - **Arquivos:** `GameBoard.tsx`
+   - **Data:** 2024-12-11
 
-# Pontos de Atenção para Revisão
+3. ✅ *Multiplayer* - **GameOver:** Ao final da partida, refatorar fluxo de sair/nova partida entre jogadores.
+   - **Solução:** Implementado fluxo completo de Rematch com eventos `rematch_requested`, `rematch_accepted`, `rematch_declined`
+   - **Arquivos:** `multiplayerStore.ts`, `GameOverDialog.tsx`, `OverlayManager.tsx`, `App.tsx`, tipos
+   - **Data:** 2024-12-11
 
-1. *Multiplayer* - **GameOver:** Ao final da partida, refatorar fluxo de sair/nova partida entre jogadores.
-> Atualmente quando jogador "Guest" clica em jogar novamente ou no "X" ele é enviado para tela inicial (reseta gameState), enquanto o "Host" visualiza a tela de "Iniciando partida... Aguarde enquanto o jogo e preparado". Quando o "Guest" tenta iniciar uma nova partida é exibida a tela de oponente "Conexão perdida. Tentando reconectar..." e não consegue se conectar corretamente enquanto não clicar em "Encerrar" e tentar conectar na sala novamente com o código. Após a reconexão o game entra na fase de escolha de itens inicial o guest recebe os eventos corretamente após confirmar a escolha e o host também, a partida para ele se inicia corretamente mas para o Host não, ele não recebe a confirmação de escolha de itens do oponente e fica preso aguardando a confirmação dele.
+---
+
+**Referência:** Ver detalhes completos em `.specs/refactor-game-store/PLANO-CORRECOES.md`

@@ -70,7 +70,7 @@ export function DisconnectedOverlay() {
 
                 {/* Mensagem */}
                 <div className="text-center space-y-2">
-                  <h2 className="text-xl font-bold">
+                  <h2 className="text-xl font-normal">
                     {isLocalIssue ? 'Conexao Perdida' : 'Oponente Desconectado'}
                   </h2>
                   <p className="text-sm text-muted-foreground">
@@ -85,7 +85,7 @@ export function DisconnectedOverlay() {
                   <p className="text-sm text-muted-foreground mb-1">
                     Tempo restante
                   </p>
-                  <p className="text-4xl font-mono font-bold text-primary">
+                  <p className="text-4xl font-mono font-normal text-primary">
                     {formattedTimeRemaining}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">

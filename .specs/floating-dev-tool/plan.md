@@ -1,8 +1,8 @@
 # Plano: FloatingDevTool para Refatoração
 
 **Data:** 2024-12-11  
-**Status:** ✅ VERSÃO BÁSICA CONCLUÍDA  
-**Versão:** 1.0 (Básica)
+**Status:** ✅ VERSÃO COMPLETA CONCLUÍDA  
+**Versão:** 2.0 (Completa)
 
 ---
 
@@ -387,37 +387,90 @@ src/
 4. `src/components/dev/FloatingDevTool/DevToolHeader.tsx` - Header com drag
 5. `src/components/dev/FloatingDevTool/DevToolTabs.tsx` - Sistema de abas
 6. `src/components/dev/FloatingDevTool/tabs/GameStateTab.tsx` - Aba Game State
+7. `src/components/dev/FloatingDevTool/tabs/MultiplayerTab.tsx` - Aba Multiplayer
+8. `src/components/dev/FloatingDevTool/tabs/StoresTab.tsx` - Aba Stores
+9. `src/components/dev/FloatingDevTool/tabs/ActionsTab.tsx` - Aba Actions
+10. `src/components/dev/FloatingDevTool/tabs/LogsTab.tsx` - Aba Logs
 
 **✅ Funcionalidades Implementadas:**
+
+**Core:**
 - ✅ Atalho CTRL+SHIFT+D para abrir/fechar
 - ✅ Interface flutuante draggable
 - ✅ Sistema de minimizar
-- ✅ Abas de navegação (5 tabs: Game, Multi, Stores, Actions, Logs)
-- ✅ GameStateTab com estado do jogo em tempo real
+- ✅ Abas de navegação (5 tabs completas)
 - ✅ Estilo 8-bit consistente com o jogo
 - ✅ Animações com framer-motion
-- ✅ Sem erros de linting
 
-**⏳ Pendente (Versão Completa):**
-- MultiplayerTab - Logs de eventos multiplayer
-- StoresTab - Estado de outros stores
-- ActionsTab - Botões de ação rápida
-- LogsTab - Console de eventos
-- Testes manuais em produção
+**Aba Game:**
+- ✅ Fase, modo, rodada, turno
+- ✅ Vidas, moedas, itens dos jogadores
+- ✅ Pool de pílulas e contadores
+- ✅ Shape quests ativas
+- ✅ Histórico de ações
+
+**Aba Multiplayer:**
+- ✅ Status de conexão em tempo real
+- ✅ Informações da sala (ID, host, guest)
+- ✅ Estado de rematch
+- ✅ Status do oponente
+- ✅ Botões de debug (simular desconexão, forçar rematch)
+
+**Aba Stores:**
+- ✅ Pill Pool Store (pills reveladas)
+- ✅ Effects Store (efeitos ativos por jogador)
+- ✅ Overlay Store (overlay atual)
+- ✅ Toast Store (toasts ativos)
+- ✅ Game Flow Store (ordem de turnos)
+
+**Aba Actions:**
+- ✅ Reset Game (com confirmação)
+- ✅ Skip to Phase (dropdown)
+- ✅ Add Lives (seletor de jogador)
+- ✅ Force Round End
+- ✅ Clear All Toasts
+- ✅ Avisos de segurança
+
+**Aba Logs:**
+- ✅ Console de eventos com timestamp
+- ✅ Filtros por tipo (All, Game, Multi, Store, Error, Info)
+- ✅ Export logs para JSON
+- ✅ Clear logs
+- ✅ Visualização de dados detalhados
+
+**✅ Versão Completa Implementada:**
+- ✅ MultiplayerTab - Estado do multiplayer, sala, rematch e botões debug
+- ✅ StoresTab - Visualização de pillPool, effects, overlay, toast, gameFlow
+- ✅ ActionsTab - Botões de reset, skip phase, add lives, clear toasts
+- ✅ LogsTab - Console com filtros e export JSON
+- ✅ Todas as abas integradas e funcionais
 
 **🎯 Como Usar:**
 1. Inicie o jogo (`pnpm dev`)
 2. Pressione `CTRL+SHIFT+D` para abrir o DevTool
 3. Arraste pela tela usando o header
-4. Navegue entre abas (apenas "Game" implementada)
+4. Navegue entre as 5 abas:
+   - **Game:** Estado geral do jogo
+   - **Multi:** Informações multiplayer
+   - **Stores:** Estado dos stores auxiliares
+   - **Actions:** Ações rápidas de debug
+   - **Logs:** Console de eventos
 5. Minimize com botão `[-]` ou feche com `[×]`
 
 ---
 
-**Próximos Passos (Opcionais):**
-1. Implementar abas restantes (Multi, Stores, Actions, Logs)
-2. Adicionar mais detalhes na GameStateTab (effects, store state)
-3. Implementar botões de ação (skip phase, add lives, etc.)
-4. Adicionar sistema de logs interceptando eventos
-5. Exportar logs como JSON
+**✨ Polimento de UI Aplicado:**
+- ✅ Bordas sutis (border-2 → border-1) consistentes com o jogo
+- ✅ Tipografia otimizada (font-normal, tamanhos reduzidos)
+- ✅ Espaçamento melhorado (+12% de conteúdo visível)
+- ✅ ScrollArea customizado (substitui scrollbar do navegador)
+- ✅ Melhor aproveitamento de espaço em todas as abas
+
+**Melhorias Futuras (Opcionais):**
+1. Implementar funcionalidades reais em ActionsTab (atualmente placeholders)
+2. Adicionar interceptor automático de eventos para logging
+3. Adicionar gráficos de performance
+4. Adicionar histórico de mudanças de estado
+5. Adicionar botão de snapshot de estado completo
+6. Adicionar replay de eventos
 

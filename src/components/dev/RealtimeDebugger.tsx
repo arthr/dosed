@@ -206,7 +206,7 @@ VITE_SUPABASE_ANON_KEY=sua-anon-key`}
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-muted-foreground">Sala atual</p>
-                  <p className="text-2xl font-mono font-bold tracking-widest">
+                  <p className="text-2xl font-mono font-normal tracking-widest">
                     {roomId}
                   </p>
                 </div>

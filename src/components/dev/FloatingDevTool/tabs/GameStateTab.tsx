@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/8bit/card'
 import { Badge } from '@/components/ui/8bit/badge'
 import { Separator } from '@/components/ui/8bit/separator'
+import { ScrollArea } from '@/components/ui/8bit/scroll-area'
 import { cn } from '@/lib/utils'
 
 /**
@@ -44,13 +45,14 @@ export function GameStateTab() {
   }, [phase])
 
   return (
-    <div className="p-4 space-y-4 overflow-y-auto max-h-[400px]">
+    <ScrollArea className="h-[450px]">
+      <div className="p-3 space-y-3">
       {/* Phase & Mode */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-xs">Status Geral</CardTitle>
+      <Card className="border">
+        <CardHeader className="pb-1 pt-2 px-3">
+          <CardTitle className="text-[10px] font-normal">Status Geral</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-1.5 px-3 pb-2">
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Fase:</span>
             <Badge className={cn('text-xs font-mono', phaseColor)}>{phase}</Badge>
@@ -63,7 +65,7 @@ export function GameStateTab() {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Rodada:</span>
-            <span className="text-xs font-mono font-bold">{round}</span>
+            <span className="text-xs font-mono font-normal">{round}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Turno:</span>
@@ -75,15 +77,15 @@ export function GameStateTab() {
       </Card>
 
       {/* Players */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-xs">Jogadores</CardTitle>
+      <Card className="border">
+        <CardHeader className="pb-1 pt-2 px-3">
+          <CardTitle className="text-[10px] font-normal">Jogadores</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-2 px-3 pb-2">
           {/* Player 1 */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-mono font-bold text-primary">{players.player1.name}</span>
+              <span className="text-xs font-mono font-normal text-primary">{players.player1.name}</span>
               <Badge variant={players.player1.isAI ? 'secondary' : 'default'} className="text-xs">
                 {players.player1.isAI ? 'AI' : 'Human'}
               </Badge>
@@ -105,7 +107,7 @@ export function GameStateTab() {
           {/* Player 2 */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-mono font-bold text-destructive">{players.player2.name}</span>
+              <span className="text-xs font-mono font-normal text-destructive">{players.player2.name}</span>
               <Badge variant={players.player2.isAI ? 'secondary' : 'default'} className="text-xs">
                 {players.player2.isAI ? 'AI' : 'Human'}
               </Badge>
@@ -125,14 +127,14 @@ export function GameStateTab() {
       </Card>
 
       {/* Pill Pool */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-xs">Pool de Pílulas</CardTitle>
+      <Card className="border">
+        <CardHeader className="pb-1 pt-2 px-3">
+          <CardTitle className="text-[10px] font-normal">Pool de Pílulas</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-1.5 px-3 pb-2">
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Total:</span>
-            <span className="text-xs font-mono font-bold">{pillPool.length}</span>
+            <span className="text-xs font-mono font-normal">{pillPool.length}</span>
           </div>
           <Separator />
           <div className="grid grid-cols-2 gap-2 text-xs">
@@ -158,11 +160,11 @@ export function GameStateTab() {
 
       {/* Shape Quests */}
       {(shapeQuests.player1 || shapeQuests.player2) && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs">Shape Quests</CardTitle>
+        <Card className="border">
+          <CardHeader className="pb-1 pt-2 px-3">
+            <CardTitle className="text-[10px] font-normal">Shape Quests</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-xs">
+          <CardContent className="space-y-1.5 text-xs px-3 pb-2">
             {shapeQuests.player1 && (
               <div>
                 <span className="font-mono text-primary">P1:</span>
@@ -184,11 +186,11 @@ export function GameStateTab() {
       )}
 
       {/* Action History */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-xs">Últimas Ações (5)</CardTitle>
+      <Card className="border">
+        <CardHeader className="pb-1 pt-2 px-3">
+          <CardTitle className="text-[10px] font-normal">Últimas Ações (5)</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 pb-2">
           <div className="space-y-1">
             {lastActions.length === 0 ? (
               <p className="text-xs text-muted-foreground italic">Nenhuma ação ainda</p>
@@ -205,7 +207,8 @@ export function GameStateTab() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </ScrollArea>
   )
 }
 

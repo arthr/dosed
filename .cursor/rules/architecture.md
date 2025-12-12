@@ -78,24 +78,73 @@ Ao refatorar para suportar multiplayer, siga o padrão **Optimistic UI + Authori
 - **GameState (Sincronizado):** Vidas, Resistência, Turno Atual, PillPool. Este estado vem do Supabase (A verdade absoluta).
 - **UIState (Local):** Hover, Seleção de Item, Animações, Toasts. Este estado NUNCA trafega pelo WebSocket.
 
-### gameStore
-Estado central do jogo:
-- `players` - Dados dos jogadores (vidas, resistencia, inventario, efeitos, pillCoins, wantsStore)
-- `pillPool` - Pilulas na mesa (com flags inverted, doubled)
-- `currentTurn` - Quem esta jogando
-- `phase` - setup | itemSelection | playing | roundEnding | shopping | ended
-- `round` - Numero da rodada
-- `difficulty` - Nivel de dificuldade da IA (easy | normal | hard | insane)
-- `targetSelection` - Estado de selecao de alvo para itens
-- `revealedPills` - IDs de pilulas reveladas pelo Scanner
-- `itemSelectionConfirmed` - Status de confirmacao por jogador
-- `typeCounts` - Contagem publica de tipos de pilulas (informacao visivel a todos)
-- `shapeCounts` - Contagem publica de shapes (informacao visivel a todos)
-- `shapeQuests` - Objetivos de forma por jogador (`Record<PlayerId, ShapeQuest | null>`)
-- `storeState` - Estado da Pill Store (`StoreState | null`)
+### Arquitetura Modular (Refatorado 2024-12-11)
 
-Selectors:
-- `useDifficulty()` - Retorna dificuldade atual
+O sistema de stores foi decomposto em 6 stores focados (`src/stores/game/`):
+
+#### gameFlowStore
+Gerencia fases, turnos e rodadas:
+- `phase` - setup | itemSelection | playing | roundEnding | shopping | ended
+- `turnPhase` - consuming | itemUsage | waiting
+- `currentTurn` - PlayerId do jogador atual
+- `playerOrder` - Ordem de rotacao de turnos
+- `round` - Numero da rodada
+- `winner` - PlayerId do vencedor
+- `difficulty` - Nivel de dificuldade da IA
+- `mode` - single | multiplayer
+- `roomId` - ID da sala multiplayer
+
+Actions:
+- `startGame()`, `endGame()`, `nextTurn()`, `startRound()`, `checkWinner()`
+
+#### pillPoolStore
+Pool de pilulas, consumo e reveal:
+- `pillPool` - Array de pilulas na mesa
+- `revealedPills` - Set de IDs revelados pelo Scanner
+- `typeCounts` - Contagem publica de tipos
+- `shapeCounts` - Contagem publica de shapes
+
+Actions:
+- `generatePool()`, `consumePill()`, `revealPillById()`, `invertPill()`, `doublePill()`
+
+#### playerStore
+Estado dos jogadores (vidas, resistencia, inventario):
+- `players` - Record<PlayerId, Player>
+- `playerOrder` - Array de PlayerId
+
+Actions:
+- `applyDamageToPlayer()`, `applyHealToPlayer()`, `loseLife()`, `gainLife()`, `resetResistance()`
+- Inclui: inventario, pillCoins, wantsStore
+
+#### itemUsageStore
+Selecao de alvo e uso de itens:
+- `targetSelection` - Record<PlayerId, {itemId, targetId}>
+- `selectionConfirmed` - Record<PlayerId, boolean>
+
+Actions:
+- `startItemUsage()`, `cancelItemUsage()`, `completeItemUsage()`, `confirmSelection()`
+
+#### effectsStore
+Efeitos de jogador (shield, handcuffs):
+- `activeEffects` - Record<PlayerId, PlayerEffect[]>
+
+Actions:
+- `addEffect()`, `decrementEffects()`, `hasEffect()`, `clearEffects()`
+
+#### shopStore
+Pill Store, carrinho e boosts:
+- `storeState` - StoreState | null (includes confirmed, pendingBoosts, cart por jogador)
+
+Actions:
+- `openShop()`, `closeShop()`, `toggleCart()`, `confirmPurchase()`, `handleShoppingTimeout()`
+
+### gameStore (Orquestrador)
+Continua existindo (~2249 linhas) para:
+- Delegacao unificada para stores modulares
+- Retrocompatibilidade com codigo legado
+- Orquestracao de acoes complexas (startGame, endGame, consumePill)
+
+**Nota:** Acesse stores modulares via `@/stores/game` (barrel export)
 
 ### overlayStore
 Gerencia overlays bloqueantes:
@@ -107,6 +156,14 @@ Gerencia overlays bloqueantes:
 Fila de notificacoes:
 - `toasts` - Array de toasts ativos
 - `show()`, `dismiss()`, `clear()`
+
+### multiplayerStore
+Gerencia conexao e sincronizacao multiplayer:
+- `connectionStatus` - disconnected | connecting | connected | error
+- `roomId`, `localPlayerId`, `isHost`
+- `rematchState` - Estado de solicitacao de rematch
+- `emit()` - Emissao de eventos para Supabase Realtime
+- `handleRemoteEvent()` - Handler centralizado de eventos remotos
 
 ## Hooks Principais
 
@@ -297,10 +354,21 @@ Timer da Pill Store:
 
 ## Utils
 
-### aiConfig.ts (NOVO)
+### aiConfig.ts
 - `AI_CONFIGS` - Configuracoes por nivel de dificuldade
 - `getAIConfig(difficulty)` - Retorna config para nivel
 - `getAIThinkingDelay(difficulty)` - Delay aleatorio por nivel
+
+### turnManager.ts
+Funcoes puras para rotacao de turnos N-jogadores:
+- `getNextTurn(current, playerOrder, alivePlayers?)` - Retorna proximo jogador
+- `getTargetablePlayers(current, allPlayers)` - Jogadores que podem ser alvos
+
+### playerManager.ts
+Funcoes puras para geracao de jogadores:
+- `generatePlayerId(index)` - Gera ID unico (player1, player2, ...)
+- `createInitialPlayersState(configs)` - Cria estado inicial para N jogadores
+- `isValidPlayerId(id)` - Valida formato de PlayerId
 
 ### aiLogic.ts (REFATORADO)
 Analise de Risco:

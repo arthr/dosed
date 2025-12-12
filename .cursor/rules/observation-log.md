@@ -45,6 +45,16 @@ Exemplo:
   ```
   Exemplo: Bug de dupla chamada `acceptRematch()` + `declineRematch()` corrigido removendo `onClose()` manual.
 
+- [2024-12-11] **Refatoracao de Stores (N-Jogadores):** Decomposicao bem-sucedida do gameStore:
+  - **6 Stores Modulares** criados: gameFlowStore, pillPoolStore, playerStore, itemUsageStore, effectsStore, shopStore
+  - **224 testes unitarios** adicionados (antes: ~10% cobertura)
+  - **DUAL-WRITE Strategy:** Manteve retrocompatibilidade durante migracao - gameStore delega para stores modulares
+  - **Barrel Exports:** `src/stores/game/index.ts` exporta tudo - permite imports limpos (`@/stores/game`)
+  - **Funcoes Puras:** turnManager/playerManager extraidos para `utils/` - facilitam testes e logica N-jogadores
+  - **Reducao de 223 linhas** no gameStore (-9%) removendo comentarios DUAL-WRITE e logs
+  - **Zero regressoes:** Single player e multiplayer continuam funcionais
+  - **Proximos passos:** UI para N-jogadores (spec separada), remover refs hardcoded restantes
+
 ### Decisoes Arquiteturais
 
 - [2024-12-11] **PlayerId vs UserId:** Decidimos separar dois conceitos:

@@ -13,7 +13,7 @@ Durante este refactor, estamos preparando a arquitetura para futuro sistema de a
 
 #### Campo `Player.userId`
 
-Sera adicionado na **Fase 3.5** com valor `string | null`:
+Foi adicionado na **Fase 3.5** de `Game State Refactor` com valor `string | null`:
 - `null` = Guest ou Bot (joga sem cadastro, sem persistencia)
 - `string` = Usuario autenticado (stats, ranking, conquistas)
 

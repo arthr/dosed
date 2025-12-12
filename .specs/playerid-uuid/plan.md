@@ -123,4 +123,14 @@ Ordenação sempre vem de `playerOrder`.
 - `getNextTurn`/`getTargetablePlayers` usam `playerOrder` (não keys do record).
 - Em multiplayer: host e guest compartilham o mesmo `playerOrder` vindo da room.
 
+---
+
+## Checklist de Execução (incremental)
+
+- [x] **Fase A.1 — Ordem explícita (sem trocar IDs ainda):** remover ordenação derivada de `PlayerId` (ex.: `getPlayerIds()`/parse de `playerN`) das camadas de UI/turnos/IA e padronizar iteração via `playerOrder` (com fallback *sem sort* apenas para não quebrar DevTool/UI).
+- [x] **Fase A.1.1 — Fonte única:** remover `playerOrder` do `playerStore` e centralizar a fonte de verdade em `gameFlowStore` (evitar duplicação/risco de divergência).
+- [ ] **Fase A.2 — Helper neutro:** deprecar `getPlayerIds` e criar helper neutro (ex.: `getPlayerIdsUnordered`) e migrar usos.
+- [ ] **Fase A.3 — seatIndex (UI/DevTool):** exibir “P1/P2/P3” por posição em `playerOrder` sem depender de `PlayerId`.
+- [ ] **Fase B.1 — UUID (single player):** migrar `PlayerId` para UUID no `initGame` e manter `playerOrder` como fonte de ordem.
+- [ ] **Fase B.2 — UUID (multiplayer):** host cria UUIDs + `playerOrder` e envia para guest no sync inicial; eventos usam UUID.
 

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useGameStore } from '@/stores/gameStore'
+import { useGameFlowStore } from '@/stores/game/gameFlowStore'
 import { getTargetablePlayers } from '@/utils/turnManager'
-import { getAlivePlayers, getPlayerIds } from '@/utils/playerManager'
 import type { PlayerId } from '@/types'
 
 /**
@@ -18,13 +18,16 @@ import type { PlayerId } from '@/types'
 export function useTargetablePlayers(): PlayerId[] {
     const currentTurn = useGameStore((state) => state.currentTurn)
     const players = useGameStore((state) => state.players)
+    const playerOrder = useGameFlowStore((state) => state.playerOrder)
 
     return useMemo(() => {
-        const allPlayerIds = getPlayerIds(players)
-        const alivePlayerIds = getAlivePlayers(players)
+        const fallbackIds = Object.keys(players) as PlayerId[]
+        const allPlayerIds = (playerOrder.length > 0 ? playerOrder : fallbackIds)
+            .filter((id) => players[id] !== undefined)
+        const alivePlayerIds = allPlayerIds.filter((id) => players[id]?.lives > 0)
 
         return getTargetablePlayers(currentTurn, allPlayerIds, alivePlayerIds)
-    }, [currentTurn, players])
+    }, [currentTurn, players, playerOrder])
 }
 
 /**

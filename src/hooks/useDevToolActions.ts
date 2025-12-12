@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 import { useGameStore } from '@/stores/gameStore'
+import { useGameFlowStore } from '@/stores/game/gameFlowStore'
 import { useToastStore } from '@/stores/toastStore'
-import { getPlayerIds, generatePlayerId } from '@/utils/playerManager'
+import { generatePlayerId } from '@/utils/playerManager'
 import type { GamePhase, Player, PlayerId } from '@/types'
 
 const MAX_PLAYERS_FOR_LAYOUT_TEST: number = 4
@@ -39,18 +40,25 @@ export function useDevToolActions() {
   const forceEndRound = useGameStore((s) => s.forceEndRound)
   const currentPhase = useGameStore((s) => s.phase)
   const players = useGameStore((s) => s.players)
+  const playerOrder = useGameFlowStore((s) => s.playerOrder)
 
   const clearToasts = useToastStore((s) => s.clear)
   const showToast = useToastStore((s) => s.show)
 
-  const playerIds = useMemo(() => getPlayerIds(players), [players])
+  const playerIds = useMemo(() => {
+    const fallbackIds = Object.keys(players) as PlayerId[]
+    return (playerOrder.length > 0 ? playerOrder : fallbackIds).filter((id) => players[id] !== undefined)
+  }, [players, playerOrder])
   const extraBotIds = useMemo(() => {
     return playerIds.filter((id) => getPlayerIndex(id) >= 3 && players[id]?.isAI)
   }, [playerIds, players])
 
   const addBot = () => {
     const state = useGameStore.getState()
-    const ids = getPlayerIds(state.players)
+    const orderFromStore = useGameFlowStore.getState().playerOrder
+    const fallbackIds = Object.keys(state.players) as PlayerId[]
+    const ids = (orderFromStore.length > 0 ? orderFromStore : fallbackIds)
+      .filter((id) => state.players[id] !== undefined)
 
     if (ids.length >= MAX_PLAYERS_FOR_LAYOUT_TEST) {
       showToast({ type: 'info', message: `Limite atingido (${MAX_PLAYERS_FOR_LAYOUT_TEST} jogadores)` })
@@ -58,7 +66,10 @@ export function useDevToolActions() {
     }
 
     // Gera próximo id baseado no maior índice existente (evita colisão se ids não forem contíguos)
-    const maxIndex = ids.reduce((acc, id) => Math.max(acc, getPlayerIndex(id)), 0)
+    const maxIndex = (Object.keys(state.players) as PlayerId[]).reduce(
+      (acc, id) => Math.max(acc, getPlayerIndex(id)),
+      0
+    )
     const nextId = generatePlayerId(maxIndex) as PlayerId
     const template = {
       lives: state.players[ids[0] ?? generatePlayerId(0)]?.maxLives ?? 3,
@@ -91,17 +102,29 @@ export function useDevToolActions() {
       }
     })
 
+    // Atualiza playerOrder como fonte única de ordem (sem sort por PlayerId)
+    const currentOrder = useGameFlowStore.getState().playerOrder
+    const baseOrder = currentOrder.length > 0 ? currentOrder : (Object.keys(state.players) as PlayerId[])
+    const nextOrder = [...baseOrder.filter((id) => id !== nextId), nextId]
+    useGameFlowStore.getState().setPlayerOrder(nextOrder)
+
     showToast({ type: 'info', message: `Bot adicionado: ${nextId}` })
   }
 
   const removeBot = () => {
     const state = useGameStore.getState()
-    const ids = getPlayerIds(state.players)
-    const removable = ids
-      .filter((id) => getPlayerIndex(id) >= 3 && state.players[id]?.isAI)
-      .sort((a, b) => getPlayerIndex(b) - getPlayerIndex(a))
+    const orderFromStore = useGameFlowStore.getState().playerOrder
+    const fallbackIds = Object.keys(state.players) as PlayerId[]
+    const ids = (orderFromStore.length > 0 ? orderFromStore : fallbackIds)
+      .filter((id) => state.players[id] !== undefined)
 
-    const removeId = removable[0]
+    // Seleciona o bot extra "mais alto" sem usar sort (evita derivar ordem por PlayerId)
+    const removeId = ids.reduce<PlayerId | null>((acc, id) => {
+      if (getPlayerIndex(id) < 3) return acc
+      if (!state.players[id]?.isAI) return acc
+      if (!acc) return id
+      return getPlayerIndex(id) > getPlayerIndex(acc) ? id : acc
+    }, null)
     if (!removeId) {
       showToast({ type: 'info', message: 'Nenhum bot extra para remover (apenas base do jogo)' })
       return
@@ -141,8 +164,10 @@ export function useDevToolActions() {
           }
         : prev.storeState
 
-      const nextIds = getPlayerIds(restPlayers)
-      const fallbackTurn = (nextIds[0] ?? generatePlayerId(0)) as PlayerId
+      const nextIds = Object.keys(restPlayers) as PlayerId[]
+      const currentOrder = useGameFlowStore.getState().playerOrder
+      const nextOrder = (currentOrder.length > 0 ? currentOrder : nextIds).filter((id) => id !== removeId && restPlayers[id] !== undefined)
+      const fallbackTurn = (nextOrder[0] ?? nextIds[0] ?? generatePlayerId(0)) as PlayerId
       const nextCurrentTurn = prev.currentTurn === removeId ? fallbackTurn : prev.currentTurn
 
       return {
@@ -154,6 +179,12 @@ export function useDevToolActions() {
         currentTurn: nextCurrentTurn,
       }
     })
+
+    // Atualiza playerOrder removendo o bot
+    const currentOrder = useGameFlowStore.getState().playerOrder
+    const baseOrder = currentOrder.length > 0 ? currentOrder : (Object.keys(state.players) as PlayerId[])
+    const nextOrder = baseOrder.filter((id) => id !== removeId)
+    useGameFlowStore.getState().setPlayerOrder(nextOrder)
 
     showToast({ type: 'info', message: `Bot removido: ${removeId}` })
   }

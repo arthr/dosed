@@ -10,7 +10,6 @@ import type {
 } from '@/types'
 import {
     createPlayerFromConfig,
-    getPlayerIds,
     getAlivePlayers,
     countAlivePlayers,
     isPlayerAlive,
@@ -34,8 +33,6 @@ interface PlayerSetupConfig extends PlayerConfig {
 interface PlayerState {
     /** Todos os jogadores na partida */
     players: Record<PlayerId, Player>
-    /** Ordem dos jogadores (para turnos) */
-    playerOrder: PlayerId[]
 }
 
 /**
@@ -171,11 +168,6 @@ interface PlayerActions {
     isAlive: (playerId: PlayerId) => boolean
 
     /**
-     * Obtem ordem dos jogadores
-     */
-    getPlayerOrder: () => PlayerId[]
-
-    /**
      * Reseta store para estado inicial
      */
     reset: () => void
@@ -188,7 +180,6 @@ type PlayerStore = PlayerState & PlayerActions
  */
 const initialState: PlayerState = {
     players: {},
-    playerOrder: [],
 }
 
 /**
@@ -210,15 +201,13 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
     initializePlayers: (configs) => {
         const players: Record<PlayerId, Player> = {}
-        const playerOrder: PlayerId[] = []
 
         configs.forEach((config, index) => {
             const playerId = `player${index + 1}`
             players[playerId] = createPlayerFromConfig(playerId, config, config.userId ?? null)
-            playerOrder.push(playerId)
         })
 
-        set({ players, playerOrder })
+        set({ players })
     },
 
     getPlayer: (playerId) => {
@@ -495,10 +484,6 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
         return isPlayerAlive(get().players, playerId)
     },
 
-    getPlayerOrder: () => {
-        return get().playerOrder
-    },
-
     reset: () => {
         set(initialState)
     },
@@ -517,12 +502,6 @@ export const usePlayers = () =>
  */
 export const usePlayer = (playerId: PlayerId) =>
     usePlayerStore((state) => state.players[playerId])
-
-/**
- * Hook para obter ordem dos jogadores
- */
-export const usePlayerOrder = () =>
-    usePlayerStore((state) => state.playerOrder)
 
 /**
  * Hook para obter IDs de jogadores vivos

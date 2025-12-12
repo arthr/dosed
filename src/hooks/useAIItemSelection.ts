@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { useGameStore } from '@/stores/gameStore'
+import { useGameFlowStore } from '@/stores/game/gameFlowStore'
 import { getAllItemsForInitialSelection } from '@/utils/itemCatalog'
 import { selectAIInitialItems } from '@/utils/aiLogic'
-import { getPlayerIds } from '@/utils/playerManager'
+import type { PlayerId } from '@/types'
 
 /** Delay antes de comecar a selecionar itens (ms) */
 const AI_SELECTION_START_DELAY = 500
@@ -22,12 +23,16 @@ export function useAIItemSelection() {
   // Selectors granulares - retornam primitivos para evitar re-renders
   const phase = useGameStore((state) => state.phase)
   const mode = useGameStore((state) => state.mode)
+  const players = useGameStore((state) => state.players)
+  const playerOrder = useGameFlowStore((state) => state.playerOrder)
 
   // Determina (de forma estável) qual jogador é IA (single player)
-  const aiPlayerId = useGameStore((state) => {
-    const ids = getPlayerIds(state.players)
-    return ids.find((id) => state.players[id].isAI) ?? null
-  })
+  const aiPlayerId = (() => {
+    const fallbackIds = Object.keys(players) as PlayerId[]
+    const ids = (playerOrder.length > 0 ? playerOrder : fallbackIds)
+      .filter((id) => players[id] !== undefined)
+    return ids.find((id) => players[id]?.isAI) ?? null
+  })()
   const isAIAvailable = useGameStore((state) => (aiPlayerId ? state.players[aiPlayerId]?.isAI === true : false))
 
   // Refs para controle de estado

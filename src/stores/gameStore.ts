@@ -424,7 +424,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Verifica progresso do quest do jogador que consumiu
     const consumedShape = pill.visuals.shape
     const currentQuest = state.shapeQuests[consumerId]
-    let newShapeQuests = { ...state.shapeQuests }
+    const newShapeQuests = { ...state.shapeQuests }
     let earnedPillCoin = false
     let questWasReset = false
 
@@ -560,8 +560,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     // Fluxo normal: determina proximo jogador usando turnManager
-    const allPlayerIds = Object.keys(state.players) as PlayerId[]
-    const alivePlayerIds = allPlayerIds.filter(id => state.players[id].lives > 0)
+    const orderFromStore = useGameFlowStore.getState().playerOrder
+    const fallbackIds = Object.keys(state.players) as PlayerId[]
+    const allPlayerIds = (orderFromStore.length > 0 ? orderFromStore : fallbackIds)
+      .filter((id) => state.players[id] !== undefined)
+    const alivePlayerIds = allPlayerIds.filter((id) => state.players[id]?.lives > 0)
     const nextPlayerId = getNextTurn(state.currentTurn, allPlayerIds, alivePlayerIds)
     
     let nextPlayer = state.players[nextPlayerId]
@@ -644,9 +647,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const state = get()
     if (state.phase !== 'playing') return
 
-    const alivePlayers = Object.keys(state.players).filter(
-      (id) => state.players[id as PlayerId].lives > 0
-    ) as PlayerId[]
+    const orderFromStore = useGameFlowStore.getState().playerOrder
+    const fallbackIds = Object.keys(state.players) as PlayerId[]
+    const allPlayerIds = (orderFromStore.length > 0 ? orderFromStore : fallbackIds)
+      .filter((id) => state.players[id] !== undefined)
+    const alivePlayers = allPlayerIds.filter((id) => state.players[id]?.lives > 0)
     const nextPlayer = useGameFlowStore.getState().nextTurn(alivePlayers)
     set({ currentTurn: nextPlayer })
   },
@@ -1106,7 +1111,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     // Aplica efeito baseado no tipo de item
-    let newState: Partial<GameState> = {
+    const newState: Partial<GameState> = {
       players: {
         ...state.players,
         [currentPlayerId]: updatedCurrentPlayer,
@@ -1539,7 +1544,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const p2Wants = players.player2.wantsStore && players.player2.pillCoins > 0
 
     if (p1Wants || p2Wants) {
-      const playerIds = Object.keys(players) as PlayerId[]
+      const orderFromStore = useGameFlowStore.getState().playerOrder
+      const fallbackIds = Object.keys(players) as PlayerId[]
+      const playerIds = (orderFromStore.length > 0 ? orderFromStore : fallbackIds)
+        .filter((id) => players[id] !== undefined)
       useShopStore.getState().openShop(DEFAULT_STORE_CONFIG.shoppingTime, playerIds)
 
       set({
@@ -1937,7 +1945,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newPlayers = { ...players }
     const newRevealAtStart = { ...revealAtStart }
 
-    const playerIds = Object.keys(players) as PlayerId[]
+    const orderFromStore = useGameFlowStore.getState().playerOrder
+    const fallbackIds = Object.keys(players) as PlayerId[]
+    const playerIds = (orderFromStore.length > 0 ? orderFromStore : fallbackIds)
+      .filter((id) => players[id] !== undefined)
     for (const playerId of playerIds) {
       const boosts = shopState.getPendingBoosts(playerId)
       let player = newPlayers[playerId]
@@ -2227,8 +2238,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
    */
   getOpponent: () => {
     const state = get()
-    const allPlayerIds = Object.keys(state.players) as PlayerId[]
-    const alivePlayerIds = allPlayerIds.filter(id => state.players[id].lives > 0)
+    const orderFromStore = useGameFlowStore.getState().playerOrder
+    const fallbackIds = Object.keys(state.players) as PlayerId[]
+    const allPlayerIds = (orderFromStore.length > 0 ? orderFromStore : fallbackIds)
+      .filter((id) => state.players[id] !== undefined)
+    const alivePlayerIds = allPlayerIds.filter((id) => state.players[id]?.lives > 0)
     const targetable = getTargetablePlayers(state.currentTurn, allPlayerIds, alivePlayerIds)
     const opponentId = targetable[0] ?? allPlayerIds[0] // Primeiro alvo ou fallback
     return state.players[opponentId]
@@ -2307,8 +2321,11 @@ export const useCurrentPlayer = () =>
  */
 export const useOpponent = () =>
   useGameStore((state) => {
-    const allPlayerIds = Object.keys(state.players) as PlayerId[]
-    const alivePlayerIds = allPlayerIds.filter(id => state.players[id].lives > 0)
+    const orderFromStore = useGameFlowStore.getState().playerOrder
+    const fallbackIds = Object.keys(state.players) as PlayerId[]
+    const allPlayerIds = (orderFromStore.length > 0 ? orderFromStore : fallbackIds)
+      .filter((id) => state.players[id] !== undefined)
+    const alivePlayerIds = allPlayerIds.filter((id) => state.players[id]?.lives > 0)
     const targetable = getTargetablePlayers(state.currentTurn, allPlayerIds, alivePlayerIds)
     const opponentId = targetable[0] ?? allPlayerIds[0]
     return state.players[opponentId]

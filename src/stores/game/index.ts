@@ -18,10 +18,12 @@ export * from './effectsStore'
 export * from './shopStore'
 export * from './pillPoolStore'
 export * from './itemUsageStore'
+
 export * from './playerStore'
 export * from './gameFlowStore'
 
 // ============ RETROCOMPATIBILIDADE ============
 // Re-exporta do store legado para migracao gradual
 // TODO: Fase 5 - Remover apos validacao completa
-export * from '../gameStore'
+// NOTE: Evitamos `export *` do store legado aqui porque ele conflita com hooks
+// dos stores modulares (ex: useGamePhase/usePlayerOrder/usePillPool) e quebra o build.

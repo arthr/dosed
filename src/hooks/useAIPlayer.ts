@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 import type { AIDecisionContext, GameMode, GamePhase, Pill, Player, PlayerId } from '@/types'
 import { useGameStore } from '@/stores/gameStore'
+import { useGameFlowStore } from '@/stores/game/gameFlowStore'
 import { getAIConfig, getAIThinkingDelay } from '@/utils/aiConfig'
-import { getAlivePlayers, getPlayerIds } from '@/utils/playerManager'
 import { getTargetablePlayers } from '@/utils/turnManager'
 import {
   selectAIPill,
@@ -41,8 +41,11 @@ function buildAIContext(aiPlayerId: PlayerId): AIDecisionContext {
 
   const aiPlayer = state.players[aiPlayerId]
 
-  const allPlayerIds = getPlayerIds(state.players)
-  const alivePlayerIds = getAlivePlayers(state.players)
+  const playerOrder = useGameFlowStore.getState().playerOrder
+  const fallbackIds = Object.keys(state.players) as PlayerId[]
+  const allPlayerIds = (playerOrder.length > 0 ? playerOrder : fallbackIds)
+    .filter((id) => state.players[id] !== undefined)
+  const alivePlayerIds = allPlayerIds.filter((id) => state.players[id]?.lives > 0)
   const targetable = getTargetablePlayers(aiPlayerId, allPlayerIds, alivePlayerIds)
   const opponentId =
     targetable[0] ?? allPlayerIds.find((id) => id !== aiPlayerId) ?? aiPlayerId

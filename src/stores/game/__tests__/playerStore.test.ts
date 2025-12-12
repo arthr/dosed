@@ -10,7 +10,6 @@ describe('playerStore', () => {
         it('deve iniciar com players vazio', () => {
             const state = usePlayerStore.getState()
             expect(state.players).toEqual({})
-            expect(state.playerOrder).toEqual([])
         })
     })
 
@@ -26,7 +25,6 @@ describe('playerStore', () => {
             expect(state.players.player1.name).toBe('Alice')
             expect(state.players.player2.name).toBe('Bob')
             expect(state.players.player2.isAI).toBe(true)
-            expect(state.playerOrder).toEqual(['player1', 'player2'])
         })
 
         it('deve inicializar 4 jogadores', () => {
@@ -39,7 +37,6 @@ describe('playerStore', () => {
 
             const state = usePlayerStore.getState()
             expect(Object.keys(state.players)).toHaveLength(4)
-            expect(state.playerOrder).toEqual(['player1', 'player2', 'player3', 'player4'])
         })
 
         it('deve definir userId quando fornecido', () => {
@@ -506,7 +503,6 @@ describe('playerStore', () => {
 
             const state = usePlayerStore.getState()
             expect(state.players).toEqual({})
-            expect(state.playerOrder).toEqual([])
         })
     })
 

@@ -5,7 +5,6 @@ import { useOverlayStore } from '@/stores/overlayStore'
 import { useToastStore } from '@/stores/toastStore'
 import { useGameFlowStore } from '@/stores/game/gameFlowStore'
 import { useGameStore } from '@/stores/gameStore'
-import { getPlayerIds } from '@/utils/playerManager'
 import type { PlayerId } from '@/types'
 
 /**
@@ -25,9 +24,10 @@ export function useDevToolStoresSnapshot() {
   const currentTurn = useGameFlowStore((s) => s.currentTurn)
 
   const players = useGameStore((s) => s.players)
-  const fallbackIds: PlayerId[] = useMemo(() => getPlayerIds(players), [players])
+  const fallbackIds: PlayerId[] = useMemo(() => Object.keys(players) as PlayerId[], [players])
 
-  const playerIds: PlayerId[] = playerOrder.length > 0 ? playerOrder : fallbackIds
+  const playerIds: PlayerId[] = (playerOrder.length > 0 ? playerOrder : fallbackIds)
+    .filter((id) => players[id] !== undefined)
 
   return {
     revealedPills,

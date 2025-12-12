@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useGameStore } from '@/stores/gameStore'
+import { useGameFlowStore } from '@/stores/game/gameFlowStore'
 import { getTargetablePlayers } from '@/utils/turnManager'
-import { getAlivePlayers, getPlayerIds } from '@/utils/playerManager'
 import type { ItemType, PlayerId } from '@/types'
 
 /**
@@ -14,6 +14,7 @@ export function useItemUsage() {
   const phase = useGameStore((state) => state.phase)
   const currentTurn = useGameStore((state) => state.currentTurn)
   const players = useGameStore((state) => state.players)
+  const playerOrder = useGameFlowStore((state) => state.playerOrder)
   const currentPlayerInventory = useGameStore(
     (state) => state.players[state.currentTurn]?.inventory ?? { items: [], maxItems: 5 }
   )
@@ -25,10 +26,12 @@ export function useItemUsage() {
 
   // Jogadores alvo disponiveis (N-player support)
   const targetablePlayers: PlayerId[] = useMemo(() => {
-    const allPlayerIds = getPlayerIds(players)
-    const alivePlayerIds = getAlivePlayers(players)
+    const fallbackIds = Object.keys(players) as PlayerId[]
+    const allPlayerIds = (playerOrder.length > 0 ? playerOrder : fallbackIds)
+      .filter((id) => players[id] !== undefined)
+    const alivePlayerIds = allPlayerIds.filter((id) => players[id]?.lives > 0)
     return getTargetablePlayers(currentTurn, allPlayerIds, alivePlayerIds)
-  }, [currentTurn, players])
+  }, [currentTurn, players, playerOrder])
 
   // Computed values
   const isSelectingTarget = targetSelection.active

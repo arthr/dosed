@@ -98,6 +98,13 @@ interface GameFlowActions {
     setCurrentTurn: (playerId: PlayerId) => void
 
     /**
+     * Define a ordem dos jogadores.
+     * Regra de Ouro: ordem sempre vem de playerOrder, nunca de sort por PlayerId.
+     * @param playerOrder - Nova ordem dos jogadores
+     */
+    setPlayerOrder: (playerOrder: PlayerId[]) => void
+
+    /**
      * Termina o jogo com um vencedor
      * @param winnerId - ID do vencedor
      */
@@ -290,6 +297,17 @@ export const useGameFlowStore = create<GameFlowStore>((set, get) => ({
 
     setCurrentTurn: (playerId) => {
         set({ currentTurn: playerId })
+    },
+
+    setPlayerOrder: (playerOrder) => {
+        const state = get()
+        const nextTurn =
+            playerOrder.includes(state.currentTurn) ? state.currentTurn : (playerOrder[0] ?? state.currentTurn)
+
+        set({
+            playerOrder,
+            currentTurn: nextTurn,
+        })
     },
 
     endGame: (winnerId) => {

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useGameStore } from '@/stores/gameStore'
-import { getAlivePlayers, getPlayerIds } from '@/utils/playerManager'
+import { useGameFlowStore } from '@/stores/game/gameFlowStore'
 import { getTargetablePlayers } from '@/utils/turnManager'
 import type { Player, PlayerId } from '@/types'
 
@@ -37,7 +37,14 @@ export function useCurrentPlayer(): Player {
  */
 export function usePlayerIds(): PlayerId[] {
     const players = useGameStore((state) => state.players)
-    return useMemo(() => getPlayerIds(players), [players])
+    const playerOrder = useGameFlowStore((state) => state.playerOrder)
+
+    return useMemo(() => {
+        const fallbackIds = Object.keys(players) as PlayerId[]
+        const ordered = (playerOrder.length > 0 ? playerOrder : fallbackIds)
+            .filter((id) => players[id] !== undefined)
+        return ordered
+    }, [players, playerOrder])
 }
 
 /**
@@ -46,7 +53,11 @@ export function usePlayerIds(): PlayerId[] {
  */
 export function useAlivePlayerIds(): PlayerId[] {
     const players = useGameStore((state) => state.players)
-    return useMemo(() => getAlivePlayers(players), [players])
+    const playerIds = usePlayerIds()
+
+    return useMemo(() => {
+        return playerIds.filter((id) => players[id]?.lives > 0)
+    }, [playerIds, players])
 }
 
 /**
@@ -55,10 +66,14 @@ export function useAlivePlayerIds(): PlayerId[] {
  */
 export function usePlayersArray(): Player[] {
     const players = useGameStore((state) => state.players)
+    const playerOrder = useGameFlowStore((state) => state.playerOrder)
     return useMemo(() => {
-        const ids = getPlayerIds(players)
-        return ids.map((id) => players[id])
-    }, [players])
+        const ids = Object.keys(players) as PlayerId[]
+        // Preferir ordem explícita do gameFlowStore quando disponível
+        const orderedIds = (playerOrder.length > 0 ? playerOrder : ids)
+            .filter((id) => players[id] !== undefined)
+        return orderedIds.map((id) => players[id]).filter((p): p is Player => p !== undefined)
+    }, [players, playerOrder])
 }
 
 /**
@@ -67,18 +82,22 @@ export function usePlayersArray(): Player[] {
  */
 export function useAlivePlayers(): Player[] {
     const players = useGameStore((state) => state.players)
+    const playerOrder = useGameFlowStore((state) => state.playerOrder)
     return useMemo(() => {
-        const aliveIds = getAlivePlayers(players)
-        return aliveIds.map((id) => players[id])
-    }, [players])
+        const ids = Object.keys(players) as PlayerId[]
+        const orderedIds = (playerOrder.length > 0 ? playerOrder : ids)
+            .filter((id) => players[id] !== undefined)
+        const aliveIds = orderedIds.filter((id) => players[id]?.lives > 0)
+        return aliveIds.map((id) => players[id]).filter((p): p is Player => p !== undefined)
+    }, [players, playerOrder])
 }
 
 /**
  * Hook para contar jogadores vivos
  */
 export function useAliveCount(): number {
-    const players = useGameStore((state) => state.players)
-    return useMemo(() => getAlivePlayers(players).length, [players])
+    const aliveIds = useAlivePlayerIds()
+    return aliveIds.length
 }
 
 /**
@@ -90,8 +109,11 @@ export function useOpponent(): Player {
     const players = useGameStore((state) => state.players)
     
     return useMemo(() => {
-        const allPlayerIds = Object.keys(players) as PlayerId[]
-        const alivePlayerIds = allPlayerIds.filter(id => players[id].lives > 0)
+        const fallbackIds = Object.keys(players) as PlayerId[]
+        const playerOrder = useGameFlowStore.getState().playerOrder
+        const allPlayerIds = (playerOrder.length > 0 ? playerOrder : fallbackIds)
+            .filter((id) => players[id] !== undefined)
+        const alivePlayerIds = allPlayerIds.filter((id) => players[id]?.lives > 0)
         const targetable = getTargetablePlayers(currentTurn, allPlayerIds, alivePlayerIds)
         const opponentId = targetable[0] ?? allPlayerIds[0]
         return players[opponentId]

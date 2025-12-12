@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { useGameStore } from '@/stores/gameStore'
+import { useGameFlowStore } from '@/stores/game/gameFlowStore'
 import { shouldAIWantStore, selectAIStoreItems } from '@/utils/aiLogic'
 import { getAIConfig } from '@/utils/aiConfig'
 import { STORE_ITEMS } from '@/utils/storeConfig'
-import { getPlayerIds } from '@/utils/playerManager'
 import type { AIDecisionContext, PlayerId } from '@/types'
 
 /** Delay antes de processar compras (ms) */
@@ -50,12 +50,16 @@ function buildAIStoreContext(aiPlayerId: PlayerId, opponentId: PlayerId): AIDeci
 export function useAIStore() {
   const phase = useGameStore((state) => state.phase)
   const mode = useGameStore((state) => state.mode)
+  const players = useGameStore((state) => state.players)
+  const playerOrder = useGameFlowStore((state) => state.playerOrder)
 
   // Determina (de forma estável) qual jogador é IA (single player)
-  const aiPlayerId = useGameStore((state) => {
-    const ids = getPlayerIds(state.players)
-    return ids.find((id) => state.players[id].isAI) ?? null
-  })
+  const aiPlayerId = (() => {
+    const fallbackIds = Object.keys(players) as PlayerId[]
+    const ids = (playerOrder.length > 0 ? playerOrder : fallbackIds)
+      .filter((id) => players[id] !== undefined)
+    return ids.find((id) => players[id]?.isAI) ?? null
+  })()
 
   const isAIAvailable = useGameStore((state) => (aiPlayerId ? state.players[aiPlayerId]?.isAI === true : false))
   const aiCoins = useGameStore((state) => (aiPlayerId ? state.players[aiPlayerId]?.pillCoins ?? 0 : 0))
@@ -93,7 +97,10 @@ export function useAIStore() {
 
     // Constroi contexto e verifica se deve querer ir a loja
     const state = useGameStore.getState()
-    const allIds = getPlayerIds(state.players)
+    const orderFromStore = useGameFlowStore.getState().playerOrder
+    const fallbackIds = Object.keys(state.players) as PlayerId[]
+    const allIds = (orderFromStore.length > 0 ? orderFromStore : fallbackIds)
+      .filter((id) => state.players[id] !== undefined)
     const opponentId = allIds.find((id) => id !== aiPlayerId) ?? aiPlayerId
     const ctx = buildAIStoreContext(aiPlayerId, opponentId)
     const shouldWant = shouldAIWantStore(ctx)
@@ -129,7 +136,10 @@ export function useAIStore() {
 
     // Constroi contexto e seleciona itens
     const state = useGameStore.getState()
-    const allIds = getPlayerIds(state.players)
+    const orderFromStore = useGameFlowStore.getState().playerOrder
+    const fallbackIds = Object.keys(state.players) as PlayerId[]
+    const allIds = (orderFromStore.length > 0 ? orderFromStore : fallbackIds)
+      .filter((id) => state.players[id] !== undefined)
     const opponentId = allIds.find((id) => id !== aiPlayerId) ?? aiPlayerId
     const ctx = buildAIStoreContext(aiPlayerId, opponentId)
     const storeItems = STORE_ITEMS

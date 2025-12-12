@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useGameStore } from '@/stores/gameStore'
-import { getPlayerIds } from '@/utils/playerManager'
+import { useGameFlowStore } from '@/stores/game/gameFlowStore'
 import type { PlayerId } from '@/types'
 
 /**
@@ -17,8 +17,14 @@ export function useDevToolGameSnapshot() {
   const shapeQuests = useGameStore((s) => s.shapeQuests)
   const actionHistory = useGameStore((s) => s.actionHistory)
   const mode = useGameStore((s) => s.mode)
+  const playerOrder = useGameFlowStore((s) => s.playerOrder)
 
-  const playerIds: PlayerId[] = useMemo(() => getPlayerIds(players), [players])
+  const playerIds: PlayerId[] = useMemo(() => {
+    const fallbackIds = Object.keys(players) as PlayerId[]
+    const ids = (playerOrder.length > 0 ? playerOrder : fallbackIds)
+      .filter((id) => players[id] !== undefined)
+    return ids
+  }, [players, playerOrder])
 
   return {
     phase,

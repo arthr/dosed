@@ -130,6 +130,7 @@ describe('playerManager', () => {
             ids.forEach((id) => {
                 players[id] = {
                     id,
+                    userId: null,
                     name: id,
                     lives: 3,
                     maxLives: 3,
@@ -169,6 +170,7 @@ describe('playerManager', () => {
             Object.entries(livesMap).forEach(([id, lives]) => {
                 players[id] = {
                     id,
+                    userId: null,
                     name: id,
                     lives,
                     maxLives: 3,
@@ -223,6 +225,7 @@ describe('playerManager', () => {
             Object.entries(livesMap).forEach(([id, lives]) => {
                 players[id] = {
                     id,
+                    userId: null,
                     name: id,
                     lives,
                     maxLives: 3,
@@ -264,6 +267,7 @@ describe('playerManager', () => {
             Object.entries(livesMap).forEach(([id, lives]) => {
                 players[id] = {
                     id,
+                    userId: null,
                     name: id,
                     lives,
                     maxLives: 3,

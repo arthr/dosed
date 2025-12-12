@@ -3,7 +3,7 @@ import { HashRouter, Routes, Route } from 'react-router-dom'
 import { TooltipProvider } from '@/components/ui/8bit/tooltip'
 import { Button } from '@/components/ui/8bit/button'
 import { GameLayout } from '@/components/layout/GameLayout'
-import { useGameActions, useGamePhase, useGameStats, useWinner, usePlayers, useMultiplayer } from '@/hooks'
+import { useGameActions, useGamePhase, useGameStats, useWinner, usePlayers, useMultiplayer, useDevTool } from '@/hooks'
 import { InfoPanel } from '@/components/game/InfoPanel'
 import { GameBoard } from '@/components/game/GameBoard'
 import { ItemSelectionScreen } from '@/components/game/ItemSelectionScreen'
@@ -11,6 +11,7 @@ import { DifficultySelect } from '@/components/game/DifficultySelect'
 import { LobbyScreen, WaitingRoom, DisconnectedOverlay } from '@/components/multiplayer'
 import { OverlayManager } from '@/components/overlays'
 import { ToastManager } from '@/components/toasts'
+import { FloatingDevTool } from '@/components/dev/FloatingDevTool'
 import { useOverlayStore } from '@/stores/overlayStore'
 import { DevPage } from '@/components/dev'
 import type { DifficultyLevel, GameMode } from '@/types'
@@ -132,6 +133,9 @@ function GameContent() {
 }
 
 function GamePage() {
+  // Ativa atalho CTRL+SHIFT+D
+  useDevTool()
+
   return (
     <>
       <GameLayout>
@@ -142,6 +146,9 @@ function GamePage() {
       <OverlayManager />
       <ToastManager />
       <DisconnectedOverlay />
+      
+      {/* DevTool flutuante (CTRL+SHIFT+D) */}
+      <FloatingDevTool />
     </>
   )
 }

@@ -36,7 +36,7 @@
 - **Critério de pronto:** nenhuma referência direta a `players.player1/player2` dentro de `useStoreTimer.ts`.
 
 ### Tarefa 5 — Remover hardcodes 1v1: IA (loja + seleção inicial + contexto)
-- **Status:** PENDING
+- **Status:** DONE
 - **Objetivo:** IA não assumir `player2` como único bot.
 - **Escopo mínimo:**
   - `useAIStore.ts` e `useAIItemSelection.ts`: derivar `aiPlayerId` (primeiro `Player.isAI` em single);
@@ -44,7 +44,7 @@
 - **Critério de pronto:** nenhuma referência direta a `'player2'` como “IA fixa” nesses hooks.
 
 ### Tarefa 6 — Remover hardcodes 1v1: fluxo de shopping no gameStore
-- **Status:** TODO
+- **Status:** PENDING
 - **Objetivo:** em `gameStore.ts`, remover lógica binária `p1Wants/p2Wants` e `otherPlayerId` ternário no shopping flow.
 - **Critério de pronto:** shopping é baseado em lista de `playerIds` e funciona com 2+.
 

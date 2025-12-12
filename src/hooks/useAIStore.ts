@@ -3,7 +3,8 @@ import { useGameStore } from '@/stores/gameStore'
 import { shouldAIWantStore, selectAIStoreItems } from '@/utils/aiLogic'
 import { getAIConfig } from '@/utils/aiConfig'
 import { STORE_ITEMS } from '@/utils/storeConfig'
-import type { AIDecisionContext } from '@/types'
+import { getPlayerIds } from '@/utils/playerManager'
+import type { AIDecisionContext, PlayerId } from '@/types'
 
 /** Delay antes de processar compras (ms) */
 const AI_SHOPPING_DELAY = 1000
@@ -16,20 +17,14 @@ const AI_CONFIRM_DELAY = 500
 
 /**
  * Constroi contexto de decisao da IA para a loja
- *
- * @limitation Atualmente assume que IA e sempre player2.
- * Para suporte a multiplayer ou IA flexivel, este hook precisara
- * receber playerId como parametro.
- * @see .specs/future/multiplayer-ai.md
  */
-function buildAIStoreContext(): AIDecisionContext {
+function buildAIStoreContext(aiPlayerId: PlayerId, opponentId: PlayerId): AIDecisionContext {
   const state = useGameStore.getState()
   const difficulty = state.difficulty
   const config = getAIConfig(difficulty)
 
-  // NOTA: Hardcoded player2 como IA - ver @limitation acima
-  const aiPlayer = state.players.player2
-  const opponent = state.players.player1
+  const aiPlayer = state.players[aiPlayerId]
+  const opponent = state.players[opponentId]
 
   return {
     aiPlayer,
@@ -38,10 +33,10 @@ function buildAIStoreContext(): AIDecisionContext {
     revealedPills: state.revealedPills,
     typeCounts: state.typeCounts,
     shapeCounts: state.shapeCounts,
-    aiQuest: state.shapeQuests.player2,
-    opponentQuest: state.shapeQuests.player1,
+    aiQuest: state.shapeQuests[aiPlayerId],
+    opponentQuest: state.shapeQuests[opponentId],
     round: state.round,
-    revealAtStart: state.revealAtStart.player2,
+    revealAtStart: state.revealAtStart[aiPlayerId],
     config,
   }
 }
@@ -55,11 +50,18 @@ function buildAIStoreContext(): AIDecisionContext {
 export function useAIStore() {
   const phase = useGameStore((state) => state.phase)
   const mode = useGameStore((state) => state.mode)
-  const isPlayer2AI = useGameStore((state) => state.players.player2.isAI)
-  const player2Coins = useGameStore((state) => state.players.player2.pillCoins)
-  const player2Lives = useGameStore((state) => state.players.player2.lives)
-  const player2Resistance = useGameStore((state) => state.players.player2.resistance)
-  const player2WantsStore = useGameStore((state) => state.players.player2.wantsStore)
+
+  // Determina (de forma estável) qual jogador é IA (single player)
+  const aiPlayerId = useGameStore((state) => {
+    const ids = getPlayerIds(state.players)
+    return ids.find((id) => state.players[id].isAI) ?? null
+  })
+
+  const isAIAvailable = useGameStore((state) => (aiPlayerId ? state.players[aiPlayerId]?.isAI === true : false))
+  const aiCoins = useGameStore((state) => (aiPlayerId ? state.players[aiPlayerId]?.pillCoins ?? 0 : 0))
+  const aiLives = useGameStore((state) => (aiPlayerId ? state.players[aiPlayerId]?.lives ?? 0 : 0))
+  const aiResistance = useGameStore((state) => (aiPlayerId ? state.players[aiPlayerId]?.resistance ?? 0 : 0))
+  const aiWantsStore = useGameStore((state) => (aiPlayerId ? state.players[aiPlayerId]?.wantsStore ?? false : false))
 
   // Em multiplayer, IA nao deve operar na loja - oponente e humano real
   const isMultiplayer = mode === 'multiplayer'
@@ -85,19 +87,22 @@ export function useAIStore() {
     if (isMultiplayer) return
 
     if (phase !== 'playing') return
-    if (!isPlayer2AI) return
+    if (!aiPlayerId || !isAIAvailable) return
     if (hasToggledRef.current) return
-    if (player2WantsStore) return // Ja quer ir
+    if (aiWantsStore) return // Ja quer ir
 
     // Constroi contexto e verifica se deve querer ir a loja
-    const ctx = buildAIStoreContext()
+    const state = useGameStore.getState()
+    const allIds = getPlayerIds(state.players)
+    const opponentId = allIds.find((id) => id !== aiPlayerId) ?? aiPlayerId
+    const ctx = buildAIStoreContext(aiPlayerId, opponentId)
     const shouldWant = shouldAIWantStore(ctx)
 
     if (shouldWant) {
       hasToggledRef.current = true
-      useGameStore.getState().toggleWantsStore('player2')
+      useGameStore.getState().toggleWantsStore(aiPlayerId)
     }
-  }, [phase, isPlayer2AI, player2Coins, player2Lives, player2Resistance, player2WantsStore, isMultiplayer])
+  }, [phase, aiPlayerId, isAIAvailable, aiCoins, aiLives, aiResistance, aiWantsStore, isMultiplayer])
 
   // Auto-compra durante fase shopping
   useEffect(() => {
@@ -112,9 +117,9 @@ export function useAIStore() {
       return
     }
 
-    if (!isPlayer2AI) return
+    if (!aiPlayerId || !isAIAvailable) return
     if (hasShoppedRef.current) return
-    if (!player2WantsStore) return // Nao estava interessado
+    if (!aiWantsStore) return // Nao estava interessado
 
     hasShoppedRef.current = true
 
@@ -123,8 +128,11 @@ export function useAIStore() {
     if (!storeState) return
 
     // Constroi contexto e seleciona itens
-    const ctx = buildAIStoreContext()
-    const storeItems = Object.values(STORE_ITEMS)
+    const state = useGameStore.getState()
+    const allIds = getPlayerIds(state.players)
+    const opponentId = allIds.find((id) => id !== aiPlayerId) ?? aiPlayerId
+    const ctx = buildAIStoreContext(aiPlayerId, opponentId)
+    const storeItems = STORE_ITEMS
 
     const itemsToBuy = selectAIStoreItems(ctx, storeItems)
 
@@ -134,7 +142,7 @@ export function useAIStore() {
     itemsToBuy.forEach((item) => {
       const timeout = setTimeout(() => {
         if (useGameStore.getState().phase === 'shopping') {
-          useGameStore.getState().addToCart('player2', item.id)
+          useGameStore.getState().addToCart(aiPlayerId, item.id)
         }
       }, currentDelay)
       timeoutsRef.current.push(timeout)
@@ -144,10 +152,10 @@ export function useAIStore() {
     // Confirma apos adicionar todos
     const confirmTimeout = setTimeout(() => {
       if (useGameStore.getState().phase === 'shopping') {
-        useGameStore.getState().confirmStorePurchases('player2')
+        useGameStore.getState().confirmStorePurchases(aiPlayerId)
       }
     }, currentDelay + AI_CONFIRM_DELAY)
     timeoutsRef.current.push(confirmTimeout)
-  }, [phase, isPlayer2AI, player2WantsStore, isMultiplayer])
+  }, [phase, aiPlayerId, isAIAvailable, aiWantsStore, isMultiplayer])
 }
 

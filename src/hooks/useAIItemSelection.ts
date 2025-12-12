@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useGameStore } from '@/stores/gameStore'
 import { getAllItemsForInitialSelection } from '@/utils/itemCatalog'
 import { selectAIInitialItems } from '@/utils/aiLogic'
+import { getPlayerIds } from '@/utils/playerManager'
 
 /** Delay antes de comecar a selecionar itens (ms) */
 const AI_SELECTION_START_DELAY = 500
@@ -21,7 +22,13 @@ export function useAIItemSelection() {
   // Selectors granulares - retornam primitivos para evitar re-renders
   const phase = useGameStore((state) => state.phase)
   const mode = useGameStore((state) => state.mode)
-  const isPlayer2AI = useGameStore((state) => state.players.player2.isAI)
+
+  // Determina (de forma estável) qual jogador é IA (single player)
+  const aiPlayerId = useGameStore((state) => {
+    const ids = getPlayerIds(state.players)
+    return ids.find((id) => state.players[id].isAI) ?? null
+  })
+  const isAIAvailable = useGameStore((state) => (aiPlayerId ? state.players[aiPlayerId]?.isAI === true : false))
 
   // Refs para controle de estado
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
@@ -43,12 +50,12 @@ export function useAIItemSelection() {
     }
 
     // Guards
-    if (!isPlayer2AI) return
+    if (!aiPlayerId || !isAIAvailable) return
     if (hasStartedRef.current) return
 
     // Verifica se IA ja confirmou (via getState para evitar dependencia)
     const { itemSelectionConfirmed, difficulty } = useGameStore.getState()
-    if (itemSelectionConfirmed.player2) return
+    if (itemSelectionConfirmed[aiPlayerId]) return
 
     hasStartedRef.current = true
 
@@ -66,7 +73,7 @@ export function useAIItemSelection() {
       const timeout = setTimeout(() => {
         // Verifica fase antes de executar (pode ter mudado)
         if (useGameStore.getState().phase === 'itemSelection') {
-          selectItem('player2', itemType)
+          selectItem(aiPlayerId, itemType)
         }
       }, currentDelay)
       timeoutsRef.current.push(timeout)
@@ -76,11 +83,11 @@ export function useAIItemSelection() {
     // Confirma apos selecionar todos
     const confirmTimeout = setTimeout(() => {
       if (useGameStore.getState().phase === 'itemSelection') {
-        confirmItemSelection('player2')
+        confirmItemSelection(aiPlayerId)
       }
     }, currentDelay + AI_CONFIRM_DELAY)
     timeoutsRef.current.push(confirmTimeout)
 
     // Nao retorna cleanup - timeouts sao limpos apenas quando fase muda
-  }, [phase, isPlayer2AI, isMultiplayer])
+  }, [phase, aiPlayerId, isAIAvailable, isMultiplayer])
 }
